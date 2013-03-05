@@ -1,6 +1,18 @@
+*.swp
+.idea
+
 *.class
 
 # Package Files #
 *.jar
 *.war
 *.ear
+
+# mvn goal products
+target/cobertura
+target/generated-classes
+target/surefire
+target/surefire-reports
+target/site
+target/javadoc-bundle-options
+target/maven-status/maven-compiler-plugin
