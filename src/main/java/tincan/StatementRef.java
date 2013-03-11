@@ -1,6 +1,8 @@
 package tincan;
 
 import lombok.Data;
+import org.codehaus.jackson.JsonNode;
+
 import java.util.UUID;
 
 /**

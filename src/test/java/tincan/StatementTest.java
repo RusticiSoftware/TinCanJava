@@ -16,4 +16,8 @@ public class StatementTest {
     public void tearDown() throws Exception {
 
     }
+
+    public void idTest() throws Exception {
+        Statement obj = new Statement();
+    }
 }
