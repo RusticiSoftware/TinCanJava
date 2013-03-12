@@ -1,11 +1,11 @@
-package tincan;
+package tincan.json;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * JSONMapper Class provides access to a Jackson ObjectMapper singleton
+ * Mapper Class provides access to a Jackson ObjectMapper singleton
  */
-public class JSONMapper {
+public class Mapper {
     private static class LazyHolder {
         private static final ObjectMapper INSTANCE = new ObjectMapper();
     }

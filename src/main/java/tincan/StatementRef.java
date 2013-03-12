@@ -1,7 +1,9 @@
 package tincan;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
-import org.codehaus.jackson.JsonNode;
+import tincan.json.JSONBase;
+import tincan.json.Mapper;
 
 import java.util.UUID;
 
@@ -10,7 +12,16 @@ import java.util.UUID;
  * object property
  */
 @Data
-public class StatementRef implements StatementTarget {
+public class StatementRef extends JSONBase implements StatementTarget {
     private final String objectType = "StatementRef";
     private UUID id;
+
+    @Override
+    public ObjectNode toJSONNode(TCAPIVersion version) {
+        ObjectNode node = Mapper.getInstance().createObjectNode();
+
+        node.put("id", this.getId().toString());
+
+        return null;
+    }
 }

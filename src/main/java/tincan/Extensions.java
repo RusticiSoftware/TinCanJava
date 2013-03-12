@@ -1,10 +1,9 @@
 package tincan;
 
-import java.net.URL;
-import java.util.HashMap;
+import tincan.json.JSONHashMapURLToObject;
 
 /**
  * Extensions model class
  */
-public class Extensions extends HashMap<URL,Object> {
+public class Extensions extends JSONHashMapURLToObject {
 }

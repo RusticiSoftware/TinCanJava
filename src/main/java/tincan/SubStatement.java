@@ -1,15 +1,14 @@
 package tincan;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ObjectNode;
-import java.io.IOException;
-import java.net.MalformedURLException;
+import tincan.json.JSONBase;
+import tincan.json.Mapper;
 
-import static org.codehaus.jackson.map.SerializationConfig.Feature.INDENT_OUTPUT;
+import java.net.MalformedURLException;
 
 /**
  * SubStatement Class used when including a statement like object in another statement,
@@ -18,7 +17,7 @@ import static org.codehaus.jackson.map.SerializationConfig.Feature.INDENT_OUTPUT
 @Data
 @NoArgsConstructor
 @Log
-public class SubStatement implements StatementTarget {
+public class SubStatement extends JSONBase implements StatementTarget {
     private final String objectType = "SubStatement";
 
     private Agent actor;
@@ -46,44 +45,25 @@ public class SubStatement implements StatementTarget {
         JsonNode objectNode = jsonNode.path("object");
         if (! objectNode.isMissingNode()) {
             JsonNode objectTypeNode = objectNode.path("objectType");
-            if (objectTypeNode.getTextValue().equals("Activity")) {
+            if (objectTypeNode.textValue().equals("Activity")) {
                 this.setObject(new Activity(objectNode));
             }
         }
     }
 
     public SubStatement (String json) throws Exception {
-        this(JSONMapper.getInstance().readValue(json, JsonNode.class));
+        this(Mapper.getInstance().readValue(json, JsonNode.class));
     }
 
+    @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
         log.info("toJSONNode - version: " + version.toString());
-        ObjectNode node = JSONMapper.getInstance().createObjectNode();
+        ObjectNode node = Mapper.getInstance().createObjectNode();
 
         node.put("actor", this.getActor().toJSONNode(version));
         node.put("verb", this.getVerb().toJSONNode(version));
         node.put("object", this.getObject().toJSONNode(version));
 
         return node;
-    }
-
-    public ObjectNode toJSONNode() {
-        TCAPIVersion version = TCAPIVersion.latest();
-        return this.toJSONNode(version);
-    }
-
-    public String toJSON() throws IOException {
-        return JSONMapper.getInstance().writeValueAsString(this.toJSONNode());
-    }
-
-    public String toJSONPretty() throws IOException {
-        ObjectMapper jsonMapper = JSONMapper.getInstance();
-        jsonMapper.configure(INDENT_OUTPUT, true);
-
-        String result = jsonMapper.writeValueAsString(this.toJSONNode());
-
-        jsonMapper.configure(INDENT_OUTPUT, false);
-
-        return result;
     }
 }

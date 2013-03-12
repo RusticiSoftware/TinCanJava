@@ -1,21 +1,19 @@
 package tincan;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.java.Log;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ObjectNode;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import java.io.IOException;
+import tincan.json.JSONBase;
+import tincan.json.Mapper;
 import java.net.MalformedURLException;
 import java.util.UUID;
-
-import static org.codehaus.jackson.map.SerializationConfig.Feature.INDENT_OUTPUT;
 
 /**
  * Statement Class
@@ -23,7 +21,7 @@ import static org.codehaus.jackson.map.SerializationConfig.Feature.INDENT_OUTPUT
 @Data
 @NoArgsConstructor
 @Log
-public class Statement {
+public class Statement extends JSONBase {
     private UUID id;
     private Agent actor;
     private Verb verb;
@@ -45,7 +43,7 @@ public class Statement {
         log.info("constructor (from JsonNode)");
         JsonNode idNode = jsonNode.path("id");
         if (! idNode.isMissingNode()) {
-            this.setId(UUID.fromString(idNode.getTextValue()));
+            this.setId(UUID.fromString(idNode.textValue()));
         }
 
         JsonNode actorNode = jsonNode.path("actor");
@@ -62,19 +60,19 @@ public class Statement {
         JsonNode objectNode = jsonNode.path("object");
         if (! objectNode.isMissingNode()) {
             JsonNode objectTypeNode = objectNode.path("objectType");
-            if (objectTypeNode.getTextValue().equals("Activity")) {
+            if (objectTypeNode.textValue().equals("Activity")) {
                 this.setObject(new Activity(objectNode));
             }
         }
 
         JsonNode timestampNode = jsonNode.path("timestamp");
         if (! timestampNode.isMissingNode()) {
-            this.setTimestamp(new DateTime(timestampNode.getTextValue()));
+            this.setTimestamp(new DateTime(timestampNode.textValue()));
         }
 
         JsonNode storedNode = jsonNode.path("stored");
         if (! storedNode.isMissingNode()) {
-            this.setStored(new DateTime(storedNode.getTextValue()));
+            this.setStored(new DateTime(storedNode.textValue()));
         }
 
         JsonNode authorityNode = jsonNode.path("authority");
@@ -84,15 +82,16 @@ public class Statement {
     }
 
     public Statement (String json) throws Exception {
-        this(JSONMapper.getInstance().readValue(json, JsonNode.class));
+        this(Mapper.getInstance().readValue(json, JsonNode.class));
 
         log.info("constructor (from String)");
         this.set_json(json);
     }
 
+    @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
         log.info("toJSONNode - version: " + version.toString());
-        ObjectNode node = JSONMapper.getInstance().createObjectNode();
+        ObjectNode node = Mapper.getInstance().createObjectNode();
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 
         if (this.id != null) {
@@ -113,28 +112,6 @@ public class Statement {
         }
 
         return node;
-    }
-
-    public ObjectNode toJSONNode() {
-        TCAPIVersion version = TCAPIVersion.latest();
-        return this.toJSONNode(version);
-    }
-
-    public String toJSON() throws IOException {
-        log.info("toJSON");
-        return JSONMapper.getInstance().writeValueAsString(this.toJSONNode());
-    }
-
-    public String toJSONPretty() throws IOException {
-        log.info("toJSONPretty");
-        ObjectMapper jsonMapper = JSONMapper.getInstance();
-        jsonMapper.configure(INDENT_OUTPUT, true);
-
-        String result = jsonMapper.writeValueAsString(this.toJSONNode());
-
-        jsonMapper.configure(INDENT_OUTPUT, false);
-
-        return result;
     }
 
     /**

@@ -1,16 +1,18 @@
 package tincan;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ObjectNode;
+import tincan.json.JSONBase;
+import tincan.json.Mapper;
 
 /**
  * Activity Definition model class
  */
 @Data
 @NoArgsConstructor
-public class ActivityDefinition {
+public class ActivityDefinition extends JSONBase {
     private LanguageMap name;
     private LanguageMap description;
     private String type;
@@ -28,7 +30,7 @@ public class ActivityDefinition {
 
         JsonNode typeNode = jsonNode.path("type");
         if (! typeNode.isMissingNode()) {
-            this.setType(typeNode.getTextValue());
+            this.setType(typeNode.textValue());
         }
 
         JsonNode nameNode = jsonNode.path("name");
@@ -42,8 +44,9 @@ public class ActivityDefinition {
         }
     }
 
+    @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
-        ObjectNode node = JSONMapper.getInstance().createObjectNode();
+        ObjectNode node = Mapper.getInstance().createObjectNode();
         if (this.type != null) {
             node.put("type", this.getType());
         }
@@ -55,10 +58,5 @@ public class ActivityDefinition {
         }
 
         return node;
-    }
-
-    public ObjectNode toJSONNode() {
-        TCAPIVersion version = TCAPIVersion.latest();
-        return this.toJSONNode(version);
     }
 }

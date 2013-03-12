@@ -1,8 +1,6 @@
 package tincan;
 
 import lombok.extern.java.Log;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
 import org.junit.Assert;
 import org.junit.Test;
 import java.net.MalformedURLException;

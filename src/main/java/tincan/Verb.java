@@ -1,9 +1,11 @@
 package tincan;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ObjectNode;
+import tincan.json.JSONBase;
+import tincan.json.Mapper;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -12,7 +14,7 @@ import java.net.URL;
  */
 @Data
 @NoArgsConstructor
-public class Verb {
+public class Verb extends JSONBase {
     private URL id;
     private LanguageMap display;
 
@@ -21,7 +23,7 @@ public class Verb {
 
         JsonNode idNode = jsonNode.path("id");
         if (! idNode.isMissingNode()) {
-            this.setId(new URL(idNode.getTextValue()));
+            this.setId(new URL(idNode.textValue()));
         }
 
         JsonNode displayNode = jsonNode.path("display");
@@ -30,8 +32,9 @@ public class Verb {
         }
     }
 
+    @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
-        ObjectNode node = JSONMapper.getInstance().createObjectNode();
+        ObjectNode node = Mapper.getInstance().createObjectNode();
         if (this.id != null) {
             node.put("id", this.getId().toString());
         }
@@ -40,10 +43,5 @@ public class Verb {
         }
 
         return node;
-    }
-
-    public ObjectNode toJSONNode() {
-        TCAPIVersion version = TCAPIVersion.latest();
-        return this.toJSONNode(version);
     }
 }

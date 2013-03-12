@@ -1,16 +1,18 @@
 package tincan;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ObjectNode;
+import tincan.json.JSONBase;
+import tincan.json.Mapper;
 
 /**
  * Agent model class
  */
 @Data
 @NoArgsConstructor
-public class Agent implements StatementTarget {
+public class Agent extends JSONBase implements StatementTarget {
     private final String objectType = "Agent";
     private String name;
     private String mbox;
@@ -23,12 +25,12 @@ public class Agent implements StatementTarget {
 
         JsonNode nameNode = jsonNode.path("name");
         if (! nameNode.isMissingNode()) {
-            this.setName(nameNode.getTextValue());
+            this.setName(nameNode.textValue());
         }
 
         JsonNode mboxNode = jsonNode.path("mbox");
         if (! mboxNode.isMissingNode()) {
-            this.setMbox(mboxNode.getTextValue());
+            this.setMbox(mboxNode.textValue());
         }
 
         JsonNode acctNode = jsonNode.path("account");
@@ -38,7 +40,7 @@ public class Agent implements StatementTarget {
     }
 
     public ObjectNode toJSONNode(TCAPIVersion version) {
-        ObjectNode node = JSONMapper.getInstance().createObjectNode();
+        ObjectNode node = Mapper.getInstance().createObjectNode();
         node.put("objectType", this.getObjectType());
 
         if (this.name != null) {

@@ -1,6 +1,6 @@
 package tincan;
 
-import org.codehaus.jackson.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Statement target interface for instances stored in the "object" property of a Statement

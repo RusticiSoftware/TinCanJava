@@ -1,9 +1,11 @@
 package tincan;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ObjectNode;
+import tincan.json.JSONBase;
+import tincan.json.Mapper;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -13,7 +15,7 @@ import java.net.URL;
  */
 @Data
 @NoArgsConstructor
-public class Activity implements StatementTarget {
+public class Activity extends JSONBase implements StatementTarget {
     private final String objectType = "Activity";
 
     private URL id;
@@ -24,7 +26,7 @@ public class Activity implements StatementTarget {
 
         JsonNode idNode = jsonNode.path("id");
         if (! idNode.isMissingNode()) {
-            this.setId(new URL(idNode.getTextValue()));
+            this.setId(new URL(idNode.textValue()));
         }
 
         JsonNode definitionNode = jsonNode.path("definition");
@@ -33,8 +35,9 @@ public class Activity implements StatementTarget {
         }
     }
 
+    @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
-        ObjectNode node = JSONMapper.getInstance().createObjectNode();
+        ObjectNode node = Mapper.getInstance().createObjectNode();
         node.put("objectType", this.getObjectType());
 
         if (this.id != null) {
@@ -45,10 +48,5 @@ public class Activity implements StatementTarget {
         }
 
         return node;
-    }
-
-    public ObjectNode toJSONNode() {
-        TCAPIVersion version = TCAPIVersion.latest();
-        return this.toJSONNode(version);
     }
 }
