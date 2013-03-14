@@ -1,13 +1,14 @@
 package tincan;
 
-import java.io.IOException;
+import java.util.List;
 
 /**
  * Define the interface that must be satisfied to talk to an LRS
  */
 public interface LRS {
-    Statement getStatement(String id) throws Exception;
-    StatementsResult getStatements(StatementsQuery query) throws Exception;
-    void putStatement(Statement statement) throws Exception;
-    void putStatements(Statement[] statements) throws Exception;
+    Statement fetchStatement(String id) throws Exception;
+    StatementsResult fetchStatements(List<String> ids) throws Exception;
+    StatementsResult queryStatements(StatementsQuery query) throws Exception;
+    void saveStatement(Statement statement) throws Exception;
+    void saveStatements(Statement[] statements) throws Exception;
 }

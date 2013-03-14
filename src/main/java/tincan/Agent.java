@@ -33,12 +33,23 @@ public class Agent extends JSONBase implements StatementTarget {
             this.setMbox(mboxNode.textValue());
         }
 
+        JsonNode mboxSHA1SumNode = jsonNode.path("mboxSHA1Sum");
+        if (! mboxSHA1SumNode.isMissingNode()) {
+            this.setMboxSHA1Sum(mboxSHA1SumNode.textValue());
+        }
+
+        JsonNode openIDNode = jsonNode.path("openID");
+        if (! openIDNode.isMissingNode()) {
+            this.setOpenID(openIDNode.textValue());
+        }
+
         JsonNode acctNode = jsonNode.path("account");
         if (! acctNode.isMissingNode()) {
             this.setAccount(new AgentAccount(acctNode));
         }
     }
 
+    @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
         ObjectNode node = Mapper.getInstance().createObjectNode();
         node.put("objectType", this.getObjectType());
@@ -49,15 +60,16 @@ public class Agent extends JSONBase implements StatementTarget {
         if (this.mbox != null) {
             node.put("mbox", this.getMbox());
         }
+        if (this.mboxSHA1Sum != null) {
+            node.put("mbox_sha1sum", this.getMboxSHA1Sum());
+        }
+        if (this.openID != null) {
+            node.put("openid", this.getOpenID());
+        }
         if (this.account != null) {
             node.put("account", this.getAccount().toJSONNode(version));
         }
 
         return node;
-    }
-
-    public ObjectNode toJSONNode() {
-        TCAPIVersion version = TCAPIVersion.latest();
-        return this.toJSONNode(version);
     }
 }

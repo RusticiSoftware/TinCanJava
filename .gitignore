@@ -3,6 +3,9 @@
 
 *.class
 
+# Properties
+src/test/resources/lrs.properties
+
 # Package Files #
 *.jar
 *.war
@@ -15,4 +18,6 @@ target/surefire
 target/surefire-reports
 target/site
 target/javadoc-bundle-options
+target/maven-archiver/
 target/maven-status/maven-compiler-plugin
+target/test-classes/

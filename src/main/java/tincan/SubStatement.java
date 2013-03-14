@@ -2,13 +2,12 @@ package tincan;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.net.MalformedURLException;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
 import tincan.json.JSONBase;
 import tincan.json.Mapper;
-
-import java.net.MalformedURLException;
 
 /**
  * SubStatement Class used when including a statement like object in another statement,

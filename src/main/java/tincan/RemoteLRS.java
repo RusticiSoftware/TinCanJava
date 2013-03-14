@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
+
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.ContentExchange;
@@ -72,8 +74,8 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
-    public Statement getStatement(String id) throws IOException, InterruptedException, Exception {
-        log.info("getStatement - id: " + id);
+    public Statement fetchStatement(String id) throws IOException, InterruptedException, Exception {
+        log.info("fetchStatement - id: " + id);
         ContentExchange exchange = new ContentExchange();
         exchange.setRequestHeader("Authorization", this.getAuth());
         if (!this.getVersion().equals(TCAPIVersion.V090)) {
@@ -108,13 +110,18 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
-    public StatementsResult getStatements(StatementsQuery query) {
+    public StatementsResult fetchStatements(List<String> ids) {
         return null;
     }
 
     @Override
-    public void putStatement(Statement statement) throws IOException, InterruptedException {
-        log.info("putStatement: " + statement.toJSONPretty());
+    public StatementsResult queryStatements(StatementsQuery query) {
+        return null;
+    }
+
+    @Override
+    public void saveStatement(Statement statement) throws IOException, InterruptedException {
+        log.info("saveStatement: " + statement.toJSONPretty());
 
         ContentExchange exchange = new ContentExchange();
         exchange.setRequestHeader("Authorization", this.getAuth());
@@ -159,6 +166,6 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
-    public void putStatements(Statement[] statements) {
+    public void saveStatements(Statement[] statements) {
     }
 }

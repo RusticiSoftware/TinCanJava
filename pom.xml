@@ -5,8 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.rusticisoftware</groupId>
-    <artifactId>TinCan</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>tincan</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <name>TinCan Java Library</name>
+    <url>http://tincanapi.com/</url>
+    <description>Library used to interact with Learning Record Stores (LRS) speaking the TinCanAPI protocol.</description>
     <build>
         <plugins>
             <plugin>

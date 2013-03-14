@@ -2,12 +2,37 @@ package tincan;
 
 import lombok.extern.java.Log;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Properties;
 
 @Log
 public class RemoteLRSTest {
+    private static final Properties config = new Properties();
+
+    @BeforeClass
+    public static void setupOnce() {
+        InputStream is = RemoteLRSTest.class.getResourceAsStream("/lrs.properties");
+        try {
+            config.load(is);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     @Test
     public void testEndpoint() throws Exception {
         RemoteLRS obj = new RemoteLRS();
@@ -91,11 +116,11 @@ public class RemoteLRSTest {
         st.setVerb(mockVerbDisplay());
         st.setObject(mockActivity("testPutStatement"));
 
-        obj.putStatement(st);
+        obj.saveStatement(st);
     }
 
     /*
-     * Tests calling putStatement without an ID which triggers a POST request
+     * Tests calling saveStatement without an ID which triggers a POST request
      */
     @Test
     public void testPutStatementNoID() throws Exception {
@@ -106,7 +131,7 @@ public class RemoteLRSTest {
         st.setVerb(mockVerbDisplay());
         st.setObject(mockActivity("testPutStatementNoID"));
 
-        obj.putStatement(st);
+        obj.saveStatement(st);
     }
 
     @Test
@@ -120,13 +145,13 @@ public class RemoteLRSTest {
     private RemoteLRS getLRS() {
         RemoteLRS obj = new RemoteLRS();
         try {
-            obj.setEndpoint("http://cloud.scorm.com/ScormEngineInterface/TCAPI/3HYPTQLAI9/");
+            obj.setEndpoint(config.getProperty("endpoint"));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
         obj.setVersion(TCAPIVersion.V095);
-        obj.setUsername("3HYPTQLAI9");
-        obj.setPassword("KJtohao9J76Duu9pNJiOeymxVCjFL0f1EdpbVTFi");
+        obj.setUsername(config.getProperty("username"));
+        obj.setPassword(config.getProperty("password"));
 
         return obj;
     }

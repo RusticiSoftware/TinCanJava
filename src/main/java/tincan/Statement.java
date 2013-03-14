@@ -31,6 +31,8 @@ public class Statement extends JSONBase {
     private DateTime timestamp;
     private DateTime stored;
     private Agent authority;
+
+    // TODO: these two are deprecated, figure out how to handle deprecated ones
     private Boolean voided;
     private Boolean inProgress;
 
@@ -65,6 +67,16 @@ public class Statement extends JSONBase {
             }
         }
 
+        JsonNode resultNode = jsonNode.path("result");
+        if (! resultNode.isMissingNode()) {
+            this.setResult(new Result(resultNode));
+        }
+
+        JsonNode contextNode = jsonNode.path("context");
+        if (! contextNode.isMissingNode()) {
+            this.setContext(new Context(contextNode));
+        }
+
         JsonNode timestampNode = jsonNode.path("timestamp");
         if (! timestampNode.isMissingNode()) {
             this.setTimestamp(new DateTime(timestampNode.textValue()));
@@ -97,16 +109,22 @@ public class Statement extends JSONBase {
         if (this.id != null) {
             node.put("id", this.getId().toString());
         }
+        node.put("actor", this.getActor().toJSONNode(version));
+        node.put("verb", this.getVerb().toJSONNode(version));
+        node.put("object", this.getObject().toJSONNode(version));
+
+        if (this.result != null) {
+            node.put("result", this.getResult().toJSONNode(version));
+        }
+        if (this.context != null) {
+            node.put("context", this.getContext().toJSONNode(version));
+        }
         if (this.timestamp != null) {
             node.put("timestamp", fmt.print(this.getTimestamp()));
         }
         if (this.stored != null) {
             node.put("stored", fmt.print(this.getStored()));
         }
-        node.put("actor", this.getActor().toJSONNode(version));
-        node.put("verb", this.getVerb().toJSONNode(version));
-        node.put("object", this.getObject().toJSONNode(version));
-
         if (this.authority != null) {
             node.put("authority", this.getAuthority().toJSONNode(version));
         }
