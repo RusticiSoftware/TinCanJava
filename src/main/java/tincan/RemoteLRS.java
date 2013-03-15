@@ -1,9 +1,7 @@
 package tincan;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
-import lombok.extern.java.Log;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -19,6 +17,7 @@ import org.eclipse.jetty.http.HttpMethods;
 import org.eclipse.jetty.io.ByteArrayBuffer;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import tincan.exceptions.*;
 import tincan.json.Mapper;
 import tincan.json.StringOfJSON;
 
@@ -29,7 +28,6 @@ import static org.eclipse.jetty.client.HttpClient.CONNECTOR_SELECT_CHANNEL;
  */
 // TODO: handle extended on all requests
 @Data
-@Log
 public class RemoteLRS implements LRS {
     private static HttpClient httpClient = new HttpClient();
     // TODO: should this be an instance private?
@@ -85,49 +83,53 @@ public class RemoteLRS implements LRS {
 
     public String calculateBasicAuth() {
         return  "Basic " + Base64.encodeBase64String(
-                (this.getUsername() + ":" + this.getPassword()).getBytes()
+            (this.getUsername() + ":" + this.getPassword()).getBytes()
         );
     }
 
-    @Override
-    public Statement fetchStatement(String id) throws Exception {
-        log.info("fetchStatement - id: " + id);
-        ContentExchange exchange = new ContentExchange();
+    private HTTPResponse makeRequest(ContentExchange exchange) throws Exception {
         exchange.setRequestHeader("Authorization", this.getAuth());
         if (!this.getVersion().equals(TCAPIVersion.V090)) {
             exchange.setRequestHeader("X-Experience-API-Version", this.getVersion().toString());
         }
         exchange.setRequestContentType("application/json");
-        exchange.setURL(this.getEndpoint() + "statements?statementId=" + id);
 
         httpClient.send(exchange);
 
         // Waits until the exchange is terminated
-        int exchangeState;
-        exchangeState = exchange.waitForDone();
+        int exchangeState = exchange.waitForDone();
 
         if (exchangeState == HttpExchange.STATUS_COMPLETED) {
-            log.info("exchange completed");
-            String content = exchange.getResponseContent();
-
-            return new Statement(content);
+            return new HTTPResponse(exchange.getResponseStatus(), exchange.getResponseContent());
         }
         else if (exchangeState == HttpExchange.STATUS_EXCEPTED) {
-            log.severe("exchange failed");
+            throw new FailedHTTPRequest("exchange status excepted");
         }
         else if (exchangeState == HttpExchange.STATUS_EXPIRED) {
-            log.warning("exchange expired");
+            throw new FailedHTTPRequest("exchange status expired");
         }
-        else {
-            log.severe("exchange returned unhandled status");
-        }
+        throw new FailedHTTPRequest("exchange status unrecognized");
+    }
 
-        return null;
+    @Override
+    public Statement fetchStatement(String id) throws Exception {
+        ContentExchange exchange = new ContentExchange();
+        exchange.setURL(this.getEndpoint() + "statements?statementId=" + id);
+
+        HTTPResponse response = this.makeRequest(exchange);
+        int status = response.getStatus();
+
+        if (status == 200) {
+            return new Statement(new StringOfJSON(response.getContent()));
+        }
+        else if (status == 404) {
+            return null;
+        }
+        throw new UnrecognizedHTTPResponse("status: " + status);
     }
 
     @Override
     public StatementsResult queryStatements(StatementsQuery query) throws Exception {
-        log.info("queryStatements");
         if (query == null) {
             query = new StatementsQuery();
         }
@@ -191,54 +193,19 @@ public class RemoteLRS implements LRS {
         }
 
         ContentExchange exchange = new ContentExchange();
-        exchange.setRequestHeader("Authorization", this.getAuth());
-        if (!this.getVersion().equals(TCAPIVersion.V090)) {
-            exchange.setRequestHeader("X-Experience-API-Version", this.getVersion().toString());
-        }
-        exchange.setRequestContentType("application/json");
         exchange.setURL(this.getEndpoint() + "statements" + queryString);
 
-        log.info("exchange url: " + exchange.getRequestURI());
+        HTTPResponse response = this.makeRequest(exchange);
+        if (response.getStatus() == 200) {
+            return new StatementsResult(new StringOfJSON(response.getContent()));
+        }
 
-        httpClient.send(exchange);
-
-        // Waits until the exchange is terminated
-        int exchangeState;
-        exchangeState = exchange.waitForDone();
-
-        if (exchangeState == HttpExchange.STATUS_COMPLETED) {
-            log.info("exchange completed");
-            log.info("exchange return status: " + exchange.getResponseStatus());
-            if (exchange.getResponseStatus() >= 200 && exchange.getResponseStatus() < 300) {
-                StringOfJSON content = new StringOfJSON(exchange.getResponseContent());
-                return new StatementsResult(content);
-            }
-            else {
-                log.info("exchange content: " + exchange.getResponseContent());
-            }
-        }
-        else if (exchangeState == HttpExchange.STATUS_EXCEPTED) {
-            log.severe("exchange failed");
-        }
-        else if (exchangeState == HttpExchange.STATUS_EXPIRED) {
-            log.warning("exchange expired");
-        }
-        else {
-            log.severe("exchange returned unhandled status");
-        }
-        return null;
+        throw new UnrecognizedHTTPResponse("status: " + response.getStatus());
     }
 
     @Override
     public void saveStatement(Statement statement) throws Exception {
-        log.info("saveStatement: " + statement.toJSONPretty());
-
         ContentExchange exchange = new ContentExchange();
-        exchange.setRequestHeader("Authorization", this.getAuth());
-        if (!this.getVersion().equals(TCAPIVersion.V090)) {
-            exchange.setRequestHeader("X-Experience-API-Version", this.getVersion().toString());
-        }
-        exchange.setRequestContentType("application/json");
         exchange.setRequestContent(new ByteArrayBuffer(statement.toJSON(), "UTF-8"));
 
         String url = this.getEndpoint() + "statements";
@@ -251,33 +218,19 @@ public class RemoteLRS implements LRS {
         }
         exchange.setURL(url);
 
-        httpClient.send(exchange);
+        HTTPResponse response = this.makeRequest(exchange);
+        int status = response.getStatus();
+        if (status == 204 || status == 200) {
+            StringOfJSON content = new StringOfJSON(exchange.getResponseContent());
+            // TODO: return?
+            return;
+        }
 
-        // Waits until the exchange is terminated
-        int exchangeState = HttpExchange.STATUS_START;
-        exchangeState = exchange.waitForDone();
-
-        if (exchangeState == HttpExchange.STATUS_COMPLETED) {
-            log.info("exchange completed");
-            log.info("status: " + exchange.getResponseStatus());
-
-            String content = exchange.getResponseContent();
-            log.info("content: " + content);
-        }
-        else if (exchangeState == HttpExchange.STATUS_EXCEPTED) {
-            log.severe("exchange failed");
-        }
-        else if (exchangeState == HttpExchange.STATUS_EXPIRED) {
-            log.warning("exchange expired");
-        }
-        else {
-            log.severe("exchange returned unhandled status");
-        }
+        throw new UnrecognizedHTTPResponse("status: " + status);
     }
 
     @Override
     public void saveStatements(Statement[] statements) throws Exception {
-        log.info("saveStatements: " + statements.length);
         if (statements.length == 0) {
             return;
         }
@@ -288,37 +241,32 @@ public class RemoteLRS implements LRS {
         }
 
         ContentExchange exchange = new ContentExchange();
-        exchange.setRequestHeader("Authorization", this.getAuth());
-        if (!this.getVersion().equals(TCAPIVersion.V090)) {
-            exchange.setRequestHeader("X-Experience-API-Version", this.getVersion().toString());
-        }
-        exchange.setRequestContentType("application/json");
         exchange.setRequestContent(new ByteArrayBuffer(Mapper.getInstance().writeValueAsString(rootNode), "UTF-8"));
-
         exchange.setMethod(HttpMethods.POST);
         exchange.setURL(this.getEndpoint() + "statements");
 
-        httpClient.send(exchange);
+        HTTPResponse response = this.makeRequest(exchange);
+        int status = response.getStatus();
 
-        // Waits until the exchange is terminated
-        int exchangeState = HttpExchange.STATUS_START;
-        exchangeState = exchange.waitForDone();
+        if (status == 200) {
+            return;
+        }
 
-        if (exchangeState == HttpExchange.STATUS_COMPLETED) {
-            log.info("exchange completed");
-            log.info("status: " + exchange.getResponseStatus());
+        throw new UnrecognizedHTTPResponse("status: " + status);
+    }
 
-            String content = exchange.getResponseContent();
-            log.info("content: " + content);
+    protected class HTTPResponse extends HashMap<String,Object> {
+        private int status;
+        private String content;
+
+        public HTTPResponse() {}
+        public HTTPResponse(int status, String content) {
+            this.status = status;
+            this.content = content;
         }
-        else if (exchangeState == HttpExchange.STATUS_EXCEPTED) {
-            log.severe("exchange failed");
-        }
-        else if (exchangeState == HttpExchange.STATUS_EXPIRED) {
-            log.warning("exchange expired");
-        }
-        else {
-            log.severe("exchange returned unhandled status");
-        }
+        public int getStatus() {return this.status;}
+        public void setStatus(int status) {this.status = status;}
+        public String getContent() {return this.content;}
+        public void setContent(String content) {this.content = content;}
     }
 }

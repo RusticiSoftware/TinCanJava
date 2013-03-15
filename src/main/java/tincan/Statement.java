@@ -12,6 +12,9 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import tincan.json.JSONBase;
 import tincan.json.Mapper;
+import tincan.json.StringOfJSON;
+
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.UUID;
 
@@ -38,7 +41,7 @@ public class Statement extends JSONBase {
     @Setter(AccessLevel.PROTECTED)
     private String _json;
 
-    public Statement (JsonNode jsonNode) throws MalformedURLException {
+    public Statement(JsonNode jsonNode) throws MalformedURLException {
         this();
 
         JsonNode idNode = jsonNode.path("id");
@@ -91,9 +94,9 @@ public class Statement extends JSONBase {
         }
     }
 
-    public Statement (String json) throws Exception {
-        this(Mapper.getInstance().readValue(json, JsonNode.class));
-        this.set_json(json);
+    public Statement(StringOfJSON jsonStr) throws IOException {
+        this(jsonStr.toJSONNode());
+        this.set_json(jsonStr.toString());
     }
 
     @Override

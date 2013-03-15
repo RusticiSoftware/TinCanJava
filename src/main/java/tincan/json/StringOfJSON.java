@@ -19,4 +19,9 @@ public class StringOfJSON {
         }
         return Mapper.getInstance().readValue(this.source, JsonNode.class);
     }
+
+    @Override
+    public String toString() {
+        return this.source;
+    }
 }
