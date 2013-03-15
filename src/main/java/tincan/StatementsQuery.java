@@ -1,6 +1,7 @@
 package tincan;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.joda.time.DateTime;
 import java.util.UUID;
 
@@ -8,17 +9,17 @@ import java.util.UUID;
  * Query model class used for building query parameters passed to get statements from LRS
  */
 @Data
+@NoArgsConstructor
 public class StatementsQuery {
     private Verb verb;
     private String verbID;
-    private StatementTarget object;
-    private String objectID;
+    private QueryableStatementTarget object;
     private UUID registration;
     private Boolean context;
     private Agent actor;
     private DateTime since;
     private DateTime until;
-    private Integer limit = 0;
+    private Integer limit;
     private Boolean authoritative;
     private Boolean sparse;
     private Agent instructor;

@@ -12,7 +12,7 @@ import tincan.json.Mapper;
  */
 @Data
 @NoArgsConstructor
-public class Agent extends JSONBase implements StatementTarget {
+public class Agent extends JSONBase implements QueryableStatementTarget {
     private final String objectType = "Agent";
     private String name;
     private String mbox;

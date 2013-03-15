@@ -1,6 +1,7 @@
 package tincan;
 
 import lombok.extern.java.Log;
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class RemoteLRSTest {
 
         String strURL = "http://tincanapi.com/test/TinCanJava";
         obj.setEndpoint(strURL);
-        Assert.assertEquals(strURL, obj.getEndpoint().toString());
+        Assert.assertEquals(strURL + "/", obj.getEndpoint().toString());
 
     }
 
@@ -107,14 +108,14 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testPutStatement() throws Exception {
+    public void testSaveStatement() throws Exception {
         RemoteLRS obj = getLRS();
 
         Statement st = new Statement();
         st.stamp(); // triggers a PUT
         st.setActor(mockAgent());
         st.setVerb(mockVerbDisplay());
-        st.setObject(mockActivity("testPutStatement"));
+        st.setObject(mockActivity("testSaveStatement"));
 
         obj.saveStatement(st);
     }
@@ -123,23 +124,91 @@ public class RemoteLRSTest {
      * Tests calling saveStatement without an ID which triggers a POST request
      */
     @Test
-    public void testPutStatementNoID() throws Exception {
+    public void testSaveStatementNoID() throws Exception {
         RemoteLRS obj = getLRS();
 
         Statement st = new Statement();
         st.setActor(mockAgent());
         st.setVerb(mockVerbDisplay());
-        st.setObject(mockActivity("testPutStatementNoID"));
+        st.setObject(mockActivity("testSaveStatementNoID"));
 
         obj.saveStatement(st);
     }
 
     @Test
-    public void testGetStatement() throws Exception {
+    public void testSaveStatements() throws Exception {
+        RemoteLRS obj = getLRS();
+
+        Statement[] sts = new Statement[2];
+
+        Statement st0 = new Statement();
+        st0.stamp();
+        st0.setActor(mockAgent());
+        st0.setVerb(mockVerbDisplay());
+        st0.setObject(mockActivity("testSaveStatements1"));
+
+        sts[0] = st0;
+
+        Statement st1 = new Statement();
+        st1.stamp();
+        st1.setActor(mockAgent());
+        st1.setVerb(mockVerbDisplay());
+        st1.setObject(mockActivity("testSaveStatements2"));
+
+        sts[1] = st1;
+
+        obj.saveStatements(sts);
+    }
+
+    @Test
+    public void testSaveStatementsNoIDs() throws Exception {
+        RemoteLRS obj = getLRS();
+
+        Statement[] sts = new Statement[2];
+
+        Statement st0 = new Statement();
+        st0.setActor(mockAgent());
+        st0.setVerb(mockVerbDisplay());
+        st0.setObject(mockActivity("testSaveStatementsNoIDs1"));
+
+        sts[0] = st0;
+
+        Statement st1 = new Statement();
+        st1.setActor(mockAgent());
+        st1.setVerb(mockVerbDisplay());
+        st1.setObject(mockActivity("testSaveStatementsNoIDs2"));
+
+        sts[1] = st1;
+
+        obj.saveStatements(sts);
+    }
+
+    @Test
+    public void testFetchStatement() throws Exception {
         RemoteLRS obj = getLRS();
 
         Statement result = obj.getStatement("5bd37f75-db5a-4486-b0fa-b7ec4d82c489");
         log.info("statement: " + result.toJSONPretty());
+    }
+
+    @Test
+    public void testQueryStatements() throws Exception {
+        RemoteLRS obj = getLRS();
+
+        StatementsQuery query = new StatementsQuery();
+        query.setSince(new DateTime("2013-03-13T14:17:42.610Z"));
+        //query.setLimit(3);
+        query.setActor(mockAgent());
+        query.setObject(mockActivity("testSaveStatement"));
+
+        StatementsResult result = obj.queryStatements(query);
+        if (result != null) {
+            log.info("statement count: " + result.getStatements().size());
+            //for(Statement st : result.getStatements()) {
+                //log.info("statement: " + st.toJSONPretty());
+            //}
+            log.info("result - more: " + result.getMoreURL());
+        }
     }
 
     private RemoteLRS getLRS() {

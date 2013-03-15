@@ -11,6 +11,8 @@ import java.io.IOException;
 public interface JSON {
     public ObjectNode toJSONNode(TCAPIVersion version);
     public ObjectNode toJSONNode();
+    public String toJSON(TCAPIVersion version) throws IOException;
     public String toJSON() throws IOException;
+    public String toJSONPretty(TCAPIVersion version) throws IOException;
     public String toJSONPretty() throws IOException;
 }

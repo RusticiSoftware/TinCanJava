@@ -1,9 +1,10 @@
 package tincan;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import java.io.IOException;
 import java.net.MalformedURLException;
 import tincan.json.JSONHashMapURLToObject;
-import tincan.json.Mapper;
 import tincan.json.StringOfJSON;
 
 /**
@@ -16,5 +17,9 @@ public class Extensions extends JSONHashMapURLToObject {
 
     public Extensions(JsonNode jsonNode) throws MalformedURLException {
         super(jsonNode);
+    }
+
+    public Extensions(StringOfJSON jsonStr) throws IOException {
+        super(jsonStr.toJSONNode());
     }
 }

@@ -15,7 +15,7 @@ import java.net.URL;
  */
 @Data
 @NoArgsConstructor
-public class Activity extends JSONBase implements StatementTarget {
+public class Activity extends JSONBase implements QueryableStatementTarget {
     private final String objectType = "Activity";
 
     private URL id;

@@ -20,7 +20,6 @@ import java.util.UUID;
  */
 @Data
 @NoArgsConstructor
-@Log
 public class Statement extends JSONBase {
     private UUID id;
     private Agent actor;
@@ -42,7 +41,6 @@ public class Statement extends JSONBase {
     public Statement (JsonNode jsonNode) throws MalformedURLException {
         this();
 
-        log.info("constructor (from JsonNode)");
         JsonNode idNode = jsonNode.path("id");
         if (! idNode.isMissingNode()) {
             this.setId(UUID.fromString(idNode.textValue()));
@@ -95,14 +93,11 @@ public class Statement extends JSONBase {
 
     public Statement (String json) throws Exception {
         this(Mapper.getInstance().readValue(json, JsonNode.class));
-
-        log.info("constructor (from String)");
         this.set_json(json);
     }
 
     @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
-        log.info("toJSONNode - version: " + version.toString());
         ObjectNode node = Mapper.getInstance().createObjectNode();
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 

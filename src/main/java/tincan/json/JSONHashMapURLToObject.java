@@ -61,6 +61,11 @@ public class JSONHashMapURLToObject extends JSONHashMapBase {
         return this.put(key, storeVal);
     }
 
+    public Object put(URL key, StringOfJSON val) {
+        JsonNode storeVal = Mapper.getInstance().valueToTree(val);
+        return this.put(key, storeVal);
+    }
+
     public Object put(String key, Object val) throws MalformedURLException {
         return this.put(new URL(key), val);
     }
