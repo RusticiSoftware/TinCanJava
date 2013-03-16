@@ -8,6 +8,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.client.HttpClient;
@@ -112,7 +113,7 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
-    public Statement fetchStatement(String id) throws Exception {
+    public Statement retrieveStatement(String id) throws Exception {
         ContentExchange exchange = new ContentExchange();
         exchange.setURL(this.getEndpoint() + "statements?statementId=" + id);
 
@@ -253,6 +254,87 @@ public class RemoteLRS implements LRS {
         }
 
         throw new UnrecognizedHTTPResponse("status: " + status);
+    }
+
+    @Override
+    public State retrieveState(String id, String activityId, Agent agent, UUID registration) throws Exception {
+        HashMap<String,String> params = new HashMap<String,String>();
+        params.put("stateId", id);
+        params.put("activityId", activityId);
+        params.put("agent", agent.toJSON(this.getVersion()));
+        if (registration != null) {
+            params.put("registration", registration.toString());
+        }
+
+        String queryString = "?";
+        Boolean first = true;
+        for(Map.Entry<String,String> parameter : params.entrySet()) {
+            try {
+                queryString += (first ? "" : "&") + URLEncoder.encode(parameter.getKey(), "UTF-8") + "=" + URLEncoder.encode(parameter.getValue(), "UTF-8").replace("+", "%20");
+                first = false;
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+
+        ContentExchange exchange = new ContentExchange();
+        exchange.setURL(this.getEndpoint() + "activities/state" + queryString);
+
+        HTTPResponse response = this.makeRequest(exchange);
+        int status = response.getStatus();
+
+        if (status == 200) {
+            return new State(id, new StringOfJSON(response.getContent()));
+        }
+        else if (status == 404) {
+            return null;
+        }
+        throw new UnrecognizedHTTPResponse("status: " + status);
+    }
+
+    @Override
+    public State retrieveState(String id, Activity activity, Agent agent, UUID registration) throws Exception {
+        return this.retrieveState(id, activity.getId().toString(), agent, registration);
+    }
+
+    @Override
+    public void saveState(State state, String activityId, Agent agent, UUID registration) throws Exception {
+        HashMap<String,String> params = new HashMap<String,String>();
+        params.put("stateId", state.getId());
+        params.put("activityId", activityId);
+        params.put("agent", agent.toJSON(this.getVersion()));
+        if (registration != null) {
+            params.put("registration", registration.toString());
+        }
+
+        String queryString = "?";
+        Boolean first = true;
+        for(Map.Entry<String,String> parameter : params.entrySet()) {
+            try {
+                queryString += (first ? "" : "&") + URLEncoder.encode(parameter.getKey(), "UTF-8") + "=" + URLEncoder.encode(parameter.getValue(), "UTF-8").replace("+", "%20");
+                first = false;
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+
+        ContentExchange exchange = new ContentExchange();
+        exchange.setMethod(HttpMethods.PUT);
+        exchange.setURL(this.getEndpoint() + "activities/state" + queryString);
+
+        // TODO: need to set the 'updated' property based on header
+        HTTPResponse response = this.makeRequest(exchange);
+        int status = response.getStatus();
+
+        if (status == 204) {
+            return;
+        }
+        throw new UnrecognizedHTTPResponse("status: " + status);
+    }
+
+    @Override
+    public void saveState(State state, Activity activity, Agent agent, UUID registration) throws Exception {
+        this.saveState(state, activity.getId().toString(), agent, registration);
     }
 
     protected class HTTPResponse extends HashMap<String,Object> {

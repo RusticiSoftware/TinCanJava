@@ -5,6 +5,7 @@ import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import tincan.json.StringOfJSON;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -184,7 +185,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testFetchStatement() throws Exception {
+    public void testRetrieveStatement() throws Exception {
         RemoteLRS obj = getLRS();
 
         Statement result = obj.getStatement("5bd37f75-db5a-4486-b0fa-b7ec4d82c489");
@@ -209,6 +210,26 @@ public class RemoteLRSTest {
             //}
             log.info("result - more: " + result.getMoreURL());
         }
+    }
+
+    @Test
+    public void testSaveState() throws Exception {
+        RemoteLRS obj = getLRS();
+
+        State state = new State("testSaveState", new StringOfJSON("{\"test\": \"Test\"}"));
+
+        obj.saveState(state, mockActivity("testSaveState"), mockAgent(), null);
+    }
+
+    @Test
+    public void testRetrieveState() throws Exception {
+        RemoteLRS obj = getLRS();
+
+        State state = new State("testRetrieveState", new StringOfJSON("{\"test\": \"Test\"}"));
+        obj.saveState(state, mockActivity("testRetrieveState"), mockAgent(), null);
+
+        State retrievedState = obj.retrieveState("testRetrieveState", mockActivity("testRetrieveState"), mockAgent(), null);
+        log.info("state result: " + retrievedState.getId());
     }
 
     private RemoteLRS getLRS() {
