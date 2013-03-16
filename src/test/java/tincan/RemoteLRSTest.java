@@ -188,7 +188,14 @@ public class RemoteLRSTest {
     public void testRetrieveStatement() throws Exception {
         RemoteLRS obj = getLRS();
 
-        Statement result = obj.getStatement("5bd37f75-db5a-4486-b0fa-b7ec4d82c489");
+        Statement st = new Statement();
+        st.stamp();
+        st.setActor(mockAgent());
+        st.setVerb(mockVerb());
+        st.setObject(mockActivity("testRetrieveStatement"));
+        obj.saveStatement(st);
+
+        Statement result = obj.retrieveStatement(st.getId().toString());
         log.info("statement: " + result.toJSONPretty());
     }
 
