@@ -205,6 +205,29 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
+    public StatementsResult moreStatements(String moreURL) throws Exception {
+        if (moreURL == null) {
+            return null;
+        }
+
+        //
+        // moreURL is relative to the endpoint's server root
+        //
+        URL endpoint = this.getEndpoint();
+        String url = endpoint.getProtocol() + "://" + endpoint.getHost() + (endpoint.getPort() == -1 ? "" : endpoint.getPort()) + moreURL;
+
+        ContentExchange exchange = new ContentExchange();
+        exchange.setURL(url);
+
+        HTTPResponse response = this.makeRequest(exchange);
+        if (response.getStatus() == 200) {
+            return new StatementsResult(new StringOfJSON(response.getContent()));
+        }
+
+        throw new UnrecognizedHTTPResponse("status: " + response.getStatus());
+    }
+
+    @Override
     public void saveStatement(Statement statement) throws Exception {
         ContentExchange exchange = new ContentExchange();
         exchange.setRequestContent(new ByteArrayBuffer(statement.toJSON(), "UTF-8"));
@@ -224,6 +247,8 @@ public class RemoteLRS implements LRS {
         if (status == 204 || status == 200) {
             StringOfJSON content = new StringOfJSON(exchange.getResponseContent());
             // TODO: return?
+            // TODO: in the case ID wasn't provided catch the returned value
+            //       and store it to the object
             return;
         }
 

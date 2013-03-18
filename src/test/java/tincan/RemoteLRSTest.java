@@ -220,6 +220,21 @@ public class RemoteLRSTest {
     }
 
     @Test
+    public void testMoreStatements() throws Exception {
+        RemoteLRS obj = getLRS();
+
+        StatementsQuery query = new StatementsQuery();
+        query.setLimit(3);
+        StatementsResult queryResult = obj.queryStatements(query);
+        log.info("statement count: " + queryResult.getStatements().size());
+        log.info("result - more: " + queryResult.getMoreURL());
+
+        StatementsResult moreResult = obj.moreStatements(queryResult.getMoreURL());
+        log.info("statement count: " + moreResult.getStatements().size());
+        log.info("result - more: " + moreResult.getMoreURL());
+    }
+
+    @Test
     public void testSaveState() throws Exception {
         RemoteLRS obj = getLRS();
 
