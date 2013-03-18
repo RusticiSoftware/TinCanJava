@@ -1,5 +1,6 @@
 package tincan;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -10,7 +11,7 @@ public interface LRS {
     StatementsResult queryStatements(StatementsQuery query) throws Exception;
     StatementsResult moreStatements(String moreURL) throws Exception;
     UUID saveStatement(Statement statement) throws Exception;
-    void saveStatements(Statement[] statements) throws Exception;
+    List<String> saveStatements(List<Statement> statements) throws Exception;
 
     State retrieveState(String id, String activityId, Agent agent, UUID registration) throws Exception;
     State retrieveState(String id, Activity activity, Agent agent, UUID registration) throws Exception;

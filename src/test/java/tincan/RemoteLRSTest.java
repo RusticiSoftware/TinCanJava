@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 @Log
@@ -140,7 +142,7 @@ public class RemoteLRSTest {
     public void testSaveStatements() throws Exception {
         RemoteLRS obj = getLRS();
 
-        Statement[] sts = new Statement[2];
+        List<Statement> sts = new ArrayList<Statement>();
 
         Statement st0 = new Statement();
         st0.stamp();
@@ -148,7 +150,7 @@ public class RemoteLRSTest {
         st0.setVerb(mockVerbDisplay());
         st0.setObject(mockActivity("testSaveStatements1"));
 
-        sts[0] = st0;
+        sts.add(st0);
 
         Statement st1 = new Statement();
         st1.stamp();
@@ -156,32 +158,65 @@ public class RemoteLRSTest {
         st1.setVerb(mockVerbDisplay());
         st1.setObject(mockActivity("testSaveStatements2"));
 
-        sts[1] = st1;
+        sts.add(st1);
 
-        obj.saveStatements(sts);
+        List<String> ids = obj.saveStatements(sts);
+        for(String id: ids) {
+            log.info("id: " + id);
+        }
     }
 
     @Test
     public void testSaveStatementsNoIDs() throws Exception {
         RemoteLRS obj = getLRS();
 
-        Statement[] sts = new Statement[2];
+        List<Statement> sts = new ArrayList<Statement>();
 
         Statement st0 = new Statement();
         st0.setActor(mockAgent());
         st0.setVerb(mockVerbDisplay());
         st0.setObject(mockActivity("testSaveStatementsNoIDs1"));
 
-        sts[0] = st0;
+        sts.add(st0);
 
         Statement st1 = new Statement();
         st1.setActor(mockAgent());
         st1.setVerb(mockVerbDisplay());
         st1.setObject(mockActivity("testSaveStatementsNoIDs2"));
 
-        sts[1] = st1;
+        sts.add(st1);
 
-        obj.saveStatements(sts);
+        List<String> ids = obj.saveStatements(sts);
+        for(String id: ids) {
+            log.info("id: " + id);
+        }
+    }
+
+    @Test
+    public void testSaveStatementsMixed() throws Exception {
+        RemoteLRS obj = getLRS();
+
+        List<Statement> sts = new ArrayList<Statement>();
+
+        Statement st0 = new Statement();
+        st0.stamp();
+        st0.setActor(mockAgent());
+        st0.setVerb(mockVerbDisplay());
+        st0.setObject(mockActivity("testSaveStatements1"));
+
+        sts.add(st0);
+
+        Statement st1 = new Statement();
+        st1.setActor(mockAgent());
+        st1.setVerb(mockVerbDisplay());
+        st1.setObject(mockActivity("testSaveStatements2"));
+
+        sts.add(st1);
+
+        List<String> ids = obj.saveStatements(sts);
+        for(String id: ids) {
+            log.info("id: " + id);
+        }
     }
 
     @Test

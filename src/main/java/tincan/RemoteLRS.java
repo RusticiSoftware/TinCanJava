@@ -1,15 +1,13 @@
 package tincan;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.Data;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
+import java.util.*;
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.ContentExchange;
@@ -258,9 +256,10 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
-    public void saveStatements(Statement[] statements) throws Exception {
-        if (statements.length == 0) {
-            return;
+    public List<String> saveStatements(List<Statement> statements) throws Exception {
+        List<String> statementIds = new ArrayList<String>();
+        if (statements.size() == 0) {
+            return statementIds;
         }
 
         ArrayNode rootNode = Mapper.getInstance().createArrayNode();
@@ -277,7 +276,12 @@ public class RemoteLRS implements LRS {
         int status = response.getStatus();
 
         if (status == 200) {
-            return;
+            String content = exchange.getResponseContent();
+            Iterator it =  Mapper.getInstance().readValue(content, ArrayNode.class).elements();
+            while(it.hasNext()) {
+                statementIds.add( ((JsonNode) it.next()).textValue() );
+            }
+            return statementIds;
         }
 
         throw new UnrecognizedHTTPResponse("status: " + status);
