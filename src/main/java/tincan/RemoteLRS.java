@@ -228,7 +228,7 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
-    public void saveStatement(Statement statement) throws Exception {
+    public UUID saveStatement(Statement statement) throws Exception {
         ContentExchange exchange = new ContentExchange();
         exchange.setRequestContent(new ByteArrayBuffer(statement.toJSON(), "UTF-8"));
 
@@ -244,12 +244,14 @@ public class RemoteLRS implements LRS {
 
         HTTPResponse response = this.makeRequest(exchange);
         int status = response.getStatus();
-        if (status == 204 || status == 200) {
-            StringOfJSON content = new StringOfJSON(exchange.getResponseContent());
-            // TODO: return?
-            // TODO: in the case ID wasn't provided catch the returned value
-            //       and store it to the object
-            return;
+
+        // TODO: handle 409 conflict, etc.
+        if (status == 204) {
+            return statement.getId();
+        }
+        else if (status == 200) {
+            String content = exchange.getResponseContent();
+            return UUID.fromString(Mapper.getInstance().readValue(content, ArrayNode.class).get(0).textValue());
         }
 
         throw new UnrecognizedHTTPResponse("status: " + status);
