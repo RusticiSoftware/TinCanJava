@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.extern.java.Log;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -33,10 +32,7 @@ public class Statement extends JSONBase {
     private DateTime timestamp;
     private DateTime stored;
     private Agent authority;
-
-    // TODO: these two are deprecated, figure out how to handle deprecated ones
     private Boolean voided;
-    private Boolean inProgress;
 
     @Setter(AccessLevel.PROTECTED)
     private String _json;
@@ -97,6 +93,20 @@ public class Statement extends JSONBase {
     public Statement(StringOfJSON jsonStr) throws IOException {
         this(jsonStr.toJSONNode());
         this.set_json(jsonStr.toString());
+    }
+
+    public Statement(Agent actor, Verb verb, StatementTarget object, Result result, Context context) {
+        this();
+
+        this.setActor(actor);
+        this.setVerb(verb);
+        this.setObject(object);
+        this.setResult(result);
+        this.setContext(context);
+    }
+
+    public Statement(Agent actor, Verb verb, StatementTarget object) {
+        this(actor, verb, object, null, null);
     }
 
     @Override

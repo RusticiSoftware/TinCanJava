@@ -21,6 +21,14 @@ public class Activity extends JSONBase implements QueryableStatementTarget {
     private URL id;
     private ActivityDefinition definition;
 
+    public Activity(URL id) {
+        this.id = id;
+    }
+
+    public Activity(String id) throws MalformedURLException {
+        this(new URL(id));
+    }
+
     public Activity(JsonNode jsonNode) throws MalformedURLException {
         this();
 
@@ -33,6 +41,12 @@ public class Activity extends JSONBase implements QueryableStatementTarget {
         if (! definitionNode.isMissingNode()) {
             this.setDefinition(new ActivityDefinition(definitionNode));
         }
+    }
+
+    public Activity(String id, String name, String description) throws MalformedURLException {
+        this(id);
+
+        this.setDefinition(new ActivityDefinition(name, description));
     }
 
     @Override
@@ -48,5 +62,13 @@ public class Activity extends JSONBase implements QueryableStatementTarget {
         }
 
         return node;
+    }
+
+    public void setId(URL id) {
+        this.id = id;
+    }
+
+    public void setId(String id) throws MalformedURLException {
+        this.setId(new URL(id));
     }
 }

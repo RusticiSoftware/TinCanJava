@@ -5,7 +5,6 @@ import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import tincan.json.StringOfJSON;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -231,7 +230,22 @@ public class RemoteLRSTest {
         obj.saveStatement(st);
 
         Statement result = obj.retrieveStatement(st.getId().toString());
-        log.info("statement: " + result.toJSONPretty());
+        log.info("statement: " + result.toJSON(true));
+    }
+
+    @Test
+    public void testQueryStatementsNull() throws Exception {
+        RemoteLRS obj = getLRS();
+
+        StatementsResult result = obj.queryStatements(null);
+        if (result != null) {
+            log.info("statement count: " + result.getStatements().size());
+            for(Statement st : result.getStatements()) {
+                log.info("statement - id: " + st.getId().toString());
+                log.info("statement: " + st.toJSON(true));
+            }
+            log.info("result - more: " + result.getMoreURL());
+        }
     }
 
     @Test
@@ -245,13 +259,13 @@ public class RemoteLRSTest {
         query.setObject(mockActivity("testSaveStatement"));
 
         StatementsResult result = obj.queryStatements(query);
-        if (result != null) {
-            log.info("statement count: " + result.getStatements().size());
+        //if (result != null) {
+            //log.info("statement count: " + result.getStatements().size());
             //for(Statement st : result.getStatements()) {
-                //log.info("statement: " + st.toJSONPretty());
+                //log.info("statement: " + st.toJSON(true));
             //}
-            log.info("result - more: " + result.getMoreURL());
-        }
+            //log.info("result - more: " + result.getMoreURL());
+        //}
     }
 
     @Test
@@ -273,20 +287,30 @@ public class RemoteLRSTest {
     public void testSaveState() throws Exception {
         RemoteLRS obj = getLRS();
 
-        State state = new State("testSaveState", new StringOfJSON("{\"test\": \"Test\"}"));
+        String key = "testRetrieveState";
+        String value = "Test";
+        Agent agent = mockAgent();
+        URL activityId = mockActivity(key).getId();
 
-        obj.saveState(state, mockActivity("testSaveState"), mockAgent(), null);
+        State state = new State(key, value, activityId, agent, null);
+        obj.saveState(state, mockActivity(key).getId().toString(), mockAgent(), null);
     }
 
     @Test
     public void testRetrieveState() throws Exception {
         RemoteLRS obj = getLRS();
 
-        State state = new State("testRetrieveState", new StringOfJSON("{\"test\": \"Test\"}"));
-        obj.saveState(state, mockActivity("testRetrieveState"), mockAgent(), null);
+        String key = "testRetrieveState";
+        String value = "Test";
+        Agent agent = mockAgent();
+        URL activityId = mockActivity(key).getId();
 
-        State retrievedState = obj.retrieveState("testRetrieveState", mockActivity("testRetrieveState"), mockAgent(), null);
-        log.info("state result: " + retrievedState.getId());
+        State state = new State(key, value, activityId, agent, null);
+        obj.saveState(state, mockActivity(key).getId().toString(), mockAgent(), null);
+
+        State retrievedState = obj.retrieveState(key, mockActivity(key).getId().toString(), mockAgent(), null);
+        Assert.assertEquals(key, retrievedState.getId());
+        Assert.assertEquals(value, new String(retrievedState.getContents()));
     }
 
     private RemoteLRS getLRS() {

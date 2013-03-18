@@ -3,7 +3,7 @@ package tincan;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.Data;
-import java.io.UnsupportedEncodingException;
+import lombok.NoArgsConstructor;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -14,8 +14,6 @@ import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpExchange;
 import org.eclipse.jetty.http.HttpMethods;
 import org.eclipse.jetty.io.ByteArrayBuffer;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import tincan.exceptions.*;
 import tincan.json.Mapper;
 import tincan.json.StringOfJSON;
@@ -27,35 +25,35 @@ import static org.eclipse.jetty.client.HttpClient.CONNECTOR_SELECT_CHANNEL;
  */
 // TODO: handle extended on all requests
 @Data
+@NoArgsConstructor
 public class RemoteLRS implements LRS {
-    private static HttpClient httpClient = new HttpClient();
-    // TODO: should this be an instance private?
-    static {
-        httpClient.setConnectorType(CONNECTOR_SELECT_CHANNEL);
-        try {
-            httpClient.start();
-        } catch (Exception e) {
-            // TODO: what should this be?
-            e.printStackTrace();
+    private static HttpClient _httpClient;
+    private static HttpClient httpClient() throws Exception {
+        if (_httpClient == null ) {
+            _httpClient = new HttpClient();
+            _httpClient.setConnectorType(CONNECTOR_SELECT_CHANNEL);
+            _httpClient.start();
         }
+
+        return _httpClient;
     }
 
     private URL endpoint;
-    private TCAPIVersion version;
+    private TCAPIVersion version = this.getVersion();
     private String username;
     private String password;
     private String auth;
     private HashMap extended;
 
-    private void setEndpoint(URL url) {
+    public RemoteLRS(TCAPIVersion version) {
+        this.setVersion(version);
+    }
+
+    private void setEndpoint(URL url) throws MalformedURLException {
         String strUrl = url.toString();
         if (! strUrl.substring(strUrl.length() - 1).equals("/")) {
-            try {
-                strUrl += "/";
-                url = new URL(strUrl);
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
+            strUrl += "/";
+            url = new URL(strUrl);
         }
         this.endpoint = url;
     }
@@ -87,13 +85,12 @@ public class RemoteLRS implements LRS {
     }
 
     private HTTPResponse makeRequest(ContentExchange exchange) throws Exception {
+        // TODO: add handling of extended parameters
         exchange.setRequestHeader("Authorization", this.getAuth());
-        if (!this.getVersion().equals(TCAPIVersion.V090)) {
-            exchange.setRequestHeader("X-Experience-API-Version", this.getVersion().toString());
-        }
+        exchange.setRequestHeader("X-Experience-API-Version", this.getVersion().toString());
         exchange.setRequestContentType("application/json");
 
-        httpClient.send(exchange);
+        httpClient().send(exchange);
 
         // Waits until the exchange is terminated
         int exchangeState = exchange.waitForDone();
@@ -124,7 +121,7 @@ public class RemoteLRS implements LRS {
         else if (status == 404) {
             return null;
         }
-        throw new UnrecognizedHTTPResponse("status: " + status);
+        throw new UnexpectedHTTPResponse(status, response.getContent());
     }
 
     @Override
@@ -133,62 +130,13 @@ public class RemoteLRS implements LRS {
             query = new StatementsQuery();
         }
 
-        HashMap<String,String> params = new HashMap<String,String>();
-        if (query.getVerb() != null) {
-            params.put("verb", query.getVerb().getId().toString());
-        }
-        else if (query.getVerbID() != null) {
-            params.put("verb", query.getVerbID());
-        }
-        if (query.getObject() != null) {
-            params.put("object", query.getObject().toJSON(this.getVersion()));
-        }
-        if (query.getRegistration() != null) {
-            params.put("registration", query.getRegistration().toString());
-        }
-        if (query.getContext() != null) {
-            params.put("context", query.getContext().toString());
-        }
-        if (query.getActor() != null) {
-            params.put("actor", query.getActor().toJSON(this.getVersion()));
-        }
-        if (query.getSince() != null) {
-            //
-            // The following was giving ZZ which has a : in it which was blowing up
-            //params.put("since", query.getSince().toString(ISODateTimeFormat.dateTime()));
-            //
-            DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-            params.put("since", query.getSince().toString(fmt));
-        }
-        if (query.getUntil() != null) {
-            DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-            params.put("until", query.getUntil().toString(fmt));
-        }
-        if (query.getLimit() != null) {
-            params.put("limit", query.getLimit().toString());
-        }
-        if (query.getAuthoritative() != null) {
-            params.put("authoritative", query.getAuthoritative().toString());
-        }
-        if (query.getSparse() != null) {
-            params.put("sparse", query.getSparse().toString());
-        }
-        if (query.getInstructor() != null) {
-            params.put("instructor", query.getInstructor().toJSON(this.getVersion()));
-        }
-        if (query.getAscending() != null) {
-            params.put("ascending", query.getAscending().toString());
-        }
+        HashMap<String,String> params = query.toParameterMap(this.getVersion());
 
         String queryString = "?";
         Boolean first = true;
         for(Map.Entry<String,String> parameter : params.entrySet()) {
-            try {
-                queryString += (first ? "" : "&") + URLEncoder.encode(parameter.getKey(), "UTF-8") + "=" + URLEncoder.encode(parameter.getValue(), "UTF-8").replace("+", "%20");
-                first = false;
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            queryString += (first ? "" : "&") + URLEncoder.encode(parameter.getKey(), "UTF-8") + "=" + URLEncoder.encode(parameter.getValue(), "UTF-8").replace("+", "%20");
+            first = false;
         }
 
         ContentExchange exchange = new ContentExchange();
@@ -199,7 +147,7 @@ public class RemoteLRS implements LRS {
             return new StatementsResult(new StringOfJSON(response.getContent()));
         }
 
-        throw new UnrecognizedHTTPResponse("status: " + response.getStatus());
+        throw new UnexpectedHTTPResponse(response.getStatus(), response.getContent());
     }
 
     @Override
@@ -222,7 +170,7 @@ public class RemoteLRS implements LRS {
             return new StatementsResult(new StringOfJSON(response.getContent()));
         }
 
-        throw new UnrecognizedHTTPResponse("status: " + response.getStatus());
+        throw new UnexpectedHTTPResponse(response.getStatus(), response.getContent());
     }
 
     @Override
@@ -252,7 +200,7 @@ public class RemoteLRS implements LRS {
             return UUID.fromString(Mapper.getInstance().readValue(content, ArrayNode.class).get(0).textValue());
         }
 
-        throw new UnrecognizedHTTPResponse("status: " + status);
+        throw new UnexpectedHTTPResponse(status, response.getContent());
     }
 
     @Override
@@ -284,7 +232,7 @@ public class RemoteLRS implements LRS {
             return statementIds;
         }
 
-        throw new UnrecognizedHTTPResponse("status: " + status);
+        throw new UnexpectedHTTPResponse(status, response.getContent());
     }
 
     @Override
@@ -300,12 +248,8 @@ public class RemoteLRS implements LRS {
         String queryString = "?";
         Boolean first = true;
         for(Map.Entry<String,String> parameter : params.entrySet()) {
-            try {
-                queryString += (first ? "" : "&") + URLEncoder.encode(parameter.getKey(), "UTF-8") + "=" + URLEncoder.encode(parameter.getValue(), "UTF-8").replace("+", "%20");
-                first = false;
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            queryString += (first ? "" : "&") + URLEncoder.encode(parameter.getKey(), "UTF-8") + "=" + URLEncoder.encode(parameter.getValue(), "UTF-8").replace("+", "%20");
+            first = false;
         }
 
         ContentExchange exchange = new ContentExchange();
@@ -315,17 +259,12 @@ public class RemoteLRS implements LRS {
         int status = response.getStatus();
 
         if (status == 200) {
-            return new State(id, new StringOfJSON(response.getContent()));
+            return new State(id, response.getContent(), activityId, agent, registration);
         }
         else if (status == 404) {
             return null;
         }
-        throw new UnrecognizedHTTPResponse("status: " + status);
-    }
-
-    @Override
-    public State retrieveState(String id, Activity activity, Agent agent, UUID registration) throws Exception {
-        return this.retrieveState(id, activity.getId().toString(), agent, registration);
+        throw new UnexpectedHTTPResponse(status, response.getContent());
     }
 
     @Override
@@ -341,17 +280,14 @@ public class RemoteLRS implements LRS {
         String queryString = "?";
         Boolean first = true;
         for(Map.Entry<String,String> parameter : params.entrySet()) {
-            try {
-                queryString += (first ? "" : "&") + URLEncoder.encode(parameter.getKey(), "UTF-8") + "=" + URLEncoder.encode(parameter.getValue(), "UTF-8").replace("+", "%20");
-                first = false;
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            queryString += (first ? "" : "&") + URLEncoder.encode(parameter.getKey(), "UTF-8") + "=" + URLEncoder.encode(parameter.getValue(), "UTF-8").replace("+", "%20");
+            first = false;
         }
 
         ContentExchange exchange = new ContentExchange();
         exchange.setMethod(HttpMethods.PUT);
         exchange.setURL(this.getEndpoint() + "activities/state" + queryString);
+        exchange.setRequestContent(new ByteArrayBuffer(state.getContents()));
 
         // TODO: need to set the 'updated' property based on header
         HTTPResponse response = this.makeRequest(exchange);
@@ -360,12 +296,7 @@ public class RemoteLRS implements LRS {
         if (status == 204) {
             return;
         }
-        throw new UnrecognizedHTTPResponse("status: " + status);
-    }
-
-    @Override
-    public void saveState(State state, Activity activity, Agent agent, UUID registration) throws Exception {
-        this.saveState(state, activity.getId().toString(), agent, registration);
+        throw new UnexpectedHTTPResponse(status, response.getContent());
     }
 
     protected class HTTPResponse extends HashMap<String,Object> {

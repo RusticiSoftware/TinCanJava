@@ -123,6 +123,18 @@ public class ActivityDefinition extends JSONBase {
         }
     }
 
+    public ActivityDefinition(String name, String description) {
+        this();
+
+        LanguageMap nameMap = new LanguageMap();
+        nameMap.put("und", name);
+        this.setName(nameMap);
+
+        LanguageMap descriptionMap = new LanguageMap();
+        descriptionMap.put("und", description);
+        this.setDescription(descriptionMap);
+    }
+
     @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
         ObjectMapper mapper = Mapper.getInstance();

@@ -18,6 +18,26 @@ public class Verb extends JSONBase {
     private URL id;
     private LanguageMap display;
 
+    public Verb(URL id) {
+        this.id = id;
+    }
+
+    public Verb(URL id, String display) {
+        this(id);
+
+        LanguageMap displayMap = new LanguageMap();
+        displayMap.put("und", display);
+        this.setDisplay(displayMap);
+    }
+
+    public Verb(String id) throws MalformedURLException {
+        this(new URL(id));
+    }
+
+    public Verb(String id, String display) throws MalformedURLException {
+        this(new URL(id), display);
+    }
+
     public Verb(JsonNode jsonNode) throws MalformedURLException {
         this();
 
@@ -43,5 +63,13 @@ public class Verb extends JSONBase {
         }
 
         return node;
+    }
+
+    public void setId(URL id) {
+        this.id = id;
+    }
+
+    public void setId(String id) throws MalformedURLException {
+        this.setId(new URL(id));
     }
 }

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.MalformedURLException;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.java.Log;
 import tincan.json.JSONBase;
 import tincan.json.Mapper;
 
@@ -15,7 +14,6 @@ import tincan.json.Mapper;
  */
 @Data
 @NoArgsConstructor
-@Log
 public class SubStatement extends JSONBase implements StatementTarget {
     private final String objectType = "SubStatement";
 
@@ -27,8 +25,6 @@ public class SubStatement extends JSONBase implements StatementTarget {
 
     public SubStatement (JsonNode jsonNode) throws MalformedURLException {
         this();
-
-        log.info("constructor (from JsonNode)");
 
         JsonNode actorNode = jsonNode.path("actor");
         if (! actorNode.isMissingNode()) {
@@ -56,7 +52,6 @@ public class SubStatement extends JSONBase implements StatementTarget {
 
     @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
-        log.info("toJSONNode - version: " + version.toString());
         ObjectNode node = Mapper.getInstance().createObjectNode();
 
         node.put("actor", this.getActor().toJSONNode(version));

@@ -1,7 +1,7 @@
 package tincan.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import tincan.TCAPIVersion;
@@ -20,30 +20,32 @@ public abstract class JSONBase implements JSON {
     }
 
     @Override
+    public String toJSON(TCAPIVersion version, Boolean pretty) throws IOException {
+        ObjectMapper mapper = Mapper.getInstance();
+        ObjectWriter writer;
+        if (pretty) {
+            writer = mapper.writer().withDefaultPrettyPrinter();
+        }
+        else {
+            writer = mapper.writer();
+        }
+
+        return writer.writeValueAsString(this.toJSONNode(version));
+    }
+
+
+    @Override
     public String toJSON(TCAPIVersion version) throws IOException {
-        return Mapper.getInstance().writeValueAsString(this.toJSONNode(version));
+        return this.toJSON(version, false);
+    }
+
+    @Override
+    public String toJSON(Boolean pretty) throws IOException {
+        return this.toJSON(TCAPIVersion.latest(), pretty);
     }
 
     @Override
     public String toJSON() throws IOException {
-        return this.toJSON(TCAPIVersion.latest());
-    }
-
-    @Override
-    public String toJSONPretty(TCAPIVersion version) throws IOException {
-        // TODO: check Jackson to see if this should be a different Writer
-        ObjectMapper jsonMapper = Mapper.getInstance();
-        jsonMapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-        String result = jsonMapper.writeValueAsString(this.toJSONNode(version));
-
-        jsonMapper.disable(SerializationFeature.INDENT_OUTPUT);
-
-        return result;
-    }
-
-    @Override
-    public String toJSONPretty() throws IOException {
-        return this.toJSONPretty(TCAPIVersion.latest());
+        return this.toJSON(TCAPIVersion.latest(), false);
     }
 }

@@ -8,7 +8,6 @@ import tincan.json.JSONBase;
 import tincan.json.Mapper;
 
 import java.net.MalformedURLException;
-import java.util.HashMap;
 import java.util.UUID;
 
 /**

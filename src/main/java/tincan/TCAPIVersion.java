@@ -5,8 +5,7 @@ package tincan;
  */
 public enum TCAPIVersion {
     //V100("1.0"),
-    V095("0.95"),
-    V090("0.90");
+    V095("0.95");
 
     /**
      * @param text

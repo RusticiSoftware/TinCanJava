@@ -14,7 +14,5 @@ public interface LRS {
     List<String> saveStatements(List<Statement> statements) throws Exception;
 
     State retrieveState(String id, String activityId, Agent agent, UUID registration) throws Exception;
-    State retrieveState(String id, Activity activity, Agent agent, UUID registration) throws Exception;
     void saveState(State state, String activityId, Agent agent, UUID registration) throws Exception;
-    void saveState(State state, Activity activity, Agent agent, UUID registration) throws Exception;
 }
