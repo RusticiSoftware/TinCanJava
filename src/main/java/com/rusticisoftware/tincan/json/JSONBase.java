@@ -21,14 +21,7 @@ public abstract class JSONBase implements JSON {
 
     @Override
     public String toJSON(TCAPIVersion version, Boolean pretty) throws IOException {
-        ObjectMapper mapper = Mapper.getInstance();
-        ObjectWriter writer;
-        if (pretty) {
-            writer = mapper.writer().withDefaultPrettyPrinter();
-        }
-        else {
-            writer = mapper.writer();
-        }
+        ObjectWriter writer = Mapper.getWriter(pretty);
 
         return writer.writeValueAsString(this.toJSONNode(version));
     }

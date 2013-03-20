@@ -27,15 +27,25 @@ import static org.eclipse.jetty.client.HttpClient.CONNECTOR_SELECT_CHANNEL;
 @Data
 @NoArgsConstructor
 public class RemoteLRS implements LRS {
+    private static int TIMEOUT_CONNECT = 5 * 1000;
+
     private static HttpClient _httpClient;
     private static HttpClient httpClient() throws Exception {
         if (_httpClient == null ) {
             _httpClient = new HttpClient();
             _httpClient.setConnectorType(CONNECTOR_SELECT_CHANNEL);
+            _httpClient.setConnectTimeout(TIMEOUT_CONNECT);
             _httpClient.start();
         }
 
         return _httpClient;
+    }
+
+    public static int getHTTPClientConnectTimeout() {
+        return _httpClient.getConnectTimeout();
+    }
+    public static void setHTTPClientConnectTimeout(int timeout) {
+        _httpClient.setConnectTimeout(timeout);
     }
 
     private URL endpoint;
@@ -44,6 +54,7 @@ public class RemoteLRS implements LRS {
     private String password;
     private String auth;
     private HashMap extended;
+    private Boolean prettyJSON = false;
 
     public RemoteLRS(TCAPIVersion version) {
         this.setVersion(version);
@@ -78,6 +89,13 @@ public class RemoteLRS implements LRS {
         }
     }
 
+    /**
+     * Alternate Getter method for readability of code
+     */
+    public Boolean usePrettyJSON() {
+        return this.getPrettyJSON();
+    }
+
     public String calculateBasicAuth() {
         return  "Basic " + Base64.encodeBase64String(
             (this.getUsername() + ":" + this.getPassword()).getBytes()
@@ -96,15 +114,9 @@ public class RemoteLRS implements LRS {
         int exchangeState = exchange.waitForDone();
 
         if (exchangeState == HttpExchange.STATUS_COMPLETED) {
-            return new HTTPResponse(exchange.getResponseStatus(), exchange.getResponseContent());
+            return new HTTPResponse(exchange.getResponseStatus(), exchange.getResponseContentBytes());
         }
-        else if (exchangeState == HttpExchange.STATUS_EXCEPTED) {
-            throw new FailedHTTPRequest("exchange status excepted");
-        }
-        else if (exchangeState == HttpExchange.STATUS_EXPIRED) {
-            throw new FailedHTTPRequest("exchange status expired");
-        }
-        throw new FailedHTTPRequest("exchange status unrecognized");
+        throw new FailedHTTPExchange(exchangeState);
     }
 
     @Override
@@ -121,7 +133,7 @@ public class RemoteLRS implements LRS {
         else if (status == 404) {
             return null;
         }
-        throw new UnexpectedHTTPResponse(status, response.getContent());
+        throw new UnexpectedHTTPResponse(status, response.getContentBytes());
     }
 
     @Override
@@ -147,7 +159,7 @@ public class RemoteLRS implements LRS {
             return new StatementsResult(new StringOfJSON(response.getContent()));
         }
 
-        throw new UnexpectedHTTPResponse(response.getStatus(), response.getContent());
+        throw new UnexpectedHTTPResponse(response.getStatus(), response.getContentBytes());
     }
 
     @Override
@@ -170,13 +182,13 @@ public class RemoteLRS implements LRS {
             return new StatementsResult(new StringOfJSON(response.getContent()));
         }
 
-        throw new UnexpectedHTTPResponse(response.getStatus(), response.getContent());
+        throw new UnexpectedHTTPResponse(response.getStatus(), response.getContentBytes());
     }
 
     @Override
     public UUID saveStatement(Statement statement) throws Exception {
         ContentExchange exchange = new ContentExchange();
-        exchange.setRequestContent(new ByteArrayBuffer(statement.toJSON(), "UTF-8"));
+        exchange.setRequestContent(new ByteArrayBuffer(statement.toJSON(this.getVersion(), this.usePrettyJSON()), "UTF-8"));
 
         String url = this.getEndpoint() + "statements";
         if (statement.getId() == null) {
@@ -200,7 +212,7 @@ public class RemoteLRS implements LRS {
             return UUID.fromString(Mapper.getInstance().readValue(content, ArrayNode.class).get(0).textValue());
         }
 
-        throw new UnexpectedHTTPResponse(status, response.getContent());
+        throw new UnexpectedHTTPResponse(status, response.getContentBytes());
     }
 
     @Override
@@ -216,7 +228,7 @@ public class RemoteLRS implements LRS {
         }
 
         ContentExchange exchange = new ContentExchange();
-        exchange.setRequestContent(new ByteArrayBuffer(Mapper.getInstance().writeValueAsString(rootNode), "UTF-8"));
+        exchange.setRequestContent(new ByteArrayBuffer(Mapper.getWriter(this.usePrettyJSON()).writeValueAsString(rootNode), "UTF-8"));
         exchange.setMethod(HttpMethods.POST);
         exchange.setURL(this.getEndpoint() + "statements");
 
@@ -232,7 +244,7 @@ public class RemoteLRS implements LRS {
             return statementIds;
         }
 
-        throw new UnexpectedHTTPResponse(status, response.getContent());
+        throw new UnexpectedHTTPResponse(status, response.getContentBytes());
     }
 
     @Override
@@ -240,7 +252,7 @@ public class RemoteLRS implements LRS {
         HashMap<String,String> params = new HashMap<String,String>();
         params.put("stateId", id);
         params.put("activityId", activityId);
-        params.put("agent", agent.toJSON(this.getVersion()));
+        params.put("agent", agent.toJSON(this.getVersion(), this.usePrettyJSON()));
         if (registration != null) {
             params.put("registration", registration.toString());
         }
@@ -259,12 +271,12 @@ public class RemoteLRS implements LRS {
         int status = response.getStatus();
 
         if (status == 200) {
-            return new State(id, response.getContent(), activityId, agent, registration);
+            return new State(id, response.getContentBytes(), activityId, agent, registration);
         }
         else if (status == 404) {
             return null;
         }
-        throw new UnexpectedHTTPResponse(status, response.getContent());
+        throw new UnexpectedHTTPResponse(status, response.getContentBytes());
     }
 
     @Override
@@ -272,7 +284,7 @@ public class RemoteLRS implements LRS {
         HashMap<String,String> params = new HashMap<String,String>();
         params.put("stateId", state.getId());
         params.put("activityId", activityId);
-        params.put("agent", agent.toJSON(this.getVersion()));
+        params.put("agent", agent.toJSON(this.getVersion(), this.usePrettyJSON()));
         if (registration != null) {
             params.put("registration", registration.toString());
         }
@@ -296,21 +308,23 @@ public class RemoteLRS implements LRS {
         if (status == 204) {
             return;
         }
-        throw new UnexpectedHTTPResponse(status, response.getContent());
+        throw new UnexpectedHTTPResponse(status, response.getContentBytes());
     }
 
     protected class HTTPResponse extends HashMap<String,Object> {
         private int status;
-        private String content;
+        private byte[] contentBytes;
 
-        public HTTPResponse() {}
-        public HTTPResponse(int status, String content) {
-            this.status = status;
-            this.content = content;
+        public HTTPResponse(int status, byte[] content) {
+            this.setStatus(status);
+            this.setContentBytes(content);
         }
         public int getStatus() {return this.status;}
         public void setStatus(int status) {this.status = status;}
-        public String getContent() {return this.content;}
-        public void setContent(String content) {this.content = content;}
+        public byte[] getContentBytes() {return this.contentBytes;}
+        public void setContentBytes(byte[] content) {this.contentBytes = content;}
+        public String getContent() {
+            return new String(this.getContentBytes());
+        }
     }
 }

@@ -19,21 +19,10 @@ public class RemoteLRSTest {
     private static final Properties config = new Properties();
 
     @BeforeClass
-    public static void setupOnce() {
+    public static void setupOnce() throws IOException {
         InputStream is = RemoteLRSTest.class.getResourceAsStream("/lrs.properties");
-        try {
-            config.load(is);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        config.load(is);
+        is.close();
     }
 
     @Test
@@ -340,18 +329,11 @@ public class RemoteLRSTest {
         return obj;
     }
 
-    private Verb mockVerb() {
-        Verb obj = new Verb();
-        try {
-            obj.setId(new URL("http://adlnet.gov/expapi/verbs/attempted"));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-
-        return obj;
+    private Verb mockVerb() throws MalformedURLException {
+        return new Verb("http://adlnet.gov/expapi/verbs/attempted");
     }
 
-    private Verb mockVerbDisplay() {
+    private Verb mockVerbDisplay() throws MalformedURLException {
         Verb obj = mockVerb();
         LanguageMap display = new LanguageMap();
         display.put("und", obj.getId().toString());
@@ -362,14 +344,7 @@ public class RemoteLRSTest {
         return obj;
     }
 
-    private Activity mockActivity(String suffix) {
-        Activity obj = new Activity();
-        try {
-            obj.setId(new URL ("http://tincanapi.com/TinCanJava/Test/RemoteLRSTest_mockActivity/" + suffix));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-
-        return obj;
+    private Activity mockActivity(String suffix) throws MalformedURLException {
+        return new Activity("http://tincanapi.com/TinCanJava/Test/RemoteLRSTest_mockActivity/" + suffix);
     }
 }

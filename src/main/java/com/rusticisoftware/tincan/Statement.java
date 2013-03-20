@@ -34,9 +34,6 @@ public class Statement extends JSONBase {
     private Agent authority;
     private Boolean voided;
 
-    @Setter(AccessLevel.PROTECTED)
-    private String _json;
-
     public Statement(JsonNode jsonNode) throws MalformedURLException {
         this();
 
@@ -92,7 +89,6 @@ public class Statement extends JSONBase {
 
     public Statement(StringOfJSON jsonStr) throws IOException {
         this(jsonStr.toJSONNode());
-        this.set_json(jsonStr.toString());
     }
 
     public Statement(Agent actor, Verb verb, StatementTarget object, Result result, Context context) {
