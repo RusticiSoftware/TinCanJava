@@ -1,6 +1,23 @@
+*.swp
+.idea
+
 *.class
+
+# Properties
+src/test/resources/lrs.properties
 
 # Package Files #
 *.jar
 *.war
 *.ear
+
+# mvn goal products
+target/cobertura
+target/generated-classes
+target/surefire
+target/surefire-reports
+target/site
+target/javadoc-bundle-options
+target/maven-archiver/
+target/maven-status/maven-compiler-plugin
+target/test-classes/
