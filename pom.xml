@@ -10,6 +10,11 @@
     <name>TinCan Java Library</name>
     <url>http://tincanapi.com/</url>
     <description>Library used to interact with Learning Record Stores (LRS) speaking the TinCanAPI protocol.</description>
+    <scm>
+        <connection>scm:git:https://github.com/RusticiSoftware/TinCanJava.git</connection>
+        <developerConnection>scm:git:git@github.com:RusticiSoftware/TinCanJava.git</developerConnection>
+        <url>https://github.com/RusticiSoftware/TinCanJava</url>
+    </scm>
     <build>
         <plugins>
             <plugin>
@@ -79,6 +84,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.4</version>
             </plugin>
         </plugins>
     </build>
