@@ -6,7 +6,7 @@
 
     <groupId>com.rusticisoftware</groupId>
     <artifactId>tincan</artifactId>
-    <version>0.2.2-SNAPSHOT</version>
+    <version>0.2.3-SNAPSHOT</version>
     <name>TinCan Java Library</name>
     <url>http://tincanapi.com/</url>
     <description>Library used to interact with Learning Record Stores (LRS) speaking the TinCanAPI protocol.</description>
