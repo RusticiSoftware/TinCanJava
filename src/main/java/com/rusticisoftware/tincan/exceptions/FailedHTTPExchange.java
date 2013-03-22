@@ -1,11 +1,13 @@
 package com.rusticisoftware.tincan.exceptions;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * FailedHTTPExchange
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class FailedHTTPExchange extends RuntimeException {
     private int status;
 

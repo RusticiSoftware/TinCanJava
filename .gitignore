@@ -14,6 +14,7 @@ src/test/resources/lrs.properties
 # mvn goal products
 target/cobertura
 target/generated-classes
+target/generated-sources
 target/surefire
 target/surefire-reports
 target/site

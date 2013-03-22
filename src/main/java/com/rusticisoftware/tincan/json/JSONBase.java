@@ -1,6 +1,5 @@
 package com.rusticisoftware.tincan.json;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;

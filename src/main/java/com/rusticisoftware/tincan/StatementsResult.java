@@ -3,11 +3,11 @@ package com.rusticisoftware.tincan;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -17,6 +17,7 @@ import java.util.Iterator;
  * Statements result model class, returned by LRS calls to get multiple statements
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class StatementsResult extends JSONBase {
     private ArrayList<Statement> statements = new ArrayList<Statement>();
