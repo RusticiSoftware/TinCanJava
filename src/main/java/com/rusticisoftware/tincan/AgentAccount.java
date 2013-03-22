@@ -3,6 +3,7 @@ package com.rusticisoftware.tincan;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
@@ -11,6 +12,7 @@ import com.rusticisoftware.tincan.json.Mapper;
  * Agent Account model class
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class AgentAccount extends JSONBase {
     private String homePage;

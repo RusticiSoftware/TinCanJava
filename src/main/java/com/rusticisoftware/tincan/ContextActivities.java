@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import com.rusticisoftware.tincan.exceptions.IncompatibleTCAPIVersion;
 import com.rusticisoftware.tincan.json.JSONBase;
@@ -18,6 +19,7 @@ import java.util.List;
  * ContextActivities Model class
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class ContextActivities extends JSONBase {
     private List<Activity> parent;

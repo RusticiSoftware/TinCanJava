@@ -2,11 +2,13 @@ package com.rusticisoftware.tincan.exceptions;
 
 import com.rusticisoftware.tincan.http.HTTPResponse;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * UnexpectedHTTPResponse
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class UnexpectedHTTPResponse extends RuntimeException {
     private HTTPResponse response;
 

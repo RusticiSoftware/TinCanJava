@@ -3,10 +3,10 @@ package com.rusticisoftware.tincan;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
-
 import java.net.MalformedURLException;
 import java.util.UUID;
 
@@ -14,6 +14,7 @@ import java.util.UUID;
  * Context Class Description
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class Context extends JSONBase {
     private UUID registration;

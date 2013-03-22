@@ -1,6 +1,7 @@
 package com.rusticisoftware.tincan.http;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.io.Buffer;
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.io.IOException;
  * HTTPRequest Class Description
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class HTTPRequest extends ContentExchange {
     private HTTPResponse response = new HTTPResponse();
 
