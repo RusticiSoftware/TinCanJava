@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.rusticisoftware</groupId>
     <artifactId>tincan</artifactId>
-    <version>0.2.3-SNAPSHOT</version>
+    <version>0.2.3</version>
     <name>TinCan Java Library</name>
     <url>http://tincanapi.com/</url>
     <description>Library used to interact with Learning Record Stores (LRS) speaking the TinCanAPI protocol.</description>
@@ -14,7 +12,8 @@
         <connection>scm:git:https://github.com/RusticiSoftware/TinCanJava.git</connection>
         <developerConnection>scm:git:git@github.com:RusticiSoftware/TinCanJava.git</developerConnection>
         <url>https://github.com/RusticiSoftware/TinCanJava</url>
-    </scm>
+      <tag>tincan-0.2.3</tag>
+  </scm>
     <build>
         <plugins>
             <plugin>
@@ -157,7 +156,7 @@
                 <artifactId>cobertura-maven-plugin</artifactId>
                 <version>2.5.2</version>
                 <configuration>
-                    <check></check>
+                    <check />
                     <formats>
                         <format>html</format>
                         <format>xml</format>
