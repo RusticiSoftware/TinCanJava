@@ -2,9 +2,9 @@ package com.rusticisoftware.tincan;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
-
 import java.util.UUID;
 
 /**
@@ -12,6 +12,7 @@ import java.util.UUID;
  * object property
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class StatementRef extends JSONBase implements StatementTarget {
     private final String objectType = "StatementRef";
     private UUID id;

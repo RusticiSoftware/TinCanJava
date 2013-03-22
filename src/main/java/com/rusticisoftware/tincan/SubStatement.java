@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.MalformedURLException;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
@@ -13,6 +14,7 @@ import com.rusticisoftware.tincan.json.Mapper;
  * see the 'statement' context property
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class SubStatement extends JSONBase implements StatementTarget {
     private final String objectType = "SubStatement";
