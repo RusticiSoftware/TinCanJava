@@ -29,7 +29,7 @@ public class UnexpectedHTTPResponse extends RuntimeException {
             + ", HTTP status: "
             + response.getStatus()
             + ", HTTP response: "
-            + (response.isBinary() ? "binary" : response.getContent().substring(0, 1000))
+            + (response.isBinary() ? "binary" : response.getContent().substring(0, (response.getContent().length() > 1000 ? 1000 : response.getContent().length())))
         ;
     }
 }
