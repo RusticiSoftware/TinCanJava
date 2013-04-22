@@ -8,12 +8,37 @@
     <name>TinCan Java Library</name>
     <url>http://tincanapi.com/</url>
     <description>Library used to interact with Learning Record Stores (LRS) speaking the TinCanAPI protocol.</description>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>manual</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+    <organization>
+        <name>Rustici Software</name>
+        <url>http://tincanapi.com/</url>
+    </organization>
+    <developers>
+        <developer>
+            <id>brianjmiller</id>
+            <name>Brian J. Miller</name>
+            <email>brian.miller@tincanapi.com</email>
+            <organization>Rustici Software</organization>
+            <organizationUrl>http://tincanapi.com</organizationUrl>
+            <roles>
+                <role>maintainer</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+    </developers>
     <scm>
         <connection>scm:git:https://github.com/RusticiSoftware/TinCanJava.git</connection>
         <developerConnection>scm:git:git@github.com:RusticiSoftware/TinCanJava.git</developerConnection>
         <url>https://github.com/RusticiSoftware/TinCanJava</url>
       <tag>HEAD</tag>
-  </scm>
+    </scm>
     <build>
         <plugins>
             <plugin>
