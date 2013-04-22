@@ -16,10 +16,10 @@
 package com.rusticisoftware.tincan;
 
 /**
- * Description
+ * List of supported TinCan versions
  */
 public enum TCAPIVersion {
-    //V100("1.0"),
+    V100("1.0.0"),
     V095("0.95");
 
     /**
