@@ -28,6 +28,7 @@ import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.UUID;
 
 /**
@@ -48,7 +49,7 @@ public class Statement extends JSONBase {
     private Agent authority;
     private Boolean voided;
 
-    public Statement(JsonNode jsonNode) throws MalformedURLException {
+    public Statement(JsonNode jsonNode) throws URISyntaxException {
         this();
 
         JsonNode idNode = jsonNode.path("id");
@@ -59,7 +60,7 @@ public class Statement extends JSONBase {
         JsonNode actorNode = jsonNode.path("actor");
         if (! actorNode.isMissingNode()) {
             // TODO: check for Group (objectType)
-            this.setActor(new Agent(actorNode));
+            this.setActor(Agent.fromJson(actorNode));
         }
 
         JsonNode verbNode = jsonNode.path("verb");
@@ -69,8 +70,14 @@ public class Statement extends JSONBase {
 
         JsonNode objectNode = jsonNode.path("object");
         if (! objectNode.isMissingNode()) {
-            JsonNode objectTypeNode = objectNode.path("objectType");
-            if (objectTypeNode.textValue().equals("Activity")) {
+            String objectType = objectNode.path("objectType").textValue();
+            if ("Group".equals(objectType) || "Agent".equals(objectType)){
+                this.setObject(Agent.fromJson(objectNode));
+            }
+            else if ("StatementRef".equals(objectType)){
+                this.setObject(new StatementRef(objectNode));
+            }
+            else {
                 this.setObject(new Activity(objectNode));
             }
         }
@@ -101,7 +108,7 @@ public class Statement extends JSONBase {
         }
     }
 
-    public Statement(StringOfJSON jsonStr) throws IOException {
+    public Statement(StringOfJSON jsonStr) throws IOException, URISyntaxException {
         this(jsonStr.toJSONNode());
     }
 
@@ -122,7 +129,7 @@ public class Statement extends JSONBase {
     @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
         ObjectNode node = Mapper.getInstance().createObjectNode();
-        DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+        DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 
         if (this.id != null) {
             node.put("id", this.getId().toString());

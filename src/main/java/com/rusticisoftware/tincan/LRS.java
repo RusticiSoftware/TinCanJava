@@ -23,7 +23,8 @@ import java.util.UUID;
  */
 public interface LRS {
     Statement retrieveStatement(String id) throws Exception;
-    StatementsResult queryStatements(StatementsQuery query) throws Exception;
+    Statement retrieveVoidedStatement(String id) throws Exception;
+    StatementsResult queryStatements(StatementsQueryInterface query) throws Exception;
     StatementsResult moreStatements(String moreURL) throws Exception;
     UUID saveStatement(Statement statement) throws Exception;
     List<String> saveStatements(List<Statement> statements) throws Exception;

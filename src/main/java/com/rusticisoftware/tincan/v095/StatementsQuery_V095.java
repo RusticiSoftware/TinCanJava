@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-package com.rusticisoftware.tincan;
+package com.rusticisoftware.tincan.v095;
 
 import lombok.Data;
 import lombok.Getter;
@@ -25,6 +25,7 @@ import org.joda.time.format.ISODateTimeFormat;
 
 import com.rusticisoftware.tincan.Agent;
 import com.rusticisoftware.tincan.QueryableStatementTarget;
+import com.rusticisoftware.tincan.StatementsQueryInterface;
 import com.rusticisoftware.tincan.TCAPIVersion;
 import com.rusticisoftware.tincan.Verb;
 
@@ -39,21 +40,20 @@ import java.util.UUID;
  */
 @Data
 @NoArgsConstructor
-public class StatementsQuery implements StatementsQueryInterface {
-    @Getter private TCAPIVersion version = TCAPIVersion.V100;
+public class StatementsQuery_V095 implements StatementsQueryInterface {
+    @Getter private TCAPIVersion version = TCAPIVersion.V095;
     
-    private Agent agent;
     private URI verbID;
-    private URI activityID;
+    private QueryableStatementTarget object;
     private UUID registration;
-    private Boolean relatedActivities;
-    private Boolean relatedAgents;
+    private Boolean context;
+    private Agent actor;
     private DateTime since;
     private DateTime until;
     private Integer limit;
-    private QueryResultFormat format;
-    //TODO: Expose when attachments are supported here
-    //private Boolean attachments;
+    private Boolean authoritative;
+    private Boolean sparse;
+    private Agent instructor;
     private Boolean ascending;
 
     public void setVerbID(String verbID) throws URISyntaxException {
@@ -68,23 +68,20 @@ public class StatementsQuery implements StatementsQueryInterface {
         HashMap<String,String> params = new HashMap<String,String>();
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 
-        if (this.getAgent() != null) {
-            params.put("agent", this.getAgent().toJSON(version));
-        }
         if (this.getVerbID() != null) {
             params.put("verb", this.getVerbID().toString());
         }
-        if (this.getActivityID() != null) {
-            params.put("activity", this.getActivityID().toString());
+        if (this.getObject() != null) {
+            params.put("object", this.getObject().toJSON(version));
         }
         if (this.getRegistration() != null) {
             params.put("registration", this.getRegistration().toString());
         }
-        if (this.getRelatedActivities() != null) {
-            params.put("related_activities", this.getRelatedActivities().toString());
+        if (this.getContext() != null) {
+            params.put("context", this.getContext().toString());
         }
-        if (this.getRelatedAgents() != null) {
-            params.put("related_agents", this.getRelatedAgents().toString());
+        if (this.getActor() != null) {
+            params.put("actor", this.getActor().toJSON(version));
         }
         if (this.getSince() != null) {
             params.put("since", fmt.print(this.getSince()));
@@ -95,8 +92,14 @@ public class StatementsQuery implements StatementsQueryInterface {
         if (this.getLimit() != null) {
             params.put("limit", this.getLimit().toString());
         }
-        if (this.getFormat() != null) {
-            params.put("format", this.getFormat().toString().toLowerCase());
+        if (this.getAuthoritative() != null) {
+            params.put("authoritative", this.getAuthoritative().toString());
+        }
+        if (this.getSparse() != null) {
+            params.put("sparse", this.getSparse().toString());
+        }
+        if (this.getInstructor() != null) {
+            params.put("instructor", this.getInstructor().toJSON(version));
         }
         if (this.getAscending() != null) {
             params.put("ascending", this.getAscending().toString());

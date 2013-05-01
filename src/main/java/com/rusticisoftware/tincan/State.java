@@ -15,14 +15,15 @@
 */
 package com.rusticisoftware.tincan;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.joda.time.DateTime;
-
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.UUID;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import org.joda.time.DateTime;
 
 /**
  * State Class
@@ -35,10 +36,10 @@ public class State {
     private DateTime updated;
     private byte[] contents;
     private Agent agent;
-    private URL activityId;
+    private URI activityId;
     private UUID registration;
 
-    public State(String id, byte[] contents, URL activityId, Agent agent, UUID registration) {
+    public State(String id, byte[] contents, URI activityId, Agent agent, UUID registration) {
         this.setId(id);
         this.setContents(contents);
         this.setAgent(agent);
@@ -46,31 +47,31 @@ public class State {
         this.setRegistration(registration);
     }
 
-    public State(String id, byte[] contents, String activityId, Agent agent, UUID registration) throws MalformedURLException {
-        this(id, contents, new URL(activityId), agent, registration);
+    public State(String id, byte[] contents, String activityId, Agent agent, UUID registration) throws URISyntaxException {
+        this(id, contents, new URI(activityId), agent, registration);
     }
 
-    public State(String id, byte[] contents, URL activityId, Agent agent) {
+    public State(String id, byte[] contents, URI activityId, Agent agent) {
         this(id, contents, activityId, agent, null);
     }
 
-    public State(String id, byte[] contents, String activityId, Agent agent) throws MalformedURLException {
-        this(id, contents, new URL(activityId), agent, null);
+    public State(String id, byte[] contents, String activityId, Agent agent) throws URISyntaxException {
+        this(id, contents, new URI(activityId), agent, null);
     }
 
-    public State(String id, String contents, URL activityId, Agent agent, UUID registration) {
+    public State(String id, String contents, URI activityId, Agent agent, UUID registration) {
         this(id, contents.getBytes(Charset.forName("UTF-8")), activityId, agent, registration);
     }
 
-    public State(String id, String contents, String activityId, Agent agent, UUID registration) throws MalformedURLException {
-        this(id, contents.getBytes(Charset.forName("UTF-8")), new URL(activityId), agent, registration);
+    public State(String id, String contents, String activityId, Agent agent, UUID registration) throws URISyntaxException {
+        this(id, contents.getBytes(Charset.forName("UTF-8")), new URI(activityId), agent, registration);
     }
 
-    public State(String id, String contents, URL activityId, Agent agent) {
+    public State(String id, String contents, URI activityId, Agent agent) {
         this(id, contents.getBytes(Charset.forName("UTF-8")), activityId, agent, null);
     }
 
-    public State(String id, String contents, String activityId, Agent agent) throws MalformedURLException {
-        this(id, contents.getBytes(Charset.forName("UTF-8")), new URL(activityId), agent, null);
+    public State(String id, String contents, String activityId, Agent agent) throws URISyntaxException {
+        this(id, contents.getBytes(Charset.forName("UTF-8")), new URI(activityId), agent, null);
     }
 }

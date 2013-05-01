@@ -15,15 +15,17 @@
 */
 package com.rusticisoftware.tincan;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * Verb model class
@@ -32,14 +34,14 @@ import java.net.URL;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class Verb extends JSONBase {
-    private URL id;
+    private URI id;
     private LanguageMap display;
 
-    public Verb(URL id) {
+    public Verb(URI id) {
         this.id = id;
     }
 
-    public Verb(URL id, String display) {
+    public Verb(URI id, String display) {
         this(id);
 
         LanguageMap displayMap = new LanguageMap();
@@ -47,20 +49,20 @@ public class Verb extends JSONBase {
         this.setDisplay(displayMap);
     }
 
-    public Verb(String id) throws MalformedURLException {
-        this(new URL(id));
+    public Verb(String id) throws URISyntaxException {
+        this(new URI(id));
     }
 
-    public Verb(String id, String display) throws MalformedURLException {
-        this(new URL(id), display);
+    public Verb(String id, String display) throws URISyntaxException {
+        this(new URI(id), display);
     }
 
-    public Verb(JsonNode jsonNode) throws MalformedURLException {
+    public Verb(JsonNode jsonNode) throws URISyntaxException {
         this();
 
         JsonNode idNode = jsonNode.path("id");
         if (! idNode.isMissingNode()) {
-            this.setId(new URL(idNode.textValue()));
+            this.setId(new URI(idNode.textValue()));
         }
 
         JsonNode displayNode = jsonNode.path("display");
@@ -82,11 +84,11 @@ public class Verb extends JSONBase {
         return node;
     }
 
-    public void setId(URL id) {
+    public void setId(URI id) {
         this.id = id;
     }
 
-    public void setId(String id) throws MalformedURLException {
-        this.setId(new URL(id));
+    public void setId(String id) throws URISyntaxException {
+        this.setId(new URI(id));
     }
 }

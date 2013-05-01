@@ -15,11 +15,15 @@
 */
 package com.rusticisoftware.tincan;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.UUID;
 
 /**
@@ -32,12 +36,27 @@ public class StatementRef extends JSONBase implements StatementTarget {
     private final String objectType = "StatementRef";
     private UUID id;
 
+    public StatementRef() {
+    }
+    
+    public StatementRef (UUID id) {
+        this.id = id;
+    }
+    
+    public StatementRef(JsonNode jsonNode) throws URISyntaxException {
+        this();
+
+        JsonNode idNode = jsonNode.path("id");
+        if (! idNode.isMissingNode()) {
+            this.setId(UUID.fromString(idNode.textValue()));
+        }
+    }
+    
     @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
         ObjectNode node = Mapper.getInstance().createObjectNode();
-
+        node.put("objectType", this.objectType);
         node.put("id", this.getId().toString());
-
-        return null;
+        return node;
     }
 }

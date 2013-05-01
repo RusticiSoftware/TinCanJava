@@ -15,17 +15,21 @@
 */
 package com.rusticisoftware.tincan;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.net.URISyntaxException;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
 import org.joda.time.Duration;
+import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
-import java.net.MalformedURLException;
 
 /**
  * Result Model class
@@ -37,11 +41,11 @@ public class Result extends JSONBase {
     private Score score;
     private Boolean success;
     private Boolean completion;
-    private Duration duration;
+    private Period duration;
     private String response;
     private Extensions extensions;
 
-    public Result(JsonNode jsonNode) throws MalformedURLException {
+    public Result(JsonNode jsonNode) throws URISyntaxException {
         this();
 
         JsonNode scoreNode = jsonNode.path("score");
@@ -61,7 +65,7 @@ public class Result extends JSONBase {
 
         JsonNode durationNode = jsonNode.path("duration");
         if (! durationNode.isMissingNode()) {
-            this.setDuration(new Duration(durationNode.textValue()));
+            this.setDuration(new Period(durationNode.textValue()));
         }
 
         JsonNode responseNode = jsonNode.path("response");
