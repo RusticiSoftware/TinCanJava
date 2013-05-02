@@ -59,7 +59,6 @@ public class Statement extends JSONBase {
 
         JsonNode actorNode = jsonNode.path("actor");
         if (! actorNode.isMissingNode()) {
-            // TODO: check for Group (objectType)
             this.setActor(Agent.fromJson(actorNode));
         }
 

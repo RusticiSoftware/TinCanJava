@@ -43,7 +43,7 @@ public class Group extends Agent {
     public Group(JsonNode jsonNode) {
         super(jsonNode);
         
-        JsonNode memberNode = jsonNode.path("statements");
+        JsonNode memberNode = jsonNode.path("member");
         if (! memberNode.isMissingNode()) {
             this.members = new ArrayList<Agent>();
             Iterator it = memberNode.elements();

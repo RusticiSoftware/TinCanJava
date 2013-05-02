@@ -40,7 +40,7 @@ import java.util.UUID;
  */
 @Data
 @NoArgsConstructor
-public class StatementsQuery_V095 implements StatementsQueryInterface {
+public class StatementsQuery implements StatementsQueryInterface {
     @Getter private TCAPIVersion version = TCAPIVersion.V095;
     
     private URI verbID;

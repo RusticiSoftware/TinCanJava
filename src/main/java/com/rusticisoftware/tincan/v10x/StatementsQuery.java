@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-package com.rusticisoftware.tincan;
+package com.rusticisoftware.tincan.v10x;
 
 import lombok.Data;
 import lombok.Getter;
@@ -24,7 +24,9 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 import com.rusticisoftware.tincan.Agent;
+import com.rusticisoftware.tincan.QueryResultFormat;
 import com.rusticisoftware.tincan.QueryableStatementTarget;
+import com.rusticisoftware.tincan.StatementsQueryInterface;
 import com.rusticisoftware.tincan.TCAPIVersion;
 import com.rusticisoftware.tincan.Verb;
 

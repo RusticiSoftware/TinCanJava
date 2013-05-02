@@ -15,25 +15,23 @@
 */
 package com.rusticisoftware.tincan;
 
-import lombok.extern.java.Log;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
-import org.joda.time.Period;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.rusticisoftware.tincan.v095.StatementsQuery_V095;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import lombok.extern.java.Log;
+
+import org.joda.time.DateTime;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.rusticisoftware.tincan.v10x.StatementsQuery;
 
 @Log
 public class RemoteLRSTest {
@@ -280,7 +278,9 @@ public class RemoteLRSTest {
     public void testQueryStatements_V095() throws Exception {
         RemoteLRS obj = getLRS(TCAPIVersion.V095);
 
-        StatementsQuery_V095 query = new StatementsQuery_V095();
+        com.rusticisoftware.tincan.v095.StatementsQuery query;
+        query = new com.rusticisoftware.tincan.v095.StatementsQuery();
+        
         query.setSince(new DateTime("2013-03-13T14:17:42.610Z"));
         //query.setLimit(3);
         query.setActor(mockAgent());

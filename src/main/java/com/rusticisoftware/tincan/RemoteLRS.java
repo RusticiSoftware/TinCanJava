@@ -33,7 +33,7 @@ import org.eclipse.jetty.io.ByteArrayBuffer;
 import com.rusticisoftware.tincan.exceptions.*;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
-import com.rusticisoftware.tincan.v095.StatementsQuery_V095;
+import com.rusticisoftware.tincan.v10x.StatementsQuery;
 
 import static org.eclipse.jetty.client.HttpClient.CONNECTOR_SELECT_CHANNEL;
 
@@ -161,7 +161,7 @@ public class RemoteLRS implements LRS {
         //Setup empty query object if null was passed in
         if (query == null) { 
             query = (this.getVersion() == TCAPIVersion.V095) ? 
-                        new StatementsQuery_V095() :
+                        new com.rusticisoftware.tincan.v095.StatementsQuery() :
                         new StatementsQuery();
         }
         
