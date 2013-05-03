@@ -23,6 +23,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import lombok.extern.java.Log;
 
@@ -349,17 +350,13 @@ public class RemoteLRSTest {
         Assert.assertEquals(value, new String(retrievedState.getContents()));
     }
 
-    private RemoteLRS getLRS() {
+    private RemoteLRS getLRS() throws Exception {
         return getLRS(TCAPIVersion.V100);
     }
     
-    private RemoteLRS getLRS(TCAPIVersion version) {
+    private RemoteLRS getLRS(TCAPIVersion version) throws Exception {
         RemoteLRS obj = new RemoteLRS();
-        try {
-            obj.setEndpoint(config.getProperty("endpoint"));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+        obj.setEndpoint(config.getProperty("endpoint"));
         obj.setVersion(version);
         obj.setUsername(config.getProperty("username"));
         obj.setPassword(config.getProperty("password"));
