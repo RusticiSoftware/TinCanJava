@@ -15,19 +15,24 @@
 */
 package com.rusticisoftware.tincan;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.logging.Level;
+
 import lombok.extern.java.Log;
+
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import com.rusticisoftware.tincan.v10x.StatementsQuery;
 
 @Log
 public class RemoteLRSTest {
@@ -236,22 +241,56 @@ public class RemoteLRSTest {
         Statement result = obj.retrieveStatement(st.getId().toString());
         log.info("statement: " + result.toJSON(true));
     }
+    
+    @Test
+    public void testRetrieveVoidedStatement() throws Exception {
+        RemoteLRS obj = getLRS();
+
+        Statement st = new Statement();
+        st.stamp();
+        st.setActor(mockAgent());
+        st.setVerb(mockVerb());
+        st.setObject(mockActivity("testRetrieveVoidedStatement"));
+        obj.saveStatement(st);
+        
+        Statement voiding = new Statement();
+        voiding.stamp();
+        voiding.setActor(mockAgent());
+        voiding.setVerb(new Verb("http://adlnet.gov/expapi/verbs/voided"));
+        voiding.setObject(new StatementRef(st.getId()));
+        obj.saveStatement(voiding);
+
+        //Should be null for 1.0
+        Statement result = obj.retrieveStatement(st.getId().toString());
+        log.info("statement: " + ((result == null) ? "null" : result.toJSON(true)));
+        
+        result = obj.retrieveVoidedStatement(st.getId().toString());
+        log.info("voided statement: " + result.toJSON(true));
+    }
 
     @Test
     public void testQueryStatementsNull() throws Exception {
         RemoteLRS obj = getLRS();
-
         StatementsResult result = obj.queryStatements(null);
-        if (result != null) {
-            log.info("statement count: " + result.getStatements().size());
-            for(Statement st : result.getStatements()) {
-                log.info("statement - id: " + st.getId().toString());
-                log.info("statement: " + st.toJSON(true));
-            }
-            log.info("result - more: " + result.getMoreURL());
-        }
+        log.info(result.toJSON(true));
     }
 
+    @Test
+    public void testQueryStatements_V095() throws Exception {
+        RemoteLRS obj = getLRS(TCAPIVersion.V095);
+
+        com.rusticisoftware.tincan.v095.StatementsQuery query;
+        query = new com.rusticisoftware.tincan.v095.StatementsQuery();
+        
+        query.setSince(new DateTime("2013-03-13T14:17:42.610Z"));
+        //query.setLimit(3);
+        query.setActor(mockAgent());
+        query.setObject(mockActivity("testSaveStatement"));
+
+        StatementsResult result = obj.queryStatements(query);
+        log.info(result.toJSON(true));
+    }
+    
     @Test
     public void testQueryStatements() throws Exception {
         RemoteLRS obj = getLRS();
@@ -259,17 +298,11 @@ public class RemoteLRSTest {
         StatementsQuery query = new StatementsQuery();
         query.setSince(new DateTime("2013-03-13T14:17:42.610Z"));
         //query.setLimit(3);
-        query.setActor(mockAgent());
-        query.setObject(mockActivity("testSaveStatement"));
+        query.setAgent(mockAgent());
+        query.setActivityID(mockActivity("testSaveStatement").getId());
 
         StatementsResult result = obj.queryStatements(query);
-        //if (result != null) {
-            //log.info("statement count: " + result.getStatements().size());
-            //for(Statement st : result.getStatements()) {
-                //log.info("statement: " + st.toJSON(true));
-            //}
-            //log.info("result - more: " + result.getMoreURL());
-        //}
+        log.info(result.toJSON(true));
     }
 
     @Test
@@ -294,7 +327,7 @@ public class RemoteLRSTest {
         String key = "testRetrieveState";
         String value = "Test";
         Agent agent = mockAgent();
-        URL activityId = mockActivity(key).getId();
+        URI activityId = mockActivity(key).getId();
 
         State state = new State(key, value, activityId, agent, null);
         obj.saveState(state, mockActivity(key).getId().toString(), mockAgent(), null);
@@ -307,7 +340,7 @@ public class RemoteLRSTest {
         String key = "testRetrieveState";
         String value = "Test";
         Agent agent = mockAgent();
-        URL activityId = mockActivity(key).getId();
+        URI activityId = mockActivity(key).getId();
 
         State state = new State(key, value, activityId, agent, null);
         obj.saveState(state, mockActivity(key).getId().toString(), mockAgent(), null);
@@ -317,14 +350,14 @@ public class RemoteLRSTest {
         Assert.assertEquals(value, new String(retrievedState.getContents()));
     }
 
-    private RemoteLRS getLRS() {
+    private RemoteLRS getLRS() throws Exception {
+        return getLRS(TCAPIVersion.V100);
+    }
+    
+    private RemoteLRS getLRS(TCAPIVersion version) throws Exception {
         RemoteLRS obj = new RemoteLRS();
-        try {
-            obj.setEndpoint(config.getProperty("endpoint"));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        obj.setVersion(TCAPIVersion.V095);
+        obj.setEndpoint(config.getProperty("endpoint"));
+        obj.setVersion(version);
         obj.setUsername(config.getProperty("username"));
         obj.setPassword(config.getProperty("password"));
 
@@ -344,11 +377,11 @@ public class RemoteLRSTest {
         return obj;
     }
 
-    private Verb mockVerb() throws MalformedURLException {
+    private Verb mockVerb() throws URISyntaxException {
         return new Verb("http://adlnet.gov/expapi/verbs/attempted");
     }
 
-    private Verb mockVerbDisplay() throws MalformedURLException {
+    private Verb mockVerbDisplay() throws URISyntaxException {
         Verb obj = mockVerb();
         LanguageMap display = new LanguageMap();
         display.put("und", obj.getId().toString());
@@ -359,7 +392,7 @@ public class RemoteLRSTest {
         return obj;
     }
 
-    private Activity mockActivity(String suffix) throws MalformedURLException {
+    private Activity mockActivity(String suffix) throws URISyntaxException {
         return new Activity("http://tincanapi.com/TinCanJava/Test/RemoteLRSTest_mockActivity/" + suffix);
     }
 }

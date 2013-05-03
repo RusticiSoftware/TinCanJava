@@ -15,20 +15,22 @@
 */
 package com.rusticisoftware.tincan;
 
+import static com.rusticisoftware.tincan.InteractionType.getByString;
+
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import static com.rusticisoftware.tincan.InteractionType.*;
 
 /**
  * Activity Definition model class
@@ -49,7 +51,7 @@ public class ActivityDefinition extends JSONBase {
     private ArrayList<InteractionComponent> target;
     private ArrayList<InteractionComponent> steps;
 
-    public ActivityDefinition(JsonNode jsonNode) throws MalformedURLException {
+    public ActivityDefinition(JsonNode jsonNode) throws URISyntaxException {
         this();
 
         JsonNode typeNode = jsonNode.path("type");

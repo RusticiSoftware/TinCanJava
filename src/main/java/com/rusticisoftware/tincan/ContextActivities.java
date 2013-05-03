@@ -15,20 +15,22 @@
 */
 package com.rusticisoftware.tincan;
 
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import com.rusticisoftware.tincan.exceptions.IncompatibleTCAPIVersion;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * ContextActivities Model class
@@ -41,7 +43,7 @@ public class ContextActivities extends JSONBase {
     private List<Activity> grouping;
     private List<Activity> other;
 
-    public ContextActivities(JsonNode jsonNode) throws MalformedURLException {
+    public ContextActivities(JsonNode jsonNode) throws URISyntaxException {
         this();
 
         JsonNode parentNode = jsonNode.path("parent");

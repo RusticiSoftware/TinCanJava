@@ -60,7 +60,7 @@ public class StatementsQueryTest {
 
     @Test
     public void testGetSince() throws Exception {
-
+        
     }
 
     @Test

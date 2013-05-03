@@ -15,16 +15,17 @@
 */
 package com.rusticisoftware.tincan;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * Activity model class
@@ -35,23 +36,23 @@ import java.net.URL;
 public class Activity extends JSONBase implements QueryableStatementTarget {
     private final String objectType = "Activity";
 
-    private URL id;
+    private URI id;
     private ActivityDefinition definition;
 
-    public Activity(URL id) {
+    public Activity(URI id) {
         this.id = id;
     }
 
-    public Activity(String id) throws MalformedURLException {
-        this(new URL(id));
+    public Activity(String id) throws URISyntaxException {
+        this(new URI(id));
     }
 
-    public Activity(JsonNode jsonNode) throws MalformedURLException {
+    public Activity(JsonNode jsonNode) throws URISyntaxException {
         this();
 
         JsonNode idNode = jsonNode.path("id");
         if (! idNode.isMissingNode()) {
-            this.setId(new URL(idNode.textValue()));
+            this.setId(new URI(idNode.textValue()));
         }
 
         JsonNode definitionNode = jsonNode.path("definition");
@@ -60,7 +61,7 @@ public class Activity extends JSONBase implements QueryableStatementTarget {
         }
     }
 
-    public Activity(String id, String name, String description) throws MalformedURLException {
+    public Activity(String id, String name, String description) throws URISyntaxException {
         this(id);
 
         this.setDefinition(new ActivityDefinition(name, description));
@@ -81,11 +82,11 @@ public class Activity extends JSONBase implements QueryableStatementTarget {
         return node;
     }
 
-    public void setId(URL id) {
+    public void setId(URI id) {
         this.id = id;
     }
 
-    public void setId(String id) throws MalformedURLException {
-        this.setId(new URL(id));
+    public void setId(String id) throws URISyntaxException {
+        this.setId(new URI(id));
     }
 }

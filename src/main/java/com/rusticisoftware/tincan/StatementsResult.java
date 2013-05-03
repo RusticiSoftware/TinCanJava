@@ -15,18 +15,21 @@
 */
 package com.rusticisoftware.tincan;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * Statements result model class, returned by LRS calls to get multiple statements
@@ -38,7 +41,7 @@ public class StatementsResult extends JSONBase {
     private ArrayList<Statement> statements = new ArrayList<Statement>();
     private String moreURL;
 
-    public StatementsResult(JsonNode jsonNode) throws MalformedURLException {
+    public StatementsResult(JsonNode jsonNode) throws URISyntaxException {
         this();
 
         JsonNode statementsNode = jsonNode.path("statements");
@@ -55,15 +58,25 @@ public class StatementsResult extends JSONBase {
         }
     }
 
-    public StatementsResult(StringOfJSON json) throws IOException {
+    public StatementsResult(StringOfJSON json) throws IOException, URISyntaxException {
         this(json.toJSONNode());
     }
 
     @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
         ObjectNode node = Mapper.getInstance().createObjectNode();
-        node.put("more", this.getMoreURL());
-
+        
+        if (this.getStatements() != null) {
+            ArrayNode statementsNode = Mapper.getInstance().createArrayNode();
+            for (Statement statement : this.getStatements()) {
+                statementsNode.add(statement.toJSONNode(version));
+            }
+            node.put("statements", statementsNode);
+        }
+        
+        if (this.getMoreURL() != null) {
+            node.put("more", this.getMoreURL());
+        }
         return node;
     }
 }
