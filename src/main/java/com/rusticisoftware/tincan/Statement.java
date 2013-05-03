@@ -15,21 +15,27 @@
 */
 package com.rusticisoftware.tincan;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
-import com.rusticisoftware.tincan.json.JSONBase;
-import com.rusticisoftware.tincan.json.Mapper;
-import com.rusticisoftware.tincan.json.StringOfJSON;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rusticisoftware.tincan.json.JSONBase;
+import com.rusticisoftware.tincan.json.Mapper;
+import com.rusticisoftware.tincan.json.StringOfJSON;
 
 /**
  * Statement Class
@@ -47,9 +53,14 @@ public class Statement extends JSONBase {
     private DateTime timestamp;
     private DateTime stored;
     private Agent authority;
+    private TCAPIVersion version;
+    private List<Attachment> attachments;
+    
+    
+    @Deprecated
     private Boolean voided;
 
-    public Statement(JsonNode jsonNode) throws URISyntaxException {
+    public Statement(JsonNode jsonNode) throws URISyntaxException, MalformedURLException {
         this();
 
         JsonNode idNode = jsonNode.path("id");
@@ -75,6 +86,9 @@ public class Statement extends JSONBase {
             }
             else if ("StatementRef".equals(objectType)){
                 this.setObject(new StatementRef(objectNode));
+            }
+            else if ("SubStatement".equals(objectType)) {
+                this.setObject(new SubStatement(objectNode));
             }
             else {
                 this.setObject(new Activity(objectNode));
@@ -103,7 +117,25 @@ public class Statement extends JSONBase {
 
         JsonNode authorityNode = jsonNode.path("authority");
         if (! authorityNode.isMissingNode()) {
-            this.setAuthority(new Agent(authorityNode));
+            this.setAuthority(Agent.fromJson(authorityNode));
+        }
+        
+        JsonNode voidedNode = jsonNode.path("voided");
+        if (! voidedNode.isMissingNode()) {
+            this.setVoided(voidedNode.asBoolean());
+        }
+        
+        JsonNode versionNode = jsonNode.path("version");
+        if (! versionNode.isMissingNode()) {
+            this.setVersion(TCAPIVersion.fromString(versionNode.textValue()));
+        }
+        
+        JsonNode attachmentsNode = jsonNode.path("attachments");
+        if (! attachmentsNode.isMissingNode()) {
+            this.attachments = new ArrayList<Attachment>();
+            for (JsonNode element : attachmentsNode) {
+                this.attachments.add(new Attachment(element));
+            }
         }
     }
 
@@ -152,7 +184,28 @@ public class Statement extends JSONBase {
         if (this.authority != null) {
             node.put("authority", this.getAuthority().toJSONNode(version));
         }
-
+        
+        //Include 0.95 specific fields if asking for 0.95 version
+        if (TCAPIVersion.V095.equals(version)) {
+            if (this.getVoided() != null) {
+                node.put("voided", this.getVoided());
+            }
+        }
+        
+        //Include 1.0.x specific fields if asking for 1.0.x version
+        if (version.ordinal() <= TCAPIVersion.V100.ordinal()) {
+            if (this.getVersion() != null) {
+                node.put("version", this.getVersion().toString());
+            }
+            if (this.getAttachments() != null && this.getAttachments().size() > 0) {
+                ArrayNode attachmentsNode = Mapper.getInstance().createArrayNode();
+                for (Attachment attachment : this.getAttachments()) {
+                    attachmentsNode.add(attachment.toJSONNode(version));
+                }
+                node.put("attachments", attachmentsNode);
+            }
+        }
+        
         return node;
     }
 

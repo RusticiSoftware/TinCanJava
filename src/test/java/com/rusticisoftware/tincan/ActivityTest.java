@@ -15,9 +15,10 @@
 */
 package com.rusticisoftware.tincan;
 
-import org.junit.Test;
-
+import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
 import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 public class ActivityTest {
     @Test
@@ -27,22 +28,22 @@ public class ActivityTest {
     }
 
     @Test
+    public void serializeDeserialize() throws Exception {
+        Activity act = new Activity();
+        act.setId("http://example.com/activity");
+        
+        ActivityDefinition def = new ActivityDefinition();
+        def.setName(new LanguageMap());
+        def.getName().put("en-US", "Example Activity");
+        act.setDefinition(def);
+        
+        assertSerializeDeserialize(act);
+    }
+    
+    @Test
     public void testGetId() throws Exception {
-
-    }
-
-    @Test
-    public void testGetDefinition() throws Exception {
-
-    }
-
-    @Test
-    public void testSetId() throws Exception {
-
-    }
-
-    @Test
-    public void testSetDefinition() throws Exception {
-
+        String id = "http://example.com/activity";
+        Activity act = new Activity(id);
+        assertEquals(id, act.getId().toString());
     }
 }

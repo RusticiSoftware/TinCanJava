@@ -15,6 +15,8 @@
 */
 package com.rusticisoftware.tincan;
 
+import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
+
 import org.junit.Test;
 
 /**
@@ -22,12 +24,11 @@ import org.junit.Test;
  */
 public class VerbTest {
     @Test
-    public void testGetId() throws Exception {
-
-    }
-
-    @Test
-    public void testSetId() throws Exception {
-
+    public void serializeDeserialize() throws Exception {
+        Verb verb = new Verb();
+        verb.setId("http://example.com/attempted");
+        verb.setDisplay(new LanguageMap());
+        verb.getDisplay().put("en-US", "attempted");
+        assertSerializeDeserialize(verb);
     }
 }

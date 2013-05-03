@@ -61,7 +61,7 @@ public class Agent extends JSONBase implements QueryableStatementTarget {
             this.setMbox(mboxNode.textValue());
         }
 
-        JsonNode mboxSHA1SumNode = jsonNode.path("mboxSHA1Sum");
+        JsonNode mboxSHA1SumNode = jsonNode.path("mbox_sha1sum");
         if (! mboxSHA1SumNode.isMissingNode()) {
             this.setMboxSHA1Sum(mboxSHA1SumNode.textValue());
         }

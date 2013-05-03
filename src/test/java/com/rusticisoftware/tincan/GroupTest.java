@@ -15,7 +15,14 @@
 */
 package com.rusticisoftware.tincan;
 
+import static com.rusticisoftware.tincan.TestUtils.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
+
+import com.rusticisoftware.tincan.json.StringOfJSON;
 
 import static org.junit.Assert.assertEquals;
 
@@ -24,5 +31,20 @@ public class GroupTest {
     public void testGetObjectType() throws Exception {
         Group mock = new Group();
         assertEquals(mock.getObjectType(), "Group");
+    }
+    
+    @Test
+    public void serializeDeserialize() throws Exception {
+        List<Agent> members = new ArrayList<Agent>();
+        for (int i = 0; i < 10; i++) {
+            members.add(
+                getAgent("Member " + i, "mbox", "mailto:member" + i + "@example.com"));
+        }
+        Group group = new Group();
+        group.setName("Group");
+        group.setMbox("mailto:group@example.com");
+        group.setMembers(members);
+        
+        assertSerializeDeserialize(group);
     }
 }

@@ -15,7 +15,11 @@
 */
 package com.rusticisoftware.tincan;
 
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.UUID;
+
+import org.joda.time.DateTime;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -33,49 +37,33 @@ import com.rusticisoftware.tincan.json.Mapper;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class SubStatement extends JSONBase implements StatementTarget {
+public class SubStatement extends Statement implements StatementTarget {
     private final String objectType = "SubStatement";
 
-    private Agent actor;
-    private Verb verb;
-    private StatementTarget object;
-    private Result result;
-    private Context context;
-
-    public SubStatement (JsonNode jsonNode) throws URISyntaxException {
-        this();
-
-        JsonNode actorNode = jsonNode.path("actor");
-        if (! actorNode.isMissingNode()) {
-            this.setActor(Agent.fromJson(actorNode));
-        }
-
-        JsonNode verbNode = jsonNode.path("verb");
-        if (! verbNode.isMissingNode()) {
-            this.setVerb(new Verb(verbNode));
-        }
-
-        JsonNode objectNode = jsonNode.path("object");
-        if (! objectNode.isMissingNode()) {
-            JsonNode objectTypeNode = objectNode.path("objectType");
-            if (objectTypeNode.textValue().equals("Activity")) {
-                this.setObject(new Activity(objectNode));
-            }
-        }
+    public SubStatement (JsonNode jsonNode) throws MalformedURLException, URISyntaxException {
+        super(jsonNode);
     }
 
     public SubStatement (String json) throws Exception {
-        this(Mapper.getInstance().readValue(json, JsonNode.class));
+        super(Mapper.getInstance().readValue(json, JsonNode.class));
     }
 
     @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
-        ObjectNode node = Mapper.getInstance().createObjectNode();
-
-        node.put("actor", this.getActor().toJSONNode(version));
-        node.put("verb", this.getVerb().toJSONNode(version));
-        node.put("object", this.getObject().toJSONNode(version));
-
+        ObjectNode node = super.toJSONNode(version);
+        node.put("objectType", this.getObjectType());
         return node;
+    }
+    
+    public void setId(UUID id) {
+    }
+    
+    public void setAuthority(Agent authority) {
+    }
+    
+    public void setStored(DateTime stored) {
+    }
+    
+    public void setVersion(TCAPIVersion version) {
     }
 }

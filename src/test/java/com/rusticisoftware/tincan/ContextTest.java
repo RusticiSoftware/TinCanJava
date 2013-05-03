@@ -15,6 +15,12 @@
 */
 package com.rusticisoftware.tincan;
 
+import static com.rusticisoftware.tincan.TestUtils.*;
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.UUID;
+
 import lombok.Data;
 import org.junit.Test;
 
@@ -24,92 +30,28 @@ import org.junit.Test;
 @Data
 public class ContextTest {
     @Test
-    public void testGetRegistration() throws Exception {
-
-    }
-
-    @Test
-    public void testGetInstructor() throws Exception {
-
-    }
-
-    @Test
-    public void testGetTeam() throws Exception {
-
-    }
-
-    @Test
-    public void testGetContextActivities() throws Exception {
-
-    }
-
-    @Test
-    public void testGetRevision() throws Exception {
-
-    }
-
-    @Test
-    public void testGetPlatform() throws Exception {
-
-    }
-
-    @Test
-    public void testGetLanguage() throws Exception {
-
-    }
-
-    @Test
-    public void testGetStatement() throws Exception {
-
-    }
-
-    @Test
-    public void testGetExtensions() throws Exception {
-
-    }
-
-    @Test
-    public void testSetRegistration() throws Exception {
-
-    }
-
-    @Test
-    public void testSetInstructor() throws Exception {
-
-    }
-
-    @Test
-    public void testSetTeam() throws Exception {
-
-    }
-
-    @Test
-    public void testSetContextActivities() throws Exception {
-
-    }
-
-    @Test
-    public void testSetRevision() throws Exception {
-
-    }
-
-    @Test
-    public void testSetPlatform() throws Exception {
-
-    }
-
-    @Test
-    public void testSetLanguage() throws Exception {
-
-    }
-
-    @Test
-    public void testSetStatement() throws Exception {
-
-    }
-
-    @Test
-    public void testSetExtensions() throws Exception {
-
+    public void serializeDeserialize() throws Exception {
+        Context ctx = new Context();
+        ctx.setContextActivities(new ContextActivities());
+        ctx.getContextActivities().setParent(new ArrayList<Activity>());
+        ctx.getContextActivities().getParent().add(new Activity("http://example.com/activity"));
+        
+        ctx.setExtensions(new Extensions());
+        ctx.getExtensions().put("http://example.com/extension", "extensionValue");
+        
+        ctx.setInstructor(getAgent("Instructor", "mbox", "mailto:instructor@example.com"));
+        ctx.setLanguage("en-US");
+        ctx.setPlatform("iPhone 5");
+        ctx.setRegistration(UUID.randomUUID());
+        ctx.setRevision("1.0.4");
+        
+        ctx.setStatement(new SubStatement());
+        ctx.getStatement().setActor(getAgent("Sub", "mbox", "mailto:sub@example.com"));
+        ctx.getStatement().setVerb(new Verb("http://example.com/verb"));
+        ctx.getStatement().setObject(new Activity("http://example.com/sub-activity"));
+        
+        ctx.setTeam(getAgent("Group", "mbox", "mailto:group@example.com"));
+        
+        assertSerializeDeserialize(ctx);
     }
 }

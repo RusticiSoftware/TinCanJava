@@ -15,8 +15,22 @@
 */
 package com.rusticisoftware.tincan;
 
+import static com.rusticisoftware.tincan.TestUtils.*;
+import static org.junit.Assert.assertTrue;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import lombok.Data;
+
+import org.joda.time.DateTime;
 import org.junit.Test;
+
+import com.rusticisoftware.tincan.v10x.StatementsQuery;
 
 /**
  * StatementsQueryTest Class Description
@@ -24,142 +38,60 @@ import org.junit.Test;
 @Data
 public class StatementsQueryTest {
     @Test
-    public void testGetVerb() throws Exception {
-
-    }
-
-    @Test
-    public void testGetVerbID() throws Exception {
-
-    }
-
-    @Test
-    public void testGetObject() throws Exception {
-
-    }
-
-    @Test
-    public void testGetObjectID() throws Exception {
-
-    }
-
-    @Test
-    public void testGetRegistration() throws Exception {
-
-    }
-
-    @Test
-    public void testGetContext() throws Exception {
-
-    }
-
-    @Test
-    public void testGetActor() throws Exception {
-
-    }
-
-    @Test
-    public void testGetSince() throws Exception {
+    public void v10SerializeDeserialize() throws Exception {
+        StatementsQuery query = new StatementsQuery();
+        query.setActivityID(new URI("http://example.com/activity"));
+        query.setAgent(getAgent("Joe", "mbox", "mailto:joeuser@example.com"));
+        query.setAscending(true);
+        query.setFormat(QueryResultFormat.EXACT);
+        query.setLimit(10);
+        query.setRegistration(UUID.randomUUID());
+        query.setRelatedActivities(true);
+        query.setRelatedAgents(true);
+        query.setSince(new DateTime());
+        query.setUntil(new DateTime());
+        query.setVerbID("http://example.com/verb");
         
+        //Rudimentary, but something...
+        List<String> expected = new ArrayList<String>(
+                Arrays.asList(new String[]{ 
+                    "agent", "verb", "activity", "registration", 
+                    "related_activities", "related_agents", "since",
+                    "until", "limit", "format", "ascending"
+                }));
+        
+        Map<String, String> paramMap = query.toParameterMap();
+        for (String key : expected) {
+            assertTrue(paramMap.containsKey(key));
+        }
     }
-
-    @Test
-    public void testGetUntil() throws Exception {
-
-    }
-
-    @Test
-    public void testGetLimit() throws Exception {
-
-    }
-
-    @Test
-    public void testGetAuthoritative() throws Exception {
-
-    }
-
-    @Test
-    public void testGetSparse() throws Exception {
-
-    }
-
-    @Test
-    public void testGetInstructor() throws Exception {
-
-    }
-
-    @Test
-    public void testGetAscending() throws Exception {
-
-    }
-
-    @Test
-    public void testSetVerb() throws Exception {
-
-    }
-
-    @Test
-    public void testSetVerbID() throws Exception {
-
-    }
-
-    @Test
-    public void testSetObject() throws Exception {
-
-    }
-
-    @Test
-    public void testSetObjectID() throws Exception {
-
-    }
-
-    @Test
-    public void testSetRegistration() throws Exception {
-
-    }
-
-    @Test
-    public void testSetContext() throws Exception {
-
-    }
-
-    @Test
-    public void testSetActor() throws Exception {
-
-    }
-
-    @Test
-    public void testSetSince() throws Exception {
-
-    }
-
-    @Test
-    public void testSetUntil() throws Exception {
-
-    }
-
-    @Test
-    public void testSetLimit() throws Exception {
-
-    }
-
-    @Test
-    public void testSetAuthoritative() throws Exception {
-
-    }
-
-    @Test
-    public void testSetSparse() throws Exception {
-
-    }
-
-    @Test
-    public void testSetInstructor() throws Exception {
-
-    }
-
-    @Test
-    public void testSetAscending() throws Exception {
-
+    
+    public void v95SerializeDeserialize() throws Exception {
+        com.rusticisoftware.tincan.v095.StatementsQuery query;
+        query = new com.rusticisoftware.tincan.v095.StatementsQuery();
+        query.setActor(getAgent("Joe", "mbox", "mailto:joeuser@example.com"));
+        query.setAscending(true);
+        query.setAuthoritative(true);
+        query.setContext(true);
+        query.setInstructor(getAgent("Instructor", "mbox", "mailto:instructor@example.com"));
+        query.setLimit(10);
+        query.setObject(new Activity("http://example.com/activity"));
+        query.setRegistration(UUID.randomUUID());
+        query.setSince(new DateTime());
+        query.setSparse(true);
+        query.setUntil(new DateTime());
+        query.setVerbID("http://example.com/verb");
+        
+        List<String> expected = new ArrayList<String>(
+                Arrays.asList(new String[]{ 
+                    "actor", "verb", "object", "registration", "context", 
+                    "since", "until", "limit", "authoritative", 
+                    "sparse", "instructor", "ascending"
+                }));
+        
+        Map<String, String> paramMap = query.toParameterMap();
+        for (String key : expected) {
+            assertTrue(paramMap.containsKey(key));
+        }
     }
 }

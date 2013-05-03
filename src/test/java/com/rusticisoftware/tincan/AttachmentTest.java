@@ -16,27 +16,27 @@
 package com.rusticisoftware.tincan;
 
 import static com.rusticisoftware.tincan.TestUtils.*;
-import static org.junit.Assert.assertEquals;
+import java.net.URI;
+import java.net.URL;
 
 import org.junit.Test;
 
-import lombok.Data;
-
-/**
- * ExtensionsTest Class Description
- */
-@Data
-public class ExtensionsTest {
+public class AttachmentTest {
     
     @Test
     public void serializeDeserialize() throws Exception {
-        Extensions ext = new Extensions();
-        ext.put("http://example.com/string", "extensionValue");
-        ext.put("http://example.com/int", 10);
-        ext.put("http://example.com/double", 1.897);
-        ext.put("http://example.com/object", 
-                getAgent("Random", "mbox", "mailto:random@example.com"));
+        Attachment att = new Attachment();
+        att.setContentType("text/plain");
+        att.setDisplay(new LanguageMap());
+        att.getDisplay().put("en-US", "Some attachment");
+        att.setDescription(new LanguageMap());
+        att.getDescription().put("en-US", "Some attachment description");
+        att.setFileUrl(new URL("http://example.com/somefile"));
+        att.setLength(27);
+        att.setSha2("495395e777cd98da653df9615d09c0fd6bb2f8d4788394cd53c56a3bfdcd848a");
+        att.setUsageType(new URI("http://example.com/attachment-usage/test"));
         
-        assertSerializeDeserialize(ext);
+        assertSerializeDeserialize(att);
     }
+
 }

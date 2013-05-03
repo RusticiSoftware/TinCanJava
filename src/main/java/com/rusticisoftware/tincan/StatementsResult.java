@@ -16,6 +16,7 @@
 package com.rusticisoftware.tincan;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -41,14 +42,13 @@ public class StatementsResult extends JSONBase {
     private ArrayList<Statement> statements = new ArrayList<Statement>();
     private String moreURL;
 
-    public StatementsResult(JsonNode jsonNode) throws URISyntaxException {
+    public StatementsResult(JsonNode jsonNode) throws URISyntaxException, MalformedURLException {
         this();
 
         JsonNode statementsNode = jsonNode.path("statements");
         if (! statementsNode.isMissingNode()) {
-            Iterator it = statementsNode.elements();
-            while(it.hasNext()) {
-                this.statements.add(new Statement((JsonNode) it.next()));
+            for (JsonNode element : ((ArrayNode)statementsNode)) {
+                this.statements.add(new Statement(element));
             }
         }
 

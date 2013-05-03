@@ -15,8 +15,37 @@
 */
 package com.rusticisoftware.tincan;
 
+import static org.junit.Assert.assertEquals;
+import static com.rusticisoftware.tincan.TestUtils.*;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.junit.Test;
+
+import com.rusticisoftware.tincan.json.StringOfJSON;
+
 /**
  * Description
  */
 public class AgentTest {
+    
+    @Test
+    public void serializeDeserialize() throws Exception {
+        Map<String, String> ids = new LinkedHashMap<String, String>();
+        ids.put("mbox", "mailto:joeuser@example.com");
+        ids.put("openid", "http://openid.org/joeuser");
+        ids.put("mbox_sha1sum", "b623062e19c5608ab0e1342e5011d48292ce00e3");
+        ids.put("account", "http://example.com|joeuser");
+        
+        String name = "Joe User";
+        for (String idType : ids.keySet()) {
+            for (TCAPIVersion version : TCAPIVersion.values()) {
+                Agent agent = getAgent(name, idType, ids.get(idType));
+                String agentJson = agent.toJSON(version);
+                Agent clone = Agent.fromJson(new StringOfJSON(agentJson).toJSONNode());
+                assertEquals(agentJson, clone.toJSON(version));
+            }
+        }
+    }
 }

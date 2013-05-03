@@ -26,6 +26,7 @@ import lombok.NoArgsConstructor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
 
@@ -33,7 +34,7 @@ import com.rusticisoftware.tincan.json.StringOfJSON;
  * Extensions model class
  */
 @NoArgsConstructor
-public class Extensions {
+public class Extensions extends JSONBase {
     private final HashMap<URI,JsonNode> _map = new HashMap<URI,JsonNode>();
 
     public Extensions(JsonNode jsonNode) throws URISyntaxException {

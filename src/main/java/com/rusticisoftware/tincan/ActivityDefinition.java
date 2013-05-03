@@ -17,6 +17,7 @@ package com.rusticisoftware.tincan;
 
 import static com.rusticisoftware.tincan.InteractionType.getByString;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -41,7 +42,7 @@ import com.rusticisoftware.tincan.json.Mapper;
 public class ActivityDefinition extends JSONBase {
     private LanguageMap name;
     private LanguageMap description;
-    private String type;
+    private URI type;
     private Extensions extensions;
     private InteractionType interactionType;
     private ArrayList<String> correctResponsesPattern;
@@ -51,12 +52,13 @@ public class ActivityDefinition extends JSONBase {
     private ArrayList<InteractionComponent> target;
     private ArrayList<InteractionComponent> steps;
 
+    
     public ActivityDefinition(JsonNode jsonNode) throws URISyntaxException {
         this();
 
         JsonNode typeNode = jsonNode.path("type");
         if (! typeNode.isMissingNode()) {
-            this.setType(typeNode.textValue());
+            this.setType(new URI(typeNode.textValue()));
         }
 
         JsonNode nameNode = jsonNode.path("name");
@@ -84,60 +86,48 @@ public class ActivityDefinition extends JSONBase {
         JsonNode correctResponsesPatternNode = jsonNode.path("correctResponsesPattern");
         if (! correctResponsesPatternNode.isMissingNode()) {
             this.correctResponsesPattern = new ArrayList<String>();
-
-            Iterator it = correctResponsesPatternNode.elements();
-            while(it.hasNext()) {
-                this.correctResponsesPattern.add(((JsonNode) it.next()).textValue());
+            for (JsonNode element : correctResponsesPatternNode) {
+                this.correctResponsesPattern.add(element.textValue());
             }
         }
 
         JsonNode choicesNode = jsonNode.path("choices");
         if (! choicesNode.isMissingNode()) {
             this.choices = new ArrayList<InteractionComponent>();
-
-            Iterator it = choicesNode.elements();
-            while(it.hasNext()) {
-                this.choices.add(new InteractionComponent((JsonNode) it.next()));
+            for (JsonNode element : choicesNode) {
+                this.choices.add(new InteractionComponent(element));
             }
         }
 
         JsonNode scaleNode = jsonNode.path("scale");
         if (! scaleNode.isMissingNode()) {
             this.scale = new ArrayList<InteractionComponent>();
-
-            Iterator it = scaleNode.elements();
-            while(it.hasNext()) {
-                this.scale.add(new InteractionComponent((JsonNode) it.next()));
+            for (JsonNode element : scaleNode) {
+                this.scale.add(new InteractionComponent(element));
             }
         }
 
         JsonNode sourceNode = jsonNode.path("source");
         if (! sourceNode.isMissingNode()) {
             this.source = new ArrayList<InteractionComponent>();
-
-            Iterator it = sourceNode.elements();
-            while(it.hasNext()) {
-                this.source.add(new InteractionComponent((JsonNode) it.next()));
+            for (JsonNode element : sourceNode) {
+                this.source.add(new InteractionComponent(element));
             }
         }
 
         JsonNode targetNode = jsonNode.path("target");
         if (! targetNode.isMissingNode()) {
             this.target = new ArrayList<InteractionComponent>();
-
-            Iterator it = targetNode.elements();
-            while(it.hasNext()) {
-                this.target.add(new InteractionComponent((JsonNode) it.next()));
+            for (JsonNode element : targetNode) {
+                this.target.add(new InteractionComponent(element));
             }
         }
 
         JsonNode stepsNode = jsonNode.path("steps");
         if (! stepsNode.isMissingNode()) {
             this.steps = new ArrayList<InteractionComponent>();
-
-            Iterator it = stepsNode.elements();
-            while(it.hasNext()) {
-                this.steps.add(new InteractionComponent((JsonNode) it.next()));
+            for (JsonNode element : stepsNode) {
+                this.steps.add(new InteractionComponent(element));
             }
         }
     }
@@ -165,7 +155,7 @@ public class ActivityDefinition extends JSONBase {
             node.put("description", this.getDescription().toJSONNode(version));
         }
         if (this.type != null) {
-            node.put("type", this.getType());
+            node.put("type", this.getType().toString());
         }
         if (this.extensions != null) {
             node.put("extensions", this.getExtensions().toJSONNode(version));
@@ -243,5 +233,13 @@ public class ActivityDefinition extends JSONBase {
             }
         }
         return node;
+    }
+    
+    public void setType(URI type) {
+        this.type = type;
+    }
+
+    public void setType(String type) throws URISyntaxException {
+        this.setType(new URI(type));
     }
 }

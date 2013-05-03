@@ -56,7 +56,7 @@ public class Group extends Agent {
     @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
         ObjectNode node = super.toJSONNode(version);
-        if (this.getMembers() != null) {
+        if (this.getMembers() != null && this.getMembers().size() > 0) {
             ArrayNode memberNode = Mapper.getInstance().createArrayNode();
             for (Agent member : this.getMembers()) {
                 memberNode.add(member.toJSONNode(version));

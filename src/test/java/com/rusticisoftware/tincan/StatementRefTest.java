@@ -15,6 +15,11 @@
 */
 package com.rusticisoftware.tincan;
 
+import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
+import static org.junit.Assert.assertEquals;
+
+import java.util.UUID;
+
 import lombok.Data;
 import org.junit.Test;
 
@@ -23,18 +28,18 @@ import org.junit.Test;
  */
 @Data
 public class StatementRefTest {
+    
     @Test
     public void testGetObjectType() throws Exception {
-
+        StatementRef ref = new StatementRef();
+        assertEquals("StatementRef", ref.getObjectType());
     }
 
     @Test
-    public void testGetId() throws Exception {
-
+    public void serializeDeserialize() throws Exception {
+        StatementRef ref = new StatementRef();
+        ref.setId(UUID.randomUUID());
+        assertSerializeDeserialize(ref);
     }
-
-    @Test
-    public void testSetId() throws Exception {
-
-    }
+    
 }
