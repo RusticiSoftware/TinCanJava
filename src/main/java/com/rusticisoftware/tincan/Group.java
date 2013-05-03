@@ -15,6 +15,15 @@
 */
 package com.rusticisoftware.tincan;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rusticisoftware.tincan.json.Mapper;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -24,5 +33,36 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Group extends Agent {
-    private final String objectType = "Group";
+    protected final String objectType = "Group";
+    private List<Agent> members;
+    
+    public Group() {
+        super();
+    }
+    
+    public Group(JsonNode jsonNode) {
+        super(jsonNode);
+        
+        JsonNode memberNode = jsonNode.path("member");
+        if (! memberNode.isMissingNode()) {
+            this.members = new ArrayList<Agent>();
+            Iterator it = memberNode.elements();
+            while(it.hasNext()) {
+                this.members.add(Agent.fromJson((JsonNode) it.next()));
+            }
+        }
+    }
+    
+    @Override
+    public ObjectNode toJSONNode(TCAPIVersion version) {
+        ObjectNode node = super.toJSONNode(version);
+        if (this.getMembers() != null) {
+            ArrayNode memberNode = Mapper.getInstance().createArrayNode();
+            for (Agent member : this.getMembers()) {
+                memberNode.add(member.toJSONNode(version));
+            }
+            node.put("member", memberNode);
+        }
+        return node;
+    }
 }

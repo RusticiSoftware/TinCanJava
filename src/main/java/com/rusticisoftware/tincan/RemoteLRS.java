@@ -33,6 +33,7 @@ import org.eclipse.jetty.io.ByteArrayBuffer;
 import com.rusticisoftware.tincan.exceptions.*;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
+import com.rusticisoftware.tincan.v10x.StatementsQuery;
 
 import static org.eclipse.jetty.client.HttpClient.CONNECTOR_SELECT_CHANNEL;
 
@@ -136,8 +137,12 @@ public class RemoteLRS implements LRS {
 
     @Override
     public Statement retrieveStatement(String id) throws Exception {
+        return retrieveStatement(id, "statementId");
+    }
+    
+    private Statement retrieveStatement(String id, String paramName) throws Exception {
         HTTPRequest request = new HTTPRequest();
-        request.setURL(this.getEndpoint() + "statements?statementId=" + id);
+        request.setURL(this.getEndpoint() + "statements?" + paramName + "=" + id);
 
         HTTPResponse response = this.sendRequest(request);
         int status = response.getStatus();
@@ -152,22 +157,34 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
-    public StatementsResult queryStatements(StatementsQuery query) throws Exception {
-        if (query == null) {
-            query = new StatementsQuery();
+    public StatementsResult queryStatements(StatementsQueryInterface query) throws Exception {
+        //Setup empty query object if null was passed in
+        if (query == null) { 
+            query = (this.getVersion() == TCAPIVersion.V095) ? 
+                        new com.rusticisoftware.tincan.v095.StatementsQuery() :
+                        new StatementsQuery();
+        }
+        
+        //Choke if the query parameters don't match the LRS version
+        if (this.getVersion() != query.getVersion()) {
+            throw new IncompatibleTCAPIVersion(
+                    "Attempted to issue " + this.getVersion() + " query using a " +
+                    query.getVersion() + " set of query parameters.");
         }
 
+        //Build query string
         HashMap<String,String> params = query.toParameterMap(this.getVersion());
-
-        String queryString = "?";
+        StringBuilder queryString = new StringBuilder();
         Boolean first = true;
         for(Map.Entry<String,String> parameter : params.entrySet()) {
-            queryString += (first ? "" : "&") + URLEncoder.encode(parameter.getKey(), "UTF-8") + "=" + URLEncoder.encode(parameter.getValue(), "UTF-8").replace("+", "%20");
+            queryString.append((first ? "?" : "&") + 
+                URLEncoder.encode(parameter.getKey(), "UTF-8") + "=" + 
+                URLEncoder.encode(parameter.getValue(), "UTF-8").replace("+", "%20"));
             first = false;
         }
 
         HTTPRequest request = new HTTPRequest();
-        request.setURL(this.getEndpoint() + "statements" + queryString);
+        request.setURL(this.getEndpoint() + "statements" + queryString.toString());
 
         HTTPResponse response = this.sendRequest(request);
         if (response.getStatus() == 200) {
@@ -324,5 +341,11 @@ public class RemoteLRS implements LRS {
             return;
         }
         throw new UnexpectedHTTPResponse(response);
+    }
+
+    @Override
+    public Statement retrieveVoidedStatement(String id) throws Exception {
+        String paramName = (this.getVersion() == TCAPIVersion.V095) ? "statementId" : "voidedStatementId";
+        return retrieveStatement(id, paramName);
     }
 }

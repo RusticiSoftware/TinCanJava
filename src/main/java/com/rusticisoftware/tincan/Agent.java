@@ -30,14 +30,25 @@ import com.rusticisoftware.tincan.json.Mapper;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class Agent extends JSONBase implements QueryableStatementTarget {
-    private final String objectType = "Agent";
+    protected final String objectType = "Agent";
     private String name;
     private String mbox;
     private String mboxSHA1Sum;
     private String openID;
     private AgentAccount account;
 
-    public Agent(JsonNode jsonNode) {
+    public static Agent fromJson(JsonNode jsonNode) {
+        
+        String objectType = "Agent";
+        JsonNode objectTypeNode = jsonNode.path("objectType");
+        if (! objectTypeNode.isMissingNode()) {
+            objectType = objectTypeNode.textValue();
+        }
+        
+        return "Group".equals(objectType) ? new Group(jsonNode) : new Agent(jsonNode);
+    }
+    
+    protected Agent(JsonNode jsonNode) {
         this();
 
         JsonNode nameNode = jsonNode.path("name");

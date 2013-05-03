@@ -15,12 +15,14 @@
 */
 package com.rusticisoftware.tincan;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
 
@@ -40,13 +42,12 @@ public class SubStatement extends JSONBase implements StatementTarget {
     private Result result;
     private Context context;
 
-    public SubStatement (JsonNode jsonNode) throws MalformedURLException {
+    public SubStatement (JsonNode jsonNode) throws URISyntaxException {
         this();
 
         JsonNode actorNode = jsonNode.path("actor");
         if (! actorNode.isMissingNode()) {
-            // TODO: check for Group (objectType)
-            this.setActor(new Agent(actorNode));
+            this.setActor(Agent.fromJson(actorNode));
         }
 
         JsonNode verbNode = jsonNode.path("verb");

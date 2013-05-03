@@ -15,15 +15,17 @@
 */
 package com.rusticisoftware.tincan;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
 import lombok.NoArgsConstructor;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
 
@@ -32,58 +34,58 @@ import com.rusticisoftware.tincan.json.StringOfJSON;
  */
 @NoArgsConstructor
 public class Extensions {
-    private final HashMap<URL,JsonNode> _map = new HashMap<URL,JsonNode>();
+    private final HashMap<URI,JsonNode> _map = new HashMap<URI,JsonNode>();
 
-    public Extensions(JsonNode jsonNode) throws MalformedURLException {
+    public Extensions(JsonNode jsonNode) throws URISyntaxException {
         Iterator<Map.Entry<String,JsonNode>> items = jsonNode.fields();
         while(items.hasNext()) {
             Map.Entry<String,JsonNode> item = items.next();
 
-            this.put(new URL(item.getKey()), item.getValue());
+            this.put(new URI(item.getKey()), item.getValue());
         }
     }
 
-    public Extensions(StringOfJSON jsonStr) throws IOException {
+    public Extensions(StringOfJSON jsonStr) throws IOException, URISyntaxException {
         this(jsonStr.toJSONNode());
     }
 
     public ObjectNode toJSONNode(TCAPIVersion version) {
         ObjectNode node = Mapper.getInstance().createObjectNode();
 
-        for (Map.Entry<URL,JsonNode> entry : this._map.entrySet()) {
+        for (Map.Entry<URI,JsonNode> entry : this._map.entrySet()) {
             node.put(entry.getKey().toString(), entry.getValue());
         }
 
         return node;
     }
 
-    public Object put(URL key, JsonNode val) {
+    public Object put(URI key, JsonNode val) {
         return this._map.put(key, val);
     }
 
-    public Object put(String key, JsonNode val) throws MalformedURLException {
-        return this.put(new URL(key), val);
+    public Object put(String key, JsonNode val) throws URISyntaxException {
+        return this.put(new URI(key), val);
     }
 
-    public Object put(URL key, Object val) {
+    public Object put(URI key, Object val) {
         JsonNode storeVal = Mapper.getInstance().valueToTree(val);
         return this.put(key, storeVal);
     }
 
-    public Object put(URL key, StringOfJSON val) {
+    public Object put(URI key, StringOfJSON val) {
         JsonNode storeVal = Mapper.getInstance().valueToTree(val);
         return this.put(key, storeVal);
     }
 
-    public Object put(String key, Object val) throws MalformedURLException {
-        return this.put(new URL(key), val);
+    public Object put(String key, Object val) throws URISyntaxException {
+        return this.put(new URI(key), val);
     }
 
-    public JsonNode get(URL key) {
+    public JsonNode get(URI key) {
         return this._map.get(key);
     }
 
-    public JsonNode get(String key) throws MalformedURLException {
-        return this.get(new URL(key));
+    public JsonNode get(String key) throws URISyntaxException {
+        return this.get(new URI(key));
     }
 }

@@ -15,15 +15,17 @@
 */
 package com.rusticisoftware.tincan;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.net.URISyntaxException;
+import java.util.UUID;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
-import java.net.MalformedURLException;
-import java.util.UUID;
 
 /**
  * Context Class Description
@@ -42,7 +44,7 @@ public class Context extends JSONBase {
     private SubStatement statement;
     private Extensions extensions;
 
-    public Context(JsonNode jsonNode) throws MalformedURLException {
+    public Context(JsonNode jsonNode) throws URISyntaxException {
         this();
 
         JsonNode registrationNode = jsonNode.path("registration");
@@ -53,12 +55,12 @@ public class Context extends JSONBase {
         // TODO: check these for Group
         JsonNode instructorNode = jsonNode.path("instructor");
         if (! instructorNode.isMissingNode()) {
-            this.setInstructor(new Agent(instructorNode));
+            this.setInstructor(Agent.fromJson(instructorNode));
         }
 
         JsonNode teamNode = jsonNode.path("team");
         if (! teamNode.isMissingNode()) {
-            this.setTeam(new Agent(teamNode));
+            this.setTeam(Agent.fromJson(teamNode));
         }
 
         JsonNode contextActivitiesNode = jsonNode.path("contextActivities");

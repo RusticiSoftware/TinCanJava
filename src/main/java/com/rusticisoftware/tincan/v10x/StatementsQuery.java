@@ -13,14 +13,26 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-package com.rusticisoftware.tincan;
+package com.rusticisoftware.tincan.v10x;
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+
+import com.rusticisoftware.tincan.Agent;
+import com.rusticisoftware.tincan.QueryResultFormat;
+import com.rusticisoftware.tincan.QueryableStatementTarget;
+import com.rusticisoftware.tincan.StatementsQueryInterface;
+import com.rusticisoftware.tincan.TCAPIVersion;
+import com.rusticisoftware.tincan.Verb;
+
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -29,69 +41,64 @@ import java.util.UUID;
  */
 @Data
 @NoArgsConstructor
-public class StatementsQuery {
-    private String verbID;
-    private QueryableStatementTarget object;
+public class StatementsQuery implements StatementsQueryInterface {
+    @Getter private TCAPIVersion version = TCAPIVersion.V100;
+    
+    private Agent agent;
+    private URI verbID;
+    private URI activityID;
     private UUID registration;
-    private Boolean context;
-    private Agent actor;
+    private Boolean relatedActivities;
+    private Boolean relatedAgents;
     private DateTime since;
     private DateTime until;
     private Integer limit;
-    private Boolean authoritative;
-    private Boolean sparse;
-    private Agent instructor;
+    private QueryResultFormat format;
+    //TODO: Expose when attachments are supported here
+    //private Boolean attachments;
     private Boolean ascending;
 
-    public void setVerbID(String verbID) {
-        this.verbID = verbID;
+    public void setVerbID(String verbID) throws URISyntaxException {
+        this.verbID = new URI(verbID);
     }
 
-    public void setVerbID(Verb verb) {
+    public void setVerbID(Verb verb) throws URISyntaxException {
         this.setVerbID(verb.getId().toString());
     }
 
     public HashMap<String,String> toParameterMap(TCAPIVersion version) throws IOException {
         HashMap<String,String> params = new HashMap<String,String>();
+        DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 
-        if (this.getVerbID() != null) {
-            params.put("verb", this.getVerbID());
+        if (this.getAgent() != null) {
+            params.put("agent", this.getAgent().toJSON(version));
         }
-        if (this.getObject() != null) {
-            params.put("object", this.getObject().toJSON(version));
+        if (this.getVerbID() != null) {
+            params.put("verb", this.getVerbID().toString());
+        }
+        if (this.getActivityID() != null) {
+            params.put("activity", this.getActivityID().toString());
         }
         if (this.getRegistration() != null) {
             params.put("registration", this.getRegistration().toString());
         }
-        if (this.getContext() != null) {
-            params.put("context", this.getContext().toString());
+        if (this.getRelatedActivities() != null) {
+            params.put("related_activities", this.getRelatedActivities().toString());
         }
-        if (this.getActor() != null) {
-            params.put("actor", this.getActor().toJSON(version));
+        if (this.getRelatedAgents() != null) {
+            params.put("related_agents", this.getRelatedAgents().toString());
         }
         if (this.getSince() != null) {
-            //
-            // The following was giving ZZ which has a : in it which was blowing up
-            //params.put("since", this.getSince().toString(ISODateTimeFormat.dateTime()));
-            //
-            DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-            params.put("since", this.getSince().toString(fmt));
+            params.put("since", fmt.print(this.getSince()));
         }
         if (this.getUntil() != null) {
-            DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-            params.put("until", this.getUntil().toString(fmt));
+            params.put("until", fmt.print(this.getUntil()));
         }
         if (this.getLimit() != null) {
             params.put("limit", this.getLimit().toString());
         }
-        if (this.getAuthoritative() != null) {
-            params.put("authoritative", this.getAuthoritative().toString());
-        }
-        if (this.getSparse() != null) {
-            params.put("sparse", this.getSparse().toString());
-        }
-        if (this.getInstructor() != null) {
-            params.put("instructor", this.getInstructor().toJSON(version));
+        if (this.getFormat() != null) {
+            params.put("format", this.getFormat().toString().toLowerCase());
         }
         if (this.getAscending() != null) {
             params.put("ascending", this.getAscending().toString());
