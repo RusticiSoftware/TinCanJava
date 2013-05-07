@@ -42,4 +42,15 @@ public enum TCAPIVersion {
     public static TCAPIVersion latest() {
         return TCAPIVersion.values()[0];
     }
+    
+    public static TCAPIVersion fromString(String text) {
+        if (text != null) {
+            for (TCAPIVersion v : TCAPIVersion.values()) {
+                if (text.equalsIgnoreCase(v.text)) {
+                    return v;
+                }
+            }
+        }
+        return null;
+    }
 }

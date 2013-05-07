@@ -5,5 +5,5 @@ import java.util.HashMap;
 
 public interface StatementsQueryInterface {
     TCAPIVersion getVersion();
-    HashMap<String, String> toParameterMap(TCAPIVersion version) throws IOException;
+    HashMap<String, String> toParameterMap() throws IOException;
 }

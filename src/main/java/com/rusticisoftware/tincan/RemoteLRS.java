@@ -173,7 +173,7 @@ public class RemoteLRS implements LRS {
         }
 
         //Build query string
-        HashMap<String,String> params = query.toParameterMap(this.getVersion());
+        HashMap<String,String> params = query.toParameterMap();
         StringBuilder queryString = new StringBuilder();
         Boolean first = true;
         for(Map.Entry<String,String> parameter : params.entrySet()) {

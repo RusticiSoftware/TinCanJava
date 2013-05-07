@@ -15,6 +15,11 @@
 */
 package com.rusticisoftware.tincan;
 
+import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
+import static com.rusticisoftware.tincan.TestUtils.getAgent;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 
 /**
@@ -22,22 +27,18 @@ import org.junit.Test;
  */
 public class StatementsResultTest {
     @Test
-    public void testGetStatements() throws Exception {
+    public void serializeDeserialize() throws Exception {
 
-    }
-
-    @Test
-    public void testGetMoreURL() throws Exception {
-
-    }
-
-    @Test
-    public void testSetStatements() throws Exception {
-
-    }
-
-    @Test
-    public void testSetMoreURL() throws Exception {
-
+        StatementsResult result = new StatementsResult();
+        result.setStatements(new ArrayList<Statement>());
+        Statement st = new Statement();
+        st.setActor(getAgent("Joe", "mbox", "mailto:joe@example.com"));
+        st.setVerb(new Verb("http://example.com/verb"));
+        st.setObject(new Activity("http://example.com/activity"));
+        result.getStatements().add(st);
+        result.getStatements().add(st);
+        result.setMoreURL("/statements?continueToken=abc");
+        
+        assertSerializeDeserialize(result);
     }
 }

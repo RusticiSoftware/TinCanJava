@@ -15,6 +15,7 @@
 */
 package com.rusticisoftware.tincan;
 
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
@@ -44,7 +45,7 @@ public class Context extends JSONBase {
     private SubStatement statement;
     private Extensions extensions;
 
-    public Context(JsonNode jsonNode) throws URISyntaxException {
+    public Context(JsonNode jsonNode) throws MalformedURLException, URISyntaxException {
         this();
 
         JsonNode registrationNode = jsonNode.path("registration");

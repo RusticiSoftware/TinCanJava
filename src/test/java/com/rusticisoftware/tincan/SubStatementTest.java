@@ -15,7 +15,11 @@
 */
 package com.rusticisoftware.tincan;
 
+import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
+import static com.rusticisoftware.tincan.TestUtils.getAgent;
 import lombok.Data;
+
+import org.joda.time.DateTime;
 import org.junit.Test;
 
 /**
@@ -23,63 +27,23 @@ import org.junit.Test;
  */
 @Data
 public class SubStatementTest {
+    
     @Test
-    public void testGetActor() throws Exception {
-
-    }
-
-    @Test
-    public void testGetVerb() throws Exception {
-
-    }
-
-    @Test
-    public void testGetObject() throws Exception {
-
-    }
-
-    @Test
-    public void testGetResult() throws Exception {
-
-    }
-
-    @Test
-    public void testGetContext() throws Exception {
-
-    }
-
-    @Test
-    public void testGetTimestamp() throws Exception {
-
-    }
-
-    @Test
-    public void testSetActor() throws Exception {
-
-    }
-
-    @Test
-    public void testSetVerb() throws Exception {
-
-    }
-
-    @Test
-    public void testSetObject() throws Exception {
-
-    }
-
-    @Test
-    public void testSetResult() throws Exception {
-
-    }
-
-    @Test
-    public void testSetContext() throws Exception {
-
-    }
-
-    @Test
-    public void testSetTimestamp() throws Exception {
-
+    public void serializeDeserialize() throws Exception {
+        SubStatement st = new SubStatement();
+        st.setActor(getAgent("Joe", "mbox", "mailto:joe@example.com"));
+        
+        st.setContext(new Context());
+        st.getContext().setLanguage("en-US");
+        
+        st.setObject(new Activity("http://example.com/activity"));
+        
+        st.setResult(new Result());
+        st.getResult().setCompletion(true);
+        
+        st.setTimestamp(new DateTime());
+        st.setVerb(new Verb("http://example.com/verb"));
+        
+        assertSerializeDeserialize(st);
     }
 }

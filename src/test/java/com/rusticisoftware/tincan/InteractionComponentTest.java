@@ -15,7 +15,9 @@
 */
 package com.rusticisoftware.tincan;
 
+import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
 import lombok.Data;
+
 import org.junit.Test;
 
 /**
@@ -24,22 +26,11 @@ import org.junit.Test;
 @Data
 public class InteractionComponentTest {
     @Test
-    public void testGetId() throws Exception {
-
-    }
-
-    @Test
-    public void testGetDescription() throws Exception {
-
-    }
-
-    @Test
-    public void testSetId() throws Exception {
-
-    }
-
-    @Test
-    public void testSetDescription() throws Exception {
-
+    public void serializeDeserialize() throws Exception {
+        InteractionComponent comp = new InteractionComponent();
+        comp.setId("choice1");
+        comp.setDescription(new LanguageMap());
+        comp.getDescription().put("en-US", "Some choice");
+        assertSerializeDeserialize(comp);
     }
 }
