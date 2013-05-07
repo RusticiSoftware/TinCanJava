@@ -1,4 +1,4 @@
-/*
+    /*
     Copyright 2013 Rustici Software
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,7 +51,6 @@ public class ActivityDefinition extends JSONBase {
     private ArrayList<InteractionComponent> source;
     private ArrayList<InteractionComponent> target;
     private ArrayList<InteractionComponent> steps;
-
     
     public ActivityDefinition(JsonNode jsonNode) throws URISyntaxException {
         this();

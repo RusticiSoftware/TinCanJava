@@ -17,9 +17,6 @@ package com.rusticisoftware.tincan;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.UUID;
-
-import org.joda.time.DateTime;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -27,8 +24,8 @@ import lombok.NoArgsConstructor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.rusticisoftware.tincan.json.JSONBase;
-import com.rusticisoftware.tincan.json.Mapper;
+import com.rusticisoftware.tincan.internal.StatementBase;
+import com.rusticisoftware.tincan.json.StringOfJSON;
 
 /**
  * SubStatement Class used when including a statement like object in another statement,
@@ -37,15 +34,15 @@ import com.rusticisoftware.tincan.json.Mapper;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class SubStatement extends Statement implements StatementTarget {
+public class SubStatement extends StatementBase implements StatementTarget {
     private final String objectType = "SubStatement";
 
     public SubStatement (JsonNode jsonNode) throws MalformedURLException, URISyntaxException {
         super(jsonNode);
     }
 
-    public SubStatement (String json) throws Exception {
-        super(Mapper.getInstance().readValue(json, JsonNode.class));
+    public SubStatement (StringOfJSON jsonStr) throws Exception {
+        super(jsonStr);
     }
 
     @Override
@@ -53,17 +50,5 @@ public class SubStatement extends Statement implements StatementTarget {
         ObjectNode node = super.toJSONNode(version);
         node.put("objectType", this.getObjectType());
         return node;
-    }
-    
-    public void setId(UUID id) {
-    }
-    
-    public void setAuthority(Agent authority) {
-    }
-    
-    public void setStored(DateTime stored) {
-    }
-    
-    public void setVersion(TCAPIVersion version) {
     }
 }

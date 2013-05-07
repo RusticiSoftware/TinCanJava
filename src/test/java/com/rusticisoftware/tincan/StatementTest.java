@@ -15,15 +15,14 @@
 */
 package com.rusticisoftware.tincan;
 
-import static com.rusticisoftware.tincan.TestUtils.*;
+import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
+import static com.rusticisoftware.tincan.TestUtils.getAgent;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.joda.time.DateTime;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
