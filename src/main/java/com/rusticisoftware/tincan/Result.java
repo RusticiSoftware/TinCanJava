@@ -94,7 +94,7 @@ public class Result extends JSONBase {
             node.put("completion", this.getCompletion());
         }
         if (this.duration != null) {
-            node.put("duration", ISOPeriodFormat.alternate().print(this.getDuration().toPeriod()));
+            node.put("duration", ISOPeriodFormat.standard().print(this.getDuration()));
         }
         if (this.response != null) {
             node.put("response", this.getResponse());

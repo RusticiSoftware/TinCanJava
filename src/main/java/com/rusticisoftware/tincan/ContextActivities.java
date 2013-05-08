@@ -17,7 +17,6 @@ package com.rusticisoftware.tincan;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import lombok.Data;
@@ -42,6 +41,7 @@ public class ContextActivities extends JSONBase {
     private List<Activity> parent;
     private List<Activity> grouping;
     private List<Activity> other;
+    private List<Activity> category;
 
     public ContextActivities(JsonNode jsonNode) throws URISyntaxException {
         this();
@@ -51,9 +51,8 @@ public class ContextActivities extends JSONBase {
             this.parent = new ArrayList<Activity>();
 
             if (parentNode.isArray()) {
-                Iterator it = parentNode.elements();
-                while(it.hasNext()) {
-                    this.parent.add(new Activity((JsonNode) it.next()));
+                for (JsonNode element : parentNode) {
+                    this.parent.add(new Activity(element));
                 }
             }
             else {
@@ -66,9 +65,8 @@ public class ContextActivities extends JSONBase {
             this.grouping = new ArrayList<Activity>();
 
             if (groupingNode.isArray()) {
-                Iterator it = groupingNode.elements();
-                while(it.hasNext()) {
-                    this.grouping.add(new Activity((JsonNode) it.next()));
+                for (JsonNode element : groupingNode) {
+                    this.grouping.add(new Activity(element));
                 }
             }
             else {
@@ -80,14 +78,27 @@ public class ContextActivities extends JSONBase {
         if (! otherNode.isMissingNode()) {
             this.other = new ArrayList<Activity>();
 
-            if (parentNode.isArray()) {
-                Iterator it = otherNode.elements();
-                while(it.hasNext()) {
-                    this.other.add(new Activity((JsonNode) it.next()));
+            if (otherNode.isArray()) {
+                for (JsonNode element : otherNode) {
+                    this.other.add(new Activity(element));
                 }
             }
             else {
                 this.other.add(new Activity(otherNode));
+            }
+        }
+        
+        JsonNode categoryNode = jsonNode.path("category");
+        if (! categoryNode.isMissingNode()) {
+            this.category = new ArrayList<Activity>();
+
+            if (categoryNode.isArray()) {
+                for (JsonNode element : otherNode) {
+                    this.category.add(new Activity(element));
+                }
+            }
+            else {
+                this.category.add(new Activity(otherNode));
             }
         }
     }
@@ -145,6 +156,16 @@ public class ContextActivities extends JSONBase {
 
                 for (Activity element : this.getOther()) {
                     other.add(element.toJSONNode(version));
+                }
+            }
+        }
+        if (this.category != null && this.category.size() > 0) {
+            if (version.ordinal() <= TCAPIVersion.V100.ordinal()) {
+                ArrayNode category = mapper.createArrayNode();
+                node.put("category", category);
+
+                for (Activity element : this.getOther()) {
+                    category.add(element.toJSONNode(version));
                 }
             }
         }

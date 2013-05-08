@@ -21,13 +21,15 @@ import lombok.NoArgsConstructor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
 
 /**
  * Language map
  */
 @NoArgsConstructor
-public class LanguageMap {
+public class LanguageMap extends JSONBase {
     private final HashMap<String,String> _map = new HashMap<String, String>();
 
     public LanguageMap(JsonNode jsonNode) {

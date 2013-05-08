@@ -15,6 +15,7 @@
 */
 package com.rusticisoftware.tincan;
 
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 import lombok.Data;
@@ -23,8 +24,8 @@ import lombok.NoArgsConstructor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.rusticisoftware.tincan.json.JSONBase;
-import com.rusticisoftware.tincan.json.Mapper;
+import com.rusticisoftware.tincan.internal.StatementBase;
+import com.rusticisoftware.tincan.json.StringOfJSON;
 
 /**
  * SubStatement Class used when including a statement like object in another statement,
@@ -33,49 +34,21 @@ import com.rusticisoftware.tincan.json.Mapper;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class SubStatement extends JSONBase implements StatementTarget {
+public class SubStatement extends StatementBase implements StatementTarget {
     private final String objectType = "SubStatement";
 
-    private Agent actor;
-    private Verb verb;
-    private StatementTarget object;
-    private Result result;
-    private Context context;
-
-    public SubStatement (JsonNode jsonNode) throws URISyntaxException {
-        this();
-
-        JsonNode actorNode = jsonNode.path("actor");
-        if (! actorNode.isMissingNode()) {
-            this.setActor(Agent.fromJson(actorNode));
-        }
-
-        JsonNode verbNode = jsonNode.path("verb");
-        if (! verbNode.isMissingNode()) {
-            this.setVerb(new Verb(verbNode));
-        }
-
-        JsonNode objectNode = jsonNode.path("object");
-        if (! objectNode.isMissingNode()) {
-            JsonNode objectTypeNode = objectNode.path("objectType");
-            if (objectTypeNode.textValue().equals("Activity")) {
-                this.setObject(new Activity(objectNode));
-            }
-        }
+    public SubStatement (JsonNode jsonNode) throws MalformedURLException, URISyntaxException {
+        super(jsonNode);
     }
 
-    public SubStatement (String json) throws Exception {
-        this(Mapper.getInstance().readValue(json, JsonNode.class));
+    public SubStatement (StringOfJSON jsonStr) throws Exception {
+        super(jsonStr);
     }
 
     @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
-        ObjectNode node = Mapper.getInstance().createObjectNode();
-
-        node.put("actor", this.getActor().toJSONNode(version));
-        node.put("verb", this.getVerb().toJSONNode(version));
-        node.put("object", this.getObject().toJSONNode(version));
-
+        ObjectNode node = super.toJSONNode(version);
+        node.put("objectType", this.getObjectType());
         return node;
     }
 }

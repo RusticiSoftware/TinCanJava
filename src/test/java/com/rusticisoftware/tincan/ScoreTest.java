@@ -15,6 +15,8 @@
 */
 package com.rusticisoftware.tincan;
 
+import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
+
 import lombok.Data;
 import org.junit.Test;
 
@@ -23,43 +25,14 @@ import org.junit.Test;
  */
 @Data
 public class ScoreTest {
+    
     @Test
-    public void testGetScaled() throws Exception {
-
-    }
-
-    @Test
-    public void testGetRaw() throws Exception {
-
-    }
-
-    @Test
-    public void testGetMin() throws Exception {
-
-    }
-
-    @Test
-    public void testGetMax() throws Exception {
-
-    }
-
-    @Test
-    public void testSetScaled() throws Exception {
-
-    }
-
-    @Test
-    public void testSetRaw() throws Exception {
-
-    }
-
-    @Test
-    public void testSetMin() throws Exception {
-
-    }
-
-    @Test
-    public void testSetMax() throws Exception {
-
+    public void serializeDeserialize() throws Exception {
+        Score sc = new Score();
+        sc.setMax(100.0);
+        sc.setMin(0.0);
+        sc.setRaw(80.0);
+        sc.setScaled(0.8);
+        assertSerializeDeserialize(sc);
     }
 }

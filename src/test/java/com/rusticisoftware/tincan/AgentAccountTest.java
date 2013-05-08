@@ -15,8 +15,20 @@
 */
 package com.rusticisoftware.tincan;
 
+import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
+
+import org.junit.Test;
+
 /**
  * Description
  */
 public class AgentAccountTest {
+    
+    @Test
+    public void serializeDeserialize() throws Exception {
+        AgentAccount acct = new AgentAccount();
+        acct.setHomePage("http://example.com");
+        acct.setName("joeuser");
+        assertSerializeDeserialize(acct);
+    }
 }

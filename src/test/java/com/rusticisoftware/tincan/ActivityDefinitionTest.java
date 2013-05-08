@@ -15,39 +15,60 @@
 */
 package com.rusticisoftware.tincan;
 
+import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.junit.Test;
 
 /**
  * Description
  */
 public class ActivityDefinitionTest {
+    
     @Test
-    public void testGetName() throws Exception {
+    public void serializeDeserialize() throws Exception {
+        ActivityDefinition def = new ActivityDefinition();
 
+        def.setChoices(createInteractionComponent("choice1", "Choice 1"));
+        
+        def.setCorrectResponsesPattern(
+                new ArrayList<String>(
+                        Arrays.asList(new String[]{"correct_response"})));
+        
+        def.setDescription(new LanguageMap());
+        def.getDescription().put("en-US", "Activity Definition Description");
+        
+        Extensions extensions = new Extensions();
+        extensions.put("http://example.com/extensions", "extensionValue");
+        def.setExtensions(extensions);
+        
+        
+        
+        def.setName(new LanguageMap());
+        def.getName().put("en-US", "Activity Definition");
+        
+        def.setScale(createInteractionComponent("scale1", "Scale 1"));
+        def.setSource(createInteractionComponent("source1", "Source 1"));
+        def.setSteps(createInteractionComponent("steps1", "Steps 1"));
+        def.setTarget(createInteractionComponent("target1", "Target 1"));
+        
+        def.setType("http://adlnet.gov/expapi/activities/assessment");
+        
+        for (InteractionType intType : InteractionType.values()) {
+            def.setInteractionType(intType);
+            assertSerializeDeserialize(def);
+        }
     }
-
-    @Test
-    public void testGetDescription() throws Exception {
-
-    }
-
-    @Test
-    public void testGetType() throws Exception {
-
-    }
-
-    @Test
-    public void testSetName() throws Exception {
-
-    }
-
-    @Test
-    public void testSetDescription() throws Exception {
-
-    }
-
-    @Test
-    public void testSetType() throws Exception {
-
+    
+    protected ArrayList<InteractionComponent> createInteractionComponent(String id, String description) {
+        InteractionComponent comp = new InteractionComponent();
+        comp.setId(id);
+        comp.setDescription(new LanguageMap());
+        comp.getDescription().put("en-US", description);
+        ArrayList<InteractionComponent> lst = new ArrayList<InteractionComponent>();
+        lst.add(comp);
+        return lst;
     }
 }

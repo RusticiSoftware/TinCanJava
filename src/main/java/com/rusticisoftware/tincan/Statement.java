@@ -15,21 +15,24 @@
 */
 package com.rusticisoftware.tincan;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
-import com.rusticisoftware.tincan.json.JSONBase;
-import com.rusticisoftware.tincan.json.Mapper;
-import com.rusticisoftware.tincan.json.StringOfJSON;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.UUID;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rusticisoftware.tincan.internal.StatementBase;
+import com.rusticisoftware.tincan.json.StringOfJSON;
 
 /**
  * Statement Class
@@ -37,63 +40,21 @@ import java.util.UUID;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class Statement extends JSONBase {
+public class Statement extends StatementBase {
     private UUID id;
-    private Agent actor;
-    private Verb verb;
-    private StatementTarget object;
-    private Result result;
-    private Context context;
-    private DateTime timestamp;
     private DateTime stored;
     private Agent authority;
+    private TCAPIVersion version;
+    
+    @Deprecated
     private Boolean voided;
 
-    public Statement(JsonNode jsonNode) throws URISyntaxException {
-        this();
+    public Statement(JsonNode jsonNode) throws URISyntaxException, MalformedURLException {
+        super(jsonNode);
 
         JsonNode idNode = jsonNode.path("id");
         if (! idNode.isMissingNode()) {
             this.setId(UUID.fromString(idNode.textValue()));
-        }
-
-        JsonNode actorNode = jsonNode.path("actor");
-        if (! actorNode.isMissingNode()) {
-            this.setActor(Agent.fromJson(actorNode));
-        }
-
-        JsonNode verbNode = jsonNode.path("verb");
-        if (! verbNode.isMissingNode()) {
-            this.setVerb(new Verb(verbNode));
-        }
-
-        JsonNode objectNode = jsonNode.path("object");
-        if (! objectNode.isMissingNode()) {
-            String objectType = objectNode.path("objectType").textValue();
-            if ("Group".equals(objectType) || "Agent".equals(objectType)){
-                this.setObject(Agent.fromJson(objectNode));
-            }
-            else if ("StatementRef".equals(objectType)){
-                this.setObject(new StatementRef(objectNode));
-            }
-            else {
-                this.setObject(new Activity(objectNode));
-            }
-        }
-
-        JsonNode resultNode = jsonNode.path("result");
-        if (! resultNode.isMissingNode()) {
-            this.setResult(new Result(resultNode));
-        }
-
-        JsonNode contextNode = jsonNode.path("context");
-        if (! contextNode.isMissingNode()) {
-            this.setContext(new Context(contextNode));
-        }
-
-        JsonNode timestampNode = jsonNode.path("timestamp");
-        if (! timestampNode.isMissingNode()) {
-            this.setTimestamp(new DateTime(timestampNode.textValue()));
         }
 
         JsonNode storedNode = jsonNode.path("stored");
@@ -103,22 +64,26 @@ public class Statement extends JSONBase {
 
         JsonNode authorityNode = jsonNode.path("authority");
         if (! authorityNode.isMissingNode()) {
-            this.setAuthority(new Agent(authorityNode));
+            this.setAuthority(Agent.fromJson(authorityNode));
+        }
+        
+        JsonNode voidedNode = jsonNode.path("voided");
+        if (! voidedNode.isMissingNode()) {
+            this.setVoided(voidedNode.asBoolean());
+        }
+        
+        JsonNode versionNode = jsonNode.path("version");
+        if (! versionNode.isMissingNode()) {
+            this.setVersion(TCAPIVersion.fromString(versionNode.textValue()));
         }
     }
 
     public Statement(StringOfJSON jsonStr) throws IOException, URISyntaxException {
-        this(jsonStr.toJSONNode());
+        super(jsonStr);
     }
 
     public Statement(Agent actor, Verb verb, StatementTarget object, Result result, Context context) {
-        this();
-
-        this.setActor(actor);
-        this.setVerb(verb);
-        this.setObject(object);
-        this.setResult(result);
-        this.setContext(context);
+        super(actor, verb, object, result, context);
     }
 
     public Statement(Agent actor, Verb verb, StatementTarget object) {
@@ -127,24 +92,11 @@ public class Statement extends JSONBase {
 
     @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
-        ObjectNode node = Mapper.getInstance().createObjectNode();
+        ObjectNode node = super.toJSONNode(version);
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 
         if (this.id != null) {
             node.put("id", this.getId().toString());
-        }
-        node.put("actor", this.getActor().toJSONNode(version));
-        node.put("verb", this.getVerb().toJSONNode(version));
-        node.put("object", this.getObject().toJSONNode(version));
-
-        if (this.result != null) {
-            node.put("result", this.getResult().toJSONNode(version));
-        }
-        if (this.context != null) {
-            node.put("context", this.getContext().toJSONNode(version));
-        }
-        if (this.timestamp != null) {
-            node.put("timestamp", fmt.print(this.getTimestamp()));
         }
         if (this.stored != null) {
             node.put("stored", fmt.print(this.getStored()));
@@ -152,7 +104,21 @@ public class Statement extends JSONBase {
         if (this.authority != null) {
             node.put("authority", this.getAuthority().toJSONNode(version));
         }
-
+        
+        //Include 0.95 specific fields if asking for 0.95 version
+        if (TCAPIVersion.V095.equals(version)) {
+            if (this.getVoided() != null) {
+                node.put("voided", this.getVoided());
+            }
+        }
+        
+        //Include 1.0.x specific fields if asking for 1.0.x version
+        if (version.ordinal() <= TCAPIVersion.V100.ordinal()) {
+            if (this.getVersion() != null) {
+                node.put("version", this.getVersion().toString());
+            }
+        }
+        
         return node;
     }
 
@@ -160,10 +126,10 @@ public class Statement extends JSONBase {
      * Method to set a random ID and the current date/time in the 'timestamp'
      */
     public void stamp() {
-        if (this.id == null) {
+        if (this.getId() == null) {
             this.setId(UUID.randomUUID());
         }
-        if (this.timestamp == null) {
+        if (this.getTimestamp() == null) {
             this.setTimestamp(new DateTime());
         }
     }

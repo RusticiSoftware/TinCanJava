@@ -66,7 +66,7 @@ public class StatementsQuery implements StatementsQueryInterface {
         this.setVerbID(verb.getId().toString());
     }
 
-    public HashMap<String,String> toParameterMap(TCAPIVersion version) throws IOException {
+    public HashMap<String,String> toParameterMap() throws IOException {
         HashMap<String,String> params = new HashMap<String,String>();
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 

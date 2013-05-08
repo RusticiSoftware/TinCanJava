@@ -15,8 +15,20 @@
 */
 package com.rusticisoftware.tincan;
 
+import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
+
+import org.junit.Test;
+
 /**
  * Description
  */
 public class LanguageMapTest {
+    
+    @Test
+    public void serializeDeserialize() throws Exception {
+        LanguageMap lm = new LanguageMap();
+        lm.put("en-US", "Some english");
+        lm.put("es-ES", "Some espanol");
+        assertSerializeDeserialize(lm);
+    }
 }
