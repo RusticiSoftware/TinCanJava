@@ -31,10 +31,10 @@ Releasing
 
 See http://maven.apache.org/maven-release/maven-release-plugin/index.html.
 
-mvn release:prepare -DdryRun=true
-mvn release:clean
-mvn release:prepare
-mvn release:perform
+    mvn release:prepare -DdryRun=true
+    mvn release:clean
+    mvn release:prepare
+    mvn release:perform
 
 At some point in the future we plan to make the maven artifacts available via some publicly
 available repository.
