@@ -2,7 +2,7 @@ A Java library for talking TinCan to the world.
 
 http://tincanapi.com/
 
-This library uses Maven for project management, building, etc. It outputs Maven artifacts.
+This library uses Maven 3 for project management, building, etc. It outputs Maven artifacts.
 
 Building
 --------
