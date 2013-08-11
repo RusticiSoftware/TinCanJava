@@ -93,12 +93,12 @@ public class ContextActivities extends JSONBase {
             this.category = new ArrayList<Activity>();
 
             if (categoryNode.isArray()) {
-                for (JsonNode element : otherNode) {
+                for (JsonNode element : categoryNode) {
                     this.category.add(new Activity(element));
                 }
             }
             else {
-                this.category.add(new Activity(otherNode));
+                this.category.add(new Activity(categoryNode));
             }
         }
     }
@@ -164,7 +164,7 @@ public class ContextActivities extends JSONBase {
                 ArrayNode category = mapper.createArrayNode();
                 node.put("category", category);
 
-                for (Activity element : this.getOther()) {
+                for (Activity element : this.getCategory()) {
                     category.add(element.toJSONNode(version));
                 }
             }
