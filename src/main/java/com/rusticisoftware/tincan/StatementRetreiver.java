@@ -121,6 +121,8 @@ public class StatementRetreiver
 			temp.setActor(st.getActor());
 			temp.setObject(st.getObject());
 			temp.setVerb(st.getVerb());
+			temp.setResult(st.getResult());
+			temp.setContext(st.getContext());
 			System.out.println(lrs.saveStatement(temp));
 		}
 	}
