@@ -91,12 +91,11 @@ public class StatementRetreiver
 
 		// Set target for whihc mbox to look for in the object
 		agentObjectQuery.setAgent(new Agent(targetEmail));
-
+		
 		// run query
 		// query for an object 
 		StatementsResult result2 = lrs.queryStatements(agentObjectQuery);
 		for (Statement item : result2.getStatements()) {
-
 			// get target mbox from the statement's object
 			String objectEmail = item.getObject().toJSONNode(TCAPIVersion.V100).findValues("mbox").get(0).toString();
 			// string comes back as "email@sp2.com" -- this removes the quotes
