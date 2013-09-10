@@ -37,6 +37,14 @@ public class Agent extends JSONBase implements QueryableStatementTarget {
     private String openID;
     private AgentAccount account;
 
+    
+    //MD - added a useful ctor
+    public Agent(String _mbox)
+    {
+    	this.setMbox(_mbox);	
+    }
+    
+    
     public static Agent fromJson(JsonNode jsonNode) {
         
         String objectType = "Agent";

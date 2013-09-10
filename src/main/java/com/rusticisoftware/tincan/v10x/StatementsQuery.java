@@ -58,6 +58,10 @@ public class StatementsQuery implements StatementsQueryInterface {
     //private Boolean attachments;
     private Boolean ascending;
 
+    //MD - added for agent in object support
+    private Agent object;
+    
+    
     public void setVerbID(String verbID) throws URISyntaxException {
         this.verbID = new URI(verbID);
     }

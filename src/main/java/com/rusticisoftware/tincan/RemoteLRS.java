@@ -77,6 +77,16 @@ public class RemoteLRS implements LRS {
         this.setVersion(version);
     }
 
+    // MD - added a useful ctor
+    public RemoteLRS(TCAPIVersion version, String _endpoint, String _username, String _password) throws MalformedURLException
+    {
+    	this.setVersion(version);
+    	this.setEndpoint(new URL(_endpoint));
+    	this.setPassword(_password);
+    	this.setUsername(_username);
+    	
+    }
+    
     private void setEndpoint(URL url) throws MalformedURLException {
         String strUrl = url.toString();
         if (! strUrl.substring(strUrl.length() - 1).equals("/")) {

@@ -245,7 +245,7 @@ public class RemoteLRSTest {
         obj.saveStatement(st);
 
         Statement result = obj.retrieveStatement(st.getId().toString());
-        log.info("statement: " + result.toJSON(true));
+        //log.info("statement: " + result.toJSON(true));
     }
     
     @Test
