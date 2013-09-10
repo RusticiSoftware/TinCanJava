@@ -34,11 +34,19 @@ import com.rusticisoftware.tincan.json.Mapper;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class Activity extends JSONBase implements QueryableStatementTarget {
-    private final String objectType = "Activity";
+    // MD -- removed final
+	private String objectType = "Activity";
 
     private URI id;
     private ActivityDefinition definition;
-
+    // MD -- added to support agents as objects, 
+    //TODO: add support for agent in entire class
+    private String mbox;
+    private String name;
+    private String mboxSHA1Sum;
+    private String openID;
+    private AgentAccount account;
+    
     public Activity(URI id) {
         this.id = id;
     }
