@@ -26,3 +26,8 @@ target/test-classes/
 .classpath
 .project
 .settings/
+bin/
+errors.txt
+install.log
+src/main/java/com/rusticisoftware/tincan/lrs.properties
+src/test/
