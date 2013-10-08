@@ -137,6 +137,20 @@ public class RemoteLRSTest {
         obj.saveStatement(st);
     }
 
+    @Test
+    public void testSaveStatementGZIP() throws Exception {
+        RemoteLRS obj = getLRS();
+        obj.setCompressionGZip(true);
+
+        Statement st = new Statement();
+        st.stamp(); // triggers a PUT
+        st.setActor(mockAgent());
+        st.setVerb(mockVerbDisplay());
+        st.setObject(mockActivity("testSaveStatement"));
+
+        obj.saveStatement(st);
+    }
+
     /*
      * Tests calling saveStatement without an ID which triggers a POST request
      */
