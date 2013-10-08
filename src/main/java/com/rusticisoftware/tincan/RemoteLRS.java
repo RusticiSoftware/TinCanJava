@@ -21,14 +21,21 @@ import com.rusticisoftware.tincan.http.HTTPRequest;
 import com.rusticisoftware.tincan.http.HTTPResponse;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpExchange;
 import org.eclipse.jetty.http.HttpMethods;
+import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.ByteArrayBuffer;
 import com.rusticisoftware.tincan.exceptions.*;
 import com.rusticisoftware.tincan.json.Mapper;
@@ -72,6 +79,7 @@ public class RemoteLRS implements LRS {
     private String auth;
     private HashMap extended;
     private Boolean prettyJSON = false;
+    private Boolean compressionGZip = false;
 
     public RemoteLRS(TCAPIVersion version) {
         this.setVersion(version);
@@ -106,6 +114,10 @@ public class RemoteLRS implements LRS {
         }
     }
 
+    public void setCompressionGZip(Boolean val) {
+        this.compressionGZip = val;
+    }
+
     /**
      * Alternate Getter method for readability of code
      */
@@ -123,6 +135,17 @@ public class RemoteLRS implements LRS {
         request.setRequestHeader("Authorization", this.getAuth());
         request.setRequestHeader("X-Experience-API-Version", this.getVersion().toString());
         request.setRequestContentType("application/json");
+
+        if (this.getCompressionGZip()) {
+            request.setRequestHeader("Content-Encoding", "gzip");
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            GZIPOutputStream gzos = new GZIPOutputStream(baos);
+            Buffer buf = request.getRequestContent();
+            byte[] bytes = buf.asArray();
+            gzos.write(bytes);
+            request.setRequestContent(new ByteArrayBuffer(baos.toByteArray()));
+        }
 
         httpClient().send(request);
 
