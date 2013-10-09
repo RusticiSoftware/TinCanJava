@@ -35,6 +35,7 @@ import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -138,6 +139,7 @@ public class RemoteLRSTest {
     }
 
     @Test
+    @Ignore
     public void testSaveStatementGZIP() throws Exception {
         RemoteLRS obj = getLRS();
         obj.setCompressionGZip(true);

@@ -41,6 +41,8 @@ import com.rusticisoftware.tincan.exceptions.*;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
 import com.rusticisoftware.tincan.v10x.StatementsQuery;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.ThreadPool;
 
 import static org.eclipse.jetty.client.HttpClient.CONNECTOR_SELECT_CHANNEL;
 
@@ -57,6 +59,9 @@ public class RemoteLRS implements LRS {
     private static HttpClient httpClient() throws Exception {
         if (_httpClient == null ) {
             _httpClient = new HttpClient();
+            QueuedThreadPool pool = new QueuedThreadPool();
+            pool.setDaemon(true);
+            _httpClient.setThreadPool(pool);
             _httpClient.setConnectorType(CONNECTOR_SELECT_CHANNEL);
             _httpClient.setConnectTimeout(TIMEOUT_CONNECT);
             _httpClient.start();
@@ -83,6 +88,16 @@ public class RemoteLRS implements LRS {
 
     public RemoteLRS(TCAPIVersion version) {
         this.setVersion(version);
+    }
+
+    protected void finalize () throws Throwable {
+        this.close();
+    }
+
+    public void close() {
+        if (_httpClient != null) {
+            _httpClient = null;
+        }
     }
 
     private void setEndpoint(URL url) throws MalformedURLException {
