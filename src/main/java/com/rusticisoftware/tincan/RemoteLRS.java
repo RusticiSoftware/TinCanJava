@@ -23,26 +23,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.*;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpExchange;
 import org.eclipse.jetty.http.HttpMethods;
-import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.ByteArrayBuffer;
 import com.rusticisoftware.tincan.exceptions.*;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
 import com.rusticisoftware.tincan.v10x.StatementsQuery;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.eclipse.jetty.util.thread.ThreadPool;
 
 import static org.eclipse.jetty.client.HttpClient.CONNECTOR_SELECT_CHANNEL;
 
@@ -88,16 +84,6 @@ public class RemoteLRS implements LRS {
 
     public RemoteLRS(TCAPIVersion version) {
         this.setVersion(version);
-    }
-
-    protected void finalize () throws Throwable {
-        this.close();
-    }
-
-    public void close() {
-        if (_httpClient != null) {
-            _httpClient = null;
-        }
     }
 
     private void setEndpoint(URL url) throws MalformedURLException {
