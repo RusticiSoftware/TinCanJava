@@ -139,7 +139,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    @Ignore
+//    @Ignore
     public void testSaveStatementGZIP() throws Exception {
         RemoteLRS obj = getLRS();
         obj.setCompressionGZip(true);

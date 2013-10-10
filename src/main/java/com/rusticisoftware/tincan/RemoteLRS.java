@@ -154,11 +154,11 @@ public class RemoteLRS implements LRS {
         if (this.getCompressionGZip()) {
             request.setRequestHeader("Content-Encoding", "gzip");
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            String content = request.getRequestContent().toString("UTF-8");
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(content.length());
             GZIPOutputStream gzos = new GZIPOutputStream(baos);
-            Buffer buf = request.getRequestContent();
-            byte[] bytes = buf.asArray();
-            gzos.write(bytes);
+            gzos.write(content.getBytes());
+            gzos.close();
             request.setRequestContent(new ByteArrayBuffer(baos.toByteArray()));
         }
 
