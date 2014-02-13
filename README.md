@@ -1,4 +1,10 @@
-A Java library for talking TinCan to the world.
+A Java library for implementing with the Tin Can API.
+
+For hosted API documentation, basic usage instructions, supported version listing, etc. visit the main project website at:
+
+http://rusticisoftware.github.io/TinCanJava/
+
+For more information about the Tin Can API visit:
 
 http://tincanapi.com/
 
@@ -11,7 +17,7 @@ Check out the source:
 
     git clone https://github.com/RusticiSoftware/TinCanJava.git
     cd TinCanJava
-    
+
 With the repo cloned copy the `src/test/resources/lrs.properties.template` file
 to `src/test/resources/lrs.properties` and adjust the values to point to a valid LRS. Then
 build the project using:
