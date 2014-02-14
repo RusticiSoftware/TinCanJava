@@ -21,10 +21,14 @@ import com.rusticisoftware.tincan.http.HTTPRequest;
 import com.rusticisoftware.tincan.http.HTTPResponse;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.ByteArrayOutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.zip.GZIPOutputStream;
+
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpExchange;
@@ -34,6 +38,7 @@ import com.rusticisoftware.tincan.exceptions.*;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
 import com.rusticisoftware.tincan.v10x.StatementsQuery;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import static org.eclipse.jetty.client.HttpClient.CONNECTOR_SELECT_CHANNEL;
 
@@ -50,6 +55,9 @@ public class RemoteLRS implements LRS {
     private static HttpClient httpClient() throws Exception {
         if (_httpClient == null ) {
             _httpClient = new HttpClient();
+            QueuedThreadPool pool = new QueuedThreadPool();
+            pool.setDaemon(true);
+            _httpClient.setThreadPool(pool);
             _httpClient.setConnectorType(CONNECTOR_SELECT_CHANNEL);
             _httpClient.setConnectTimeout(TIMEOUT_CONNECT);
             _httpClient.start();
@@ -72,6 +80,7 @@ public class RemoteLRS implements LRS {
     private String auth;
     private HashMap extended;
     private Boolean prettyJSON = false;
+    private Boolean compressionGZip = false;
 
     public RemoteLRS(TCAPIVersion version) {
         this.setVersion(version);
@@ -106,6 +115,10 @@ public class RemoteLRS implements LRS {
         }
     }
 
+    public void setCompressionGZip(Boolean val) {
+        this.compressionGZip = val;
+    }
+
     /**
      * Alternate Getter method for readability of code
      */
@@ -123,6 +136,17 @@ public class RemoteLRS implements LRS {
         request.setRequestHeader("Authorization", this.getAuth());
         request.setRequestHeader("X-Experience-API-Version", this.getVersion().toString());
         request.setRequestContentType("application/json");
+
+        if (this.getCompressionGZip()) {
+            request.setRequestHeader("Content-Encoding", "gzip");
+
+            String content = request.getRequestContent().toString("UTF-8");
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            GZIPOutputStream gzos = new GZIPOutputStream(baos);
+            gzos.write(content.getBytes());
+            gzos.close();
+            request.setRequestContent(new ByteArrayBuffer(baos.toByteArray()));
+        }
 
         httpClient().send(request);
 
