@@ -167,6 +167,8 @@ public class ContextActivities extends JSONBase {
                 for (Activity element : this.getCategory()) {
                     category.add(element.toJSONNode(version));
                 }
+            } else {
+                throw new IncompatibleTCAPIVersion("Version " + version.toString() + " doesn't support the category context activity");
             }
         }
 
