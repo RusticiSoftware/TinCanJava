@@ -42,7 +42,7 @@ public class Context extends JSONBase {
     private String revision;
     private String platform;
     private String language;
-    private SubStatement statement;
+    private StatementRef statement;
     private Extensions extensions;
 
     public Context(JsonNode jsonNode) throws MalformedURLException, URISyntaxException {
@@ -86,7 +86,7 @@ public class Context extends JSONBase {
 
         JsonNode statementNode = jsonNode.path("statement");
         if (! statementNode.isMissingNode()) {
-            this.setStatement(new SubStatement(statementNode));
+            this.setStatement(new StatementRef(statementNode));
         }
 
         JsonNode extensionsNode = jsonNode.path("extensions");
