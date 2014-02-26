@@ -44,12 +44,12 @@ public class ContextTest {
         ctx.setPlatform("iPhone 5");
         ctx.setRegistration(UUID.randomUUID());
         ctx.setRevision("1.0.4");
-        
-        ctx.setStatement(new SubStatement());
-        ctx.getStatement().setActor(getAgent("Sub", "mbox", "mailto:sub@example.com"));
-        ctx.getStatement().setVerb(new Verb("http://example.com/verb"));
-        ctx.getStatement().setObject(new Activity("http://example.com/sub-activity"));
-        
+
+        StatementRef ref = new StatementRef();
+        ref.setId(UUID.randomUUID());
+
+        ctx.setStatement(ref);
+
         ctx.setTeam(getAgent("Group", "mbox", "mailto:group@example.com"));
         
         assertSerializeDeserialize(ctx);
