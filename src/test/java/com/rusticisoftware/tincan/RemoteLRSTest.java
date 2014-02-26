@@ -146,7 +146,7 @@ public class RemoteLRSTest {
         st.stamp(); // triggers a PUT
         st.setActor(mockAgent());
         st.setVerb(mockVerbDisplay());
-        st.setObject(mockActivity("testSaveStatement"));
+        st.setObject(mockActivity("testSaveStatementGZIP"));
 
         obj.saveStatement(st);
     }
