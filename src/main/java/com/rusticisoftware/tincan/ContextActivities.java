@@ -160,13 +160,15 @@ public class ContextActivities extends JSONBase {
             }
         }
         if (this.category != null && this.category.size() > 0) {
-            if (version.ordinal() <= TCAPIVersion.V100.ordinal()) {
+            if (version.ordinal() >= TCAPIVersion.V100.ordinal()) {
                 ArrayNode category = mapper.createArrayNode();
                 node.put("category", category);
 
                 for (Activity element : this.getCategory()) {
                     category.add(element.toJSONNode(version));
                 }
+            } else {
+                throw new IncompatibleTCAPIVersion("Version " + version.toString() + " doesn't support the category context activity");
             }
         }
 
