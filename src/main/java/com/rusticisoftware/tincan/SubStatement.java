@@ -28,8 +28,7 @@ import com.rusticisoftware.tincan.internal.StatementBase;
 import com.rusticisoftware.tincan.json.StringOfJSON;
 
 /**
- * SubStatement Class used when including a statement like object in another statement,
- * see the 'statement' context property
+ * SubStatement Class used when including a statement like object in another statement's 'object' property
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
