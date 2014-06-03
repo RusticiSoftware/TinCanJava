@@ -17,18 +17,29 @@ package com.rusticisoftware.tincan;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.rusticisoftware.tincan.documents.ActivityProfileDocument;
+import com.rusticisoftware.tincan.documents.AgentProfileDocument;
+import com.rusticisoftware.tincan.documents.Document;
+import com.rusticisoftware.tincan.documents.StateDocument;
 import com.rusticisoftware.tincan.http.HTTPRequest;
 import com.rusticisoftware.tincan.http.HTTPResponse;
+import com.rusticisoftware.tincan.lrsresponses.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.*;
+
+import lombok.extern.java.Log;
 import org.apache.commons.codec.binary.Base64;
+import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpExchange;
 import org.eclipse.jetty.http.HttpMethods;
+import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.ByteArrayBuffer;
 import com.rusticisoftware.tincan.exceptions.*;
 import com.rusticisoftware.tincan.json.Mapper;
@@ -119,45 +130,339 @@ public class RemoteLRS implements LRS {
         );
     }
 
-    private HTTPResponse sendRequest(HTTPRequest request) throws Exception {
-        request.setRequestHeader("Authorization", this.getAuth());
-        request.setRequestHeader("X-Experience-API-Version", this.getVersion().toString());
-        request.setRequestContentType("application/json");
+    private HTTPResponse MakeSyncRequest(HTTPRequest req) throws Exception {
+        String url;
 
-        httpClient().send(request);
+        if (req.getResource().toLowerCase().startsWith("http")){
+            url = req.getResource();
+        }
+        else {
+            url = this.endpoint.toString();
+            if (! url.endsWith("/") && ! req.getResource().startsWith("/")) {
+                url += "/";
+            }
+            url += req.getResource();
+        }
+
+        if (req.getQueryParams() != null) {
+            String qs = "";
+            Iterator it = req.getQueryParams().entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry)it.next();
+                if (qs != "") {
+                    qs += "&";
+                }
+                qs += URLEncoder.encode(entry.getKey().toString(), "UTF-8") + "=" + URLEncoder.encode(entry.getValue().toString(), "UTF-8");
+            }
+            if (qs != "") {
+                url += "?" + qs;
+            }
+        }
+
+        //Overload some of an ContentExchange object's functions with anonymous inner functions
+        //Access the HTTPResponse variable via a closure
+        final HTTPResponse response = new HTTPResponse();
+        ContentExchange webReq = new ContentExchange() {
+            protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException {
+                super.onResponseStatus(version, status, reason);
+                response.setStatus(status);
+                response.setStatusMsg(reason.toString());
+            }
+
+            @Override
+            protected void onResponseHeader(Buffer name, Buffer value) throws IOException {
+                super.onResponseHeader(name, value);
+
+                response.setHeader(name.toString(), value.toString());
+            }
+
+            @Override
+            protected void onResponseComplete() throws IOException {
+                super.onResponseComplete();
+
+                response.setContentBytes(this.getResponseContentBytes());
+            }
+        };
+
+        webReq.setURL(url);
+        webReq.setMethod(req.getMethod());
+
+        webReq.addRequestHeader("X-Experience-API-Version", this.version.toString());
+        if (this.auth != null)
+        {
+            webReq.addRequestHeader("Authorization", this.auth);
+        }
+        if (req.getHeaders() != null) {
+            Iterator it = req.getHeaders().entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+                webReq.addRequestHeader(entry.getKey().toString(), entry.getValue().toString());
+            }
+        }
+
+        if (req.getContentType() != null) {
+            webReq.setRequestContentType(req.getContentType());
+        }
+        else {
+            webReq.setRequestContentType("application/octet-stream");
+        }
+
+        if (req.getContent() != null) {
+            webReq.setRequestContent(new ByteArrayBuffer(req.getContent()));
+        }
+
+        httpClient().send(webReq);
 
         // Waits until the exchange is terminated
-        int exchangeState = request.waitForDone();
+        int exchangeState = webReq.waitForDone();
 
-        if (exchangeState == HttpExchange.STATUS_COMPLETED) {
-            return request.getResponse();
+        if (exchangeState != HttpExchange.STATUS_COMPLETED) {
+            throw new FailedHTTPExchange(exchangeState);
         }
-        throw new FailedHTTPExchange(exchangeState);
+
+        return response;
     }
 
-    @Override
-    public Statement retrieveStatement(String id) throws Exception {
-        return retrieveStatement(id, "statementId");
-    }
-    
-    private Statement retrieveStatement(String id, String paramName) throws Exception {
+    private StatementLRSResponse getStatement(String id, String paramName) throws Exception {
         HTTPRequest request = new HTTPRequest();
-        request.setURL(this.getEndpoint() + "statements?" + paramName + "=" + id);
+        request.setMethod(HttpMethods.GET);
+        request.setResource("statements");
+        request.setQueryParams(new HashMap<String, String>());
+        request.getQueryParams().put(paramName, id);
 
-        HTTPResponse response = this.sendRequest(request);
+        HTTPResponse response = MakeSyncRequest(request);
         int status = response.getStatus();
 
+        StatementLRSResponse lrsResponse = new StatementLRSResponse(request, response);
+
         if (status == 200) {
-            return new Statement(new StringOfJSON(response.getContent()));
+            lrsResponse.setContent(new Statement(new StringOfJSON(response.getContent())));
+            lrsResponse.setSuccess(true);
         }
         else if (status == 404) {
-            return null;
+            lrsResponse.setSuccess(true);
         }
-        throw new UnexpectedHTTPResponse(response);
+        else {
+            lrsResponse.setSuccess(false);
+        }
+
+        return lrsResponse;
+    }
+
+    private LRSResponse GetDocument(String resource, Map<String, String> queryParams, Document document) throws Exception {
+        HTTPRequest request = new HTTPRequest();
+        request.setMethod(HttpMethods.GET);
+        request.setResource(resource);
+        request.setQueryParams(queryParams);
+
+        HTTPResponse response = MakeSyncRequest(request);
+
+        LRSResponse lrsResponse = new LRSResponse(request, response);
+
+        if(response.getStatus() == 200) {
+            document.setContent(response.getContentBytes());
+            document.setContentType(response.getContentType());
+            document.setTimestamp(response.getLastModified());
+            document.setEtag(response.getEtag());
+            lrsResponse.setSuccess(true);
+        }
+        else if (response.getStatus() == 404) {
+            lrsResponse.setSuccess(true);
+        }
+        else {
+            lrsResponse.setSuccess(false);
+        }
+
+        return lrsResponse;
+    }
+
+    private LRSResponse DeleteDocument(String resource, Map<String, String> queryParams) throws Exception {
+
+        HTTPRequest request = new HTTPRequest();
+
+        request.setMethod(HttpMethods.DELETE);
+        request.setResource(resource);
+        request.setQueryParams(queryParams);
+
+        HTTPResponse response = MakeSyncRequest(request);
+
+        LRSResponse lrsResponse = new LRSResponse(request, response);
+
+        if(response.getStatus() == 204) {
+            lrsResponse.setSuccess(true);
+        }
+        else {
+            lrsResponse.setSuccess(false);
+        }
+
+        return lrsResponse;
+    }
+
+    private LRSResponse SaveDocument(String resource, Map<String, String> queryParams, Document document) throws Exception {
+        HTTPRequest request = new HTTPRequest();
+        request.setMethod(HttpMethods.PUT);
+        request.setResource(resource);
+        request.setQueryParams(queryParams);
+        request.setContentType(document.getContentType());
+        request.setContent(document.getContent());
+
+        HTTPResponse response = MakeSyncRequest(request);
+
+        LRSResponse lrsResponse = new LRSResponse(request, response);
+
+        if(response.getStatus() == 204) {
+            lrsResponse.setSuccess(true);
+        }
+        else {
+            lrsResponse.setSuccess(false);
+        }
+
+        return lrsResponse;
+    }
+
+    private ProfileKeysLRSResponse GetProfileKeys(String resource, HashMap<String, String> queryParams) throws Exception {
+        HTTPRequest request = new HTTPRequest();
+        request.setMethod(HttpMethods.GET);
+        request.setResource(resource);
+        request.setQueryParams(queryParams);
+
+        HTTPResponse response = MakeSyncRequest(request);
+
+        ProfileKeysLRSResponse lrsResponse = new ProfileKeysLRSResponse(request, response);
+
+        if(response.getStatus() == 200){
+            lrsResponse.setSuccess(true);
+        }
+        else {
+            lrsResponse.setSuccess(false);
+        }
+
+        Iterator it = Mapper.getInstance().readValue(response.getContent(), ArrayNode.class).elements();
+        lrsResponse.setContent(new ArrayList<String>());
+        while(it.hasNext()) {
+            lrsResponse.getContent().add(it.next().toString());
+        }
+
+        return lrsResponse;
     }
 
     @Override
-    public StatementsResult queryStatements(StatementsQueryInterface query) throws Exception {
+    public AboutLRSResponse about() throws Exception {
+        HTTPRequest request = new HTTPRequest();
+        request.setMethod(HttpMethods.GET);
+        request.setResource("about");
+
+        HTTPResponse response = MakeSyncRequest(request);
+        int status = response.getStatus();
+
+        AboutLRSResponse lrsResponse = new AboutLRSResponse(request, response);
+
+        if (status == 200) {
+            lrsResponse.setSuccess(true);
+            lrsResponse.setContent(new About(response.getContent()));
+        }
+        else {
+            lrsResponse.setSuccess(false);
+        }
+
+        return lrsResponse;
+    }
+
+    @Override
+    public StatementLRSResponse saveStatement(Statement statement) throws Exception {
+        HTTPRequest request = new HTTPRequest();
+
+        request.setContent(statement.toJSON(this.getVersion(), this.usePrettyJSON()).getBytes("UTF-8"));
+        request.setResource("statements");
+        request.setContentType("application/json");
+
+        if (statement.getId() == null) {
+            request.setMethod(HttpMethods.POST);
+        }
+        else {
+            request.setMethod(HttpMethods.PUT);
+            request.setQueryParams(new HashMap<String, String>());
+            request.getQueryParams().put("statementId", statement.getId().toString());
+        }
+
+        HTTPResponse response = MakeSyncRequest(request);
+        int status = response.getStatus();
+
+        StatementLRSResponse lrsResponse = new StatementLRSResponse(request, response);
+        lrsResponse.setContent(statement);
+
+        // TODO: handle 409 conflict, etc.
+        if (status == 200) {
+            lrsResponse.setSuccess(true);
+            String content = response.getContent();
+            lrsResponse.getContent().setId(UUID.fromString(Mapper.getInstance().readValue(content, ArrayNode.class).get(0).textValue()));
+        }
+        else if (status == 204) {
+            lrsResponse.setSuccess(true);
+        }
+        else {
+            lrsResponse.setSuccess(false);
+        }
+
+        return lrsResponse;
+    }
+
+    @Override
+    public StatementsResultLRSResponse saveStatements(List<Statement> statements) throws Exception {
+        StatementsResultLRSResponse lrsResponse = new StatementsResultLRSResponse();
+        if (statements.size() == 0) {
+            lrsResponse.setSuccess(true);
+            return lrsResponse;
+        }
+
+        ArrayNode rootNode = Mapper.getInstance().createArrayNode();
+        for (Statement statement : statements) {
+            rootNode.add(statement.toJSONNode(version));
+        }
+
+
+        HTTPRequest request = new HTTPRequest();
+        request.setResource("statements");
+        request.setMethod(HttpMethods.POST);
+        request.setContentType("application/json");
+        request.setContent(Mapper.getWriter(this.usePrettyJSON()).writeValueAsBytes(rootNode));
+
+        HTTPResponse response = MakeSyncRequest(request);
+        int status = response.getStatus();
+
+        lrsResponse.setRequest(request);
+        lrsResponse.setResponse(response);
+
+        if (status == 200) {
+            String content = response.getContent();
+            lrsResponse.setContent(new StatementsResult());
+            Iterator it = Mapper.getInstance().readValue(content, ArrayNode.class).elements();
+            for(int i = 0; it.hasNext(); ++i) {
+                lrsResponse.getContent().getStatements().add(statements.get(i));
+                lrsResponse.getContent().getStatements().get(i).setId(UUID.fromString(((JsonNode) it.next()).textValue()));
+            }
+            lrsResponse.setSuccess(true);
+        }
+        else {
+            lrsResponse.setSuccess(false);
+        }
+
+        return lrsResponse;
+    }
+
+    @Override
+    public StatementLRSResponse retrieveStatement(String id) throws Exception {
+        return getStatement(id, "statementId");
+    }
+
+    @Override
+    public StatementLRSResponse retrieveVoidedStatement(String id) throws Exception {
+        String paramName = (this.getVersion() == TCAPIVersion.V095) ? "statementId" : "voidedStatementId";
+        return getStatement(id, paramName);
+    }
+
+    @Override
+    public StatementsResultLRSResponse queryStatements(StatementsQueryInterface query) throws Exception {
         //Setup empty query object if null was passed in
         if (query == null) { 
             query = (this.getVersion() == TCAPIVersion.V095) ? 
@@ -172,180 +477,222 @@ public class RemoteLRS implements LRS {
                     query.getVersion() + " set of query parameters.");
         }
 
-        //Build query string
-        HashMap<String,String> params = query.toParameterMap();
-        StringBuilder queryString = new StringBuilder();
-        Boolean first = true;
-        for(Map.Entry<String,String> parameter : params.entrySet()) {
-            queryString.append((first ? "?" : "&") + 
-                URLEncoder.encode(parameter.getKey(), "UTF-8") + "=" + 
-                URLEncoder.encode(parameter.getValue(), "UTF-8").replace("+", "%20"));
-            first = false;
-        }
-
         HTTPRequest request = new HTTPRequest();
-        request.setURL(this.getEndpoint() + "statements" + queryString.toString());
+        request.setMethod(HttpMethods.GET);
+        request.setResource("statements");
+        request.setQueryParams(query.toParameterMap());
 
-        HTTPResponse response = this.sendRequest(request);
+        HTTPResponse response = MakeSyncRequest(request);
+
+        StatementsResultLRSResponse lrsResponse = new StatementsResultLRSResponse(request, response);
+
         if (response.getStatus() == 200) {
-            return new StatementsResult(new StringOfJSON(response.getContent()));
+            lrsResponse.setContent(new StatementsResult(new StringOfJSON(response.getContent())));
+            lrsResponse.setSuccess(true);
+        }
+        else {
+            lrsResponse.setSuccess(false);
         }
 
-        throw new UnexpectedHTTPResponse(response);
+        return lrsResponse;
     }
 
     @Override
-    public StatementsResult moreStatements(String moreURL) throws Exception {
+    public StatementsResultLRSResponse moreStatements(String moreURL) throws Exception {
         if (moreURL == null) {
             return null;
         }
 
-        //
         // moreURL is relative to the endpoint's server root
-        //
         URL endpoint = this.getEndpoint();
         String url = endpoint.getProtocol() + "://" + endpoint.getHost() + (endpoint.getPort() == -1 ? "" : endpoint.getPort()) + moreURL;
 
         HTTPRequest request = new HTTPRequest();
-        request.setURL(url);
+        request.setResource(url);
+        request.setMethod(HttpMethods.GET);
+        HTTPResponse response = MakeSyncRequest(request);
 
-        HTTPResponse response = this.sendRequest(request);
+        StatementsResultLRSResponse lrsResponse = new StatementsResultLRSResponse(request, response);
+
         if (response.getStatus() == 200) {
-            return new StatementsResult(new StringOfJSON(response.getContent()));
-        }
-
-        throw new UnexpectedHTTPResponse(response);
-    }
-
-    @Override
-    public UUID saveStatement(Statement statement) throws Exception {
-        HTTPRequest request = new HTTPRequest();
-        request.setRequestContent(new ByteArrayBuffer(statement.toJSON(this.getVersion(), this.usePrettyJSON()), "UTF-8"));
-
-        String url = this.getEndpoint() + "statements";
-        if (statement.getId() == null) {
-            request.setMethod(HttpMethods.POST);
+            lrsResponse.setContent(new StatementsResult(new StringOfJSON(response.getContent())));
+            lrsResponse.setSuccess(true);
         }
         else {
-            request.setMethod(HttpMethods.PUT);
-            url += "?statementId=" + statement.getId().toString();
-        }
-        request.setURL(url);
-
-        HTTPResponse response = this.sendRequest(request);
-        int status = response.getStatus();
-
-        // TODO: handle 409 conflict, etc.
-        if (status == 204) {
-            return statement.getId();
-        }
-        else if (status == 200) {
-            String content = request.getResponseContent();
-            return UUID.fromString(Mapper.getInstance().readValue(content, ArrayNode.class).get(0).textValue());
+            lrsResponse.setSuccess(false);
         }
 
-        throw new UnexpectedHTTPResponse(response);
+        return lrsResponse;
     }
 
     @Override
-    public List<String> saveStatements(List<Statement> statements) throws Exception {
-        List<String> statementIds = new ArrayList<String>();
-        if (statements.size() == 0) {
-            return statementIds;
+    public ProfileKeysLRSResponse retrieveStateIds(Activity activity, Agent agent, UUID registration) throws Exception {
+        HashMap<String, String> queryParams = new HashMap<String, String>();
+        queryParams.put("activityId", activity.getId().toString());
+        queryParams.put("agent", agent.toJSON(this.getVersion(), this.usePrettyJSON()));
+        if(registration != null) {
+            queryParams.put("registration", registration.toString());
         }
 
-        ArrayNode rootNode = Mapper.getInstance().createArrayNode();
-        for (Statement statement : statements) {
-            rootNode.add(statement.toJSONNode(version));
-        }
-
-        HTTPRequest request = new HTTPRequest();
-        request.setRequestContent(new ByteArrayBuffer(Mapper.getWriter(this.usePrettyJSON()).writeValueAsString(rootNode), "UTF-8"));
-        request.setMethod(HttpMethods.POST);
-        request.setURL(this.getEndpoint() + "statements");
-
-        HTTPResponse response = this.sendRequest(request);
-        int status = response.getStatus();
-
-        if (status == 200) {
-            String content = request.getResponseContent();
-            Iterator it =  Mapper.getInstance().readValue(content, ArrayNode.class).elements();
-            while(it.hasNext()) {
-                statementIds.add( ((JsonNode) it.next()).textValue() );
-            }
-            return statementIds;
-        }
-
-        throw new UnexpectedHTTPResponse(response);
+        return GetProfileKeys("activities/state", queryParams);
     }
 
     @Override
-    public State retrieveState(String id, String activityId, Agent agent, UUID registration) throws Exception {
-        HashMap<String,String> params = new HashMap<String,String>();
-        params.put("stateId", id);
-        params.put("activityId", activityId);
-        params.put("agent", agent.toJSON(this.getVersion(), this.usePrettyJSON()));
-        if (registration != null) {
-            params.put("registration", registration.toString());
+    public StateLRSResponse retrieveState(String id, Activity activity, Agent agent, UUID registration) throws Exception {
+        HashMap<String, String> queryParams = new HashMap<String, String>();
+        queryParams.put("stateId", id);
+        queryParams.put("activityId", activity.getId().toString());
+        queryParams.put("agent", agent.toJSON(this.getVersion(), this.usePrettyJSON()));
+
+        StateDocument stateDocument = new StateDocument();
+        stateDocument.setId(id);
+        stateDocument.setActivity(activity);
+        stateDocument.setAgent(agent);
+
+        LRSResponse lrsResp = GetDocument("activities/state", queryParams, stateDocument);
+
+        StateLRSResponse lrsResponse = new StateLRSResponse(lrsResp.getRequest(), lrsResp.getResponse());
+        lrsResponse.setSuccess(lrsResp.getSuccess());
+
+        if (lrsResponse.getResponse().getStatus() == 200) {
+            lrsResponse.setContent(stateDocument);
         }
 
-        String queryString = "?";
-        Boolean first = true;
-        for(Map.Entry<String,String> parameter : params.entrySet()) {
-            queryString += (first ? "" : "&") + URLEncoder.encode(parameter.getKey(), "UTF-8") + "=" + URLEncoder.encode(parameter.getValue(), "UTF-8").replace("+", "%20");
-            first = false;
-        }
-
-        HTTPRequest request = new HTTPRequest();
-        request.setURL(this.getEndpoint() + "activities/state" + queryString);
-
-        HTTPResponse response = this.sendRequest(request);
-        int status = response.getStatus();
-
-        if (status == 200) {
-            return new State(id, response.getContentBytes(), activityId, agent, registration);
-        }
-        else if (status == 404) {
-            return null;
-        }
-        throw new UnexpectedHTTPResponse(response);
+        return lrsResponse;
     }
 
     @Override
-    public void saveState(State state, String activityId, Agent agent, UUID registration) throws Exception {
-        HashMap<String,String> params = new HashMap<String,String>();
-        params.put("stateId", state.getId());
-        params.put("activityId", activityId);
-        params.put("agent", agent.toJSON(this.getVersion(), this.usePrettyJSON()));
-        if (registration != null) {
-            params.put("registration", registration.toString());
-        }
+    public LRSResponse saveState(StateDocument state) throws Exception {
+        HashMap<String,String> queryParams = new HashMap<String,String>();
 
-        String queryString = "?";
-        Boolean first = true;
-        for(Map.Entry<String,String> parameter : params.entrySet()) {
-            queryString += (first ? "" : "&") + URLEncoder.encode(parameter.getKey(), "UTF-8") + "=" + URLEncoder.encode(parameter.getValue(), "UTF-8").replace("+", "%20");
-            first = false;
-        }
+        queryParams.put("stateId", state.getId());
+        queryParams.put("activityId", state.getActivity().getId().toString());
+        queryParams.put("agent", state.getAgent().toJSON(this.getVersion(), this.usePrettyJSON()));
 
-        HTTPRequest request = new HTTPRequest();
-        request.setMethod(HttpMethods.PUT);
-        request.setURL(this.getEndpoint() + "activities/state" + queryString);
-        request.setRequestContent(new ByteArrayBuffer(state.getContents()));
-
-        // TODO: need to set the 'updated' property based on header
-        HTTPResponse response = this.sendRequest(request);
-        int status = response.getStatus();
-
-        if (status == 204) {
-            return;
-        }
-        throw new UnexpectedHTTPResponse(response);
+        return SaveDocument("activities/state", queryParams, state);
     }
 
     @Override
-    public Statement retrieveVoidedStatement(String id) throws Exception {
-        String paramName = (this.getVersion() == TCAPIVersion.V095) ? "statementId" : "voidedStatementId";
-        return retrieveStatement(id, paramName);
+    public LRSResponse deleteState(StateDocument state) throws Exception {
+        Map queryParams = new HashMap<String, String>();
+
+        queryParams.put("stateId", state.getId());
+        queryParams.put("activityId", state.getActivity().getId().toString());
+        queryParams.put("agent", state.getAgent().toJSON());
+
+        if(state.getRegistration() != null ) {
+            queryParams.put("registration", state.getRegistration().toString());
+        }
+
+        return DeleteDocument("activities/state", queryParams);
     }
+
+    @Override
+    public LRSResponse clearState(Activity activity, Agent agent, UUID registration) throws Exception {
+        HashMap<String, String> queryParams = new HashMap<String, String>();
+
+        queryParams.put("activityId", activity.getId().toString());
+        queryParams.put("agent", agent.toJSON(this.getVersion(), this.usePrettyJSON()));
+        if(registration != null) {
+            queryParams.put("registration", registration.toString());
+        }
+        return DeleteDocument("activities/state", queryParams);
+    }
+
+    @Override
+    public ProfileKeysLRSResponse retrieveActivityProfileIds(Activity activity) throws Exception {
+        HashMap<String, String> queryParams = new HashMap<String, String>();
+
+        queryParams.put("activityId", activity.getId().toString());
+
+        return GetProfileKeys("activities/profile", queryParams);
+    }
+
+    @Override
+    public ActivityProfileLRSResponse retrieveActivityProfile(String id, Activity activity) throws Exception {
+        HashMap<String, String> queryParams = new HashMap<String, String>();
+        queryParams.put("profileId", id);
+        queryParams.put("activityId", activity.getId().toString());
+
+        ActivityProfileDocument profileDocument = new ActivityProfileDocument();
+        profileDocument.setId(id);
+        profileDocument.setActivity(activity);
+
+        LRSResponse lrsResp = GetDocument("activities/profile", queryParams, profileDocument);
+
+        ActivityProfileLRSResponse lrsResponse = new ActivityProfileLRSResponse(lrsResp.getRequest(), lrsResp.getResponse());
+        lrsResponse.setSuccess(lrsResp.getSuccess());
+
+        if(lrsResponse.getResponse().getStatus() == 200) {
+            lrsResponse.setContent(profileDocument);
+        }
+
+        return lrsResponse;
+    }
+
+    @Override
+    public LRSResponse saveActivityProfile(ActivityProfileDocument profile) throws Exception {
+        HashMap<String, String> queryParams = new HashMap<String, String>();
+        queryParams.put("profileId", profile.getId());
+        queryParams.put("activityId", profile.getActivity().getId().toString());
+
+        return SaveDocument("activities/profile", queryParams, profile);
+    }
+
+    @Override
+    public LRSResponse deleteActivityProfile(ActivityProfileDocument profile) throws Exception {
+        HashMap<String, String> queryParams = new HashMap<String, String>();
+        queryParams.put("profileId", profile.getId());
+        queryParams.put("activityId", profile.getActivity().getId().toString());
+        // TODO: need to pass Etag?
+
+        return DeleteDocument("activities/profile", queryParams);
+    }
+
+    @Override
+    public ProfileKeysLRSResponse retrieveAgentProfileIds(Agent agent) throws Exception {
+        HashMap<String, String> queryParams = new HashMap<String, String>();
+        queryParams.put("agent", agent.toJSON(this.getVersion(), this.usePrettyJSON()));
+
+        return GetProfileKeys("agents/profile", queryParams);
+    }
+
+    @Override
+    public AgentProfileLRSResponse retrieveAgentProfile(String id, Agent agent) throws Exception {
+        HashMap<String, String> queryParams = new HashMap<String, String>();
+        queryParams.put("profileId", id);
+        queryParams.put("agent", agent.toJSON(this.getVersion(), this.usePrettyJSON()));
+
+        AgentProfileDocument profileDocument = new AgentProfileDocument();
+        profileDocument.setId(id);
+        profileDocument.setAgent(agent);
+
+        LRSResponse lrsResp = GetDocument("agents/profile", queryParams, profileDocument);
+
+        AgentProfileLRSResponse lrsResponse = new AgentProfileLRSResponse(lrsResp.getRequest(), lrsResp.getResponse());
+        lrsResponse.setSuccess(lrsResp.getSuccess());
+
+        if(lrsResponse.getResponse().getStatus() == 200) {
+            lrsResponse.setContent(profileDocument);
+        }
+
+        return lrsResponse;
+    }
+
+    @Override
+    public LRSResponse saveAgentProfile(AgentProfileDocument profile) throws Exception {
+        HashMap<String, String> queryParams = new HashMap<String, String>();
+        queryParams.put("profileId", profile.getId());
+        queryParams.put("agent", profile.getAgent().toJSON(this.getVersion(), this.usePrettyJSON()));
+
+        return SaveDocument("agents/profile", queryParams, profile);    }
+
+    @Override
+    public LRSResponse deleteAgentProfile(AgentProfileDocument profile) throws Exception {
+        HashMap<String, String> queryParams = new HashMap<String, String>();
+        queryParams.put("profileId", profile.getId());
+        queryParams.put("agent", profile.getAgent().toJSON(this.getVersion(), this.usePrettyJSON()));
+        // TODO: need to pass Etag?
+
+        return DeleteDocument("agents/profile", queryParams);    }
 }

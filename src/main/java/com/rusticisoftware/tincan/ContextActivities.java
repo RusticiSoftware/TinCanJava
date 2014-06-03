@@ -160,7 +160,7 @@ public class ContextActivities extends JSONBase {
             }
         }
         if (this.category != null && this.category.size() > 0) {
-            if (version.ordinal() >= TCAPIVersion.V100.ordinal()) {
+            if (version.ordinal() >= TCAPIVersion.V101.ordinal()) {
                 ArrayNode category = mapper.createArrayNode();
                 node.put("category", category);
 
