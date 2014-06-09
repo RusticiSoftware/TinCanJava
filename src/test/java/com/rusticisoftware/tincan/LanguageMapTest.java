@@ -16,6 +16,11 @@
 package com.rusticisoftware.tincan;
 
 import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -30,5 +35,41 @@ public class LanguageMapTest {
         lm.put("en-US", "Some english");
         lm.put("es-ES", "Some espanol");
         assertSerializeDeserialize(lm);
+    }
+    
+    @Test
+    public void fillAndIterate() {
+    	LanguageMap lm = new LanguageMap();
+    	LanguageMap lmCopy = new LanguageMap();
+    	lm.put("und", "Some text");
+    	lm.put("en-US", "Some english");
+    	lm.put("es-ES", "Some espanol");
+    	
+    	for (Map.Entry<String, String> entry : lm) {
+    		lmCopy.put(entry);
+    	}
+    	
+    	String lmContent = "";
+    	try {
+    		lmContent = lm.toJSON();
+    	} catch (IOException e) {
+    		lmContent = "";
+    	}
+    	String lmCopyContent = "";
+    	try {
+    		lmCopyContent = lmCopy.toJSON();
+    	} catch (IOException e) {
+    		lmCopyContent = ""; 
+    	}
+    	assertEquals(lmContent, lmCopyContent);
+    	
+    	boolean hasKey = lm.containsKey("und");
+    	boolean hasValue = lm.containsValue("Some english");
+    	Map.Entry<String, String> entry = lm.findFirstValue("Some espanol");
+    	
+    	assertTrue(hasKey);
+    	assertTrue(hasValue);
+    	assertEquals(entry.getKey(), "es-ES");
+    	
     }
 }
