@@ -21,6 +21,7 @@ import lombok.NoArgsConstructor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
@@ -29,9 +30,31 @@ import com.rusticisoftware.tincan.json.Mapper;
  * Language map
  */
 @NoArgsConstructor
-public class LanguageMap extends JSONBase {
+public class LanguageMap extends JSONBase implements Iterable<Map.Entry<String, String>> {
     private final HashMap<String,String> _map = new HashMap<String, String>();
 
+    private class LanguageMapIterator implements Iterator<Map.Entry<String, String>> {
+        private Iterator<Map.Entry<String, String>> iterator;
+
+        public LanguageMapIterator() {
+            iterator = _map.entrySet().iterator();
+        }
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+
+        @Override
+        public Entry<String, String> next() {
+            return iterator.next();
+        }
+
+        @Override
+        public void remove() throws UnsupportedOperationException {
+            throw new UnsupportedOperationException(
+                "LanguageMap iterator does not implement the remove method");
+        }
+    }
     public LanguageMap(JsonNode jsonNode) {
         this();
 
@@ -56,8 +79,38 @@ public class LanguageMap extends JSONBase {
     public String put(String key, String val) {
         return this._map.put(key, val);
     }
+    
+    public String put(Map.Entry<String, String> entry) {
+        return this.put(entry.getKey(), entry.getValue());
+    }
 
     public String get(String key) {
         return this._map.get(key);
+    }
+
+    public boolean containsKey(String key) {
+        return this._map.containsKey(key);
+    }
+
+    public boolean containsValue(String value) {
+        return this._map.containsValue(value);
+    }
+
+    public Map.Entry<String, String> findFirstValue(String value) {
+        Map.Entry<String, String> retVal = null;
+        Iterator<Map.Entry<String,String>> it = this.iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, String> n = it.next();
+            if (n.getValue().equalsIgnoreCase(value)) {
+                retVal = n;
+                break;
+            }
+        }
+        return retVal;
+    }
+
+    @Override
+    public Iterator<Entry<String, String>> iterator() {
+        return new LanguageMapIterator();
     }
 }
