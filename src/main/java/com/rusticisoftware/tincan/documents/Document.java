@@ -16,10 +16,12 @@
 package com.rusticisoftware.tincan.documents;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.joda.time.DateTime;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class Document {
     private String id;

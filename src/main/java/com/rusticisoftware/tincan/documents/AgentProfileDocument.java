@@ -17,9 +17,11 @@ package com.rusticisoftware.tincan.documents;
 
 import com.rusticisoftware.tincan.Agent;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class AgentProfileDocument extends Document{
     private Agent agent;

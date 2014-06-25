@@ -19,9 +19,11 @@ import com.rusticisoftware.tincan.Statement;
 import com.rusticisoftware.tincan.http.HTTPRequest;
 import com.rusticisoftware.tincan.http.HTTPResponse;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class StatementLRSResponse extends LRSResponse{
     private Statement content;

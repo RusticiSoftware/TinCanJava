@@ -19,9 +19,11 @@ import com.rusticisoftware.tincan.documents.AgentProfileDocument;
 import com.rusticisoftware.tincan.http.HTTPRequest;
 import com.rusticisoftware.tincan.http.HTTPResponse;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class AgentProfileLRSResponse extends LRSResponse{
     private AgentProfileDocument content;

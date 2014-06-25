@@ -17,9 +17,11 @@ package com.rusticisoftware.tincan.documents;
 
 import com.rusticisoftware.tincan.Activity;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class ActivityProfileDocument extends Document {
     private Activity activity;
