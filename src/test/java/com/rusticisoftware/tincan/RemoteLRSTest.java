@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import com.rusticisoftware.tincan.exceptions.UnexpectedHTTPResponse;
 import lombok.extern.java.Log;
 
 import org.joda.time.DateTime;
@@ -39,6 +40,8 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.v10x.StatementsQuery;
+
+import javax.xml.ws.http.HTTPException;
 
 @Log
 public class RemoteLRSTest {
@@ -135,6 +138,26 @@ public class RemoteLRSTest {
         st.setObject(mockActivity("testSaveStatement"));
 
         obj.saveStatement(st);
+    }
+
+    @Test
+    public void testSaveStatementGZIP() throws Exception {
+        RemoteLRS obj = getLRS();
+        obj.setCompressionGZip(true);
+
+        Statement st = new Statement();
+        st.stamp(); // triggers a PUT
+        st.setActor(mockAgent());
+        st.setVerb(mockVerbDisplay());
+        st.setObject(mockActivity("testSaveStatementGZIP"));
+
+        try {
+            obj.saveStatement(st);
+        }
+        catch (UnexpectedHTTPResponse e) {
+            log.info("Status: " + String.valueOf(e.getResponse().getStatus()));
+            log.info("Body: " + e.getResponse().getContent());
+        }
     }
 
     /*
