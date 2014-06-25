@@ -19,6 +19,7 @@ package com.rusticisoftware.tincan;
  * Description
  */
 public enum TCAPIVersion {
+    V101("1.0.1"),
     V100("1.0.0"),
     V095("0.95");
 
