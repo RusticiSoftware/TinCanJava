@@ -188,13 +188,13 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestAbout() throws Exception {
+    public void testAbout() throws Exception {
         AboutLRSResponse lrsRes = lrs.about();
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
     @Test
-    public void TestAboutFailure() throws Exception {
+    public void testAboutFailure() throws Exception {
         RemoteLRS obj = new RemoteLRS(TCAPIVersion.V100);
         obj.setEndpoint(new URI("http://cloud.scorm.com/tc/3TQLAI9/sandbox/").toString());
 
@@ -203,7 +203,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestSaveStatement() throws Exception {
+    public void testSaveStatement() throws Exception {
         Statement statement = new Statement();
         statement.setActor(agent);
         statement.setVerb(verb);
@@ -216,7 +216,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestSaveStatementWithID() throws Exception {
+    public void testSaveStatementWithID() throws Exception {
         Statement statement = new Statement();
         statement.stamp();
         statement.setActor(agent);
@@ -229,7 +229,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestSaveStatementWithContext() throws Exception {
+    public void testSaveStatementWithContext() throws Exception {
         Statement statement = new Statement();
         statement.setActor(agent);
         statement.setVerb(verb);
@@ -242,7 +242,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestSaveStatementWithResult() throws Exception {
+    public void testSaveStatementWithResult() throws Exception {
         Statement statement = new Statement();
         statement.setActor(agent);
         statement.setVerb(verb);
@@ -256,7 +256,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestSaveStatementStatementRef() throws Exception {
+    public void testSaveStatementStatementRef() throws Exception {
         Statement statement = new Statement();
         statement.stamp();
         statement.setActor(agent);
@@ -269,7 +269,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestSaveStatementSubStatement() throws Exception {
+    public void testSaveStatementSubStatement() throws Exception {
         Statement statement = new Statement();
         statement.stamp();
         statement.setActor(agent);
@@ -282,7 +282,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestSaveStatements() throws Exception {
+    public void testSaveStatements() throws Exception {
         Statement statement1 = new Statement();
         statement1.setActor(agent);
         statement1.setVerb(verb);
@@ -315,11 +315,10 @@ public class RemoteLRSTest {
         Assert.assertEquals(s2.getVerb(), verb);
         Assert.assertEquals(s2.getObject(), activity);
         Assert.assertEquals(s2.getContext(), context);
-
     }
 
     @Test
-    public void TestRetrieveStatement() throws Exception {
+    public void testRetrieveStatement() throws Exception {
         Statement statement = new Statement();
         statement.stamp();
         statement.setActor(agent);
@@ -335,7 +334,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestQueryStatements() throws Exception {
+    public void testQueryStatements() throws Exception {
         StatementsQuery query = new StatementsQuery();
         query.setAgent(agent);
         query.setVerbID(verb.getId().toString());
@@ -350,7 +349,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestMoreStatements() throws Exception {
+    public void testMoreStatements() throws Exception {
         StatementsQuery query = new StatementsQuery();
         query.setFormat(QueryResultFormat.IDS);
         query.setLimit(2);
@@ -363,21 +362,21 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestRetrieveStateIds() throws Exception
+    public void testRetrieveStateIds() throws Exception
     {
         ProfileKeysLRSResponse lrsRes = lrs.retrieveStateIds(activity, agent, null);
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
     @Test
-    public void TestRetrieveState() throws Exception
+    public void testRetrieveState() throws Exception
     {
         StateLRSResponse lrsRes = lrs.retrieveState("test", activity, agent, null);
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
     @Test
-    public void TestSaveState() throws Exception
+    public void testSaveState() throws Exception
     {
         StateDocument doc = new StateDocument();
         doc.setActivity(activity);
@@ -390,7 +389,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestDeleteState() throws Exception
+    public void testDeleteState() throws Exception
     {
         StateDocument doc = new StateDocument();
         doc.setActivity(activity);
@@ -402,28 +401,28 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestClearState() throws Exception
+    public void testClearState() throws Exception
     {
         LRSResponse lrsRes = lrs.clearState(activity, agent, null);
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
     @Test
-    public void TestRetrieveActivityProfileIds() throws Exception
+    public void testRetrieveActivityProfileIds() throws Exception
     {
         ProfileKeysLRSResponse lrsRes = lrs.retrieveActivityProfileIds(activity);
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
     @Test
-    public void TestRetrieveActivityProfile() throws Exception
+    public void testRetrieveActivityProfile() throws Exception
     {
         ActivityProfileLRSResponse lrsRes = lrs.retrieveActivityProfile("test", activity);
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
     @Test
-    public void TestSaveActivityProfile() throws Exception
+    public void testSaveActivityProfile() throws Exception
     {
         ActivityProfileDocument doc = new ActivityProfileDocument();
         doc.setActivity(activity);
@@ -435,7 +434,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestDeleteActivityProfile() throws Exception
+    public void testDeleteActivityProfile() throws Exception
     {
         ActivityProfileDocument doc = new ActivityProfileDocument();
         doc.setActivity(activity);
@@ -446,21 +445,21 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestRetrieveAgentProfileIds() throws Exception
+    public void testRetrieveAgentProfileIds() throws Exception
     {
         ProfileKeysLRSResponse lrsRes = lrs.retrieveAgentProfileIds(agent);
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
     @Test
-    public void TestRetrieveAgentProfile() throws Exception
+    public void testRetrieveAgentProfile() throws Exception
     {
         AgentProfileLRSResponse lrsRes = lrs.retrieveAgentProfile("test", agent);
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
     @Test
-    public void TestSaveAgentProfile() throws Exception
+    public void testSaveAgentProfile() throws Exception
     {
         AgentProfileDocument doc = new AgentProfileDocument();
         doc.setAgent(agent);
@@ -472,7 +471,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void TestDeleteAgentProfile() throws Exception
+    public void testDeleteAgentProfile() throws Exception
     {
         AgentProfileDocument doc = new AgentProfileDocument();
         doc.setAgent(agent);
@@ -481,6 +480,4 @@ public class RemoteLRSTest {
         LRSResponse lrsRes = lrs.deleteAgentProfile(doc);
         Assert.assertTrue(lrsRes.getSuccess());
     }
-
 }
-
