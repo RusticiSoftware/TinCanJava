@@ -62,7 +62,7 @@ public class RemoteLRSTest {
         lrs.setPassword(config.getProperty("password"));
 
         agent = new Agent();
-        agent.setMbox("mailto:tincancsharp@tincanapi.com");
+        agent.setMbox("mailto:tincanjava@tincanapi.com");
 
         verb = new Verb("http://adlnet.gov/expapi/verbs/experienced");
         verb.setDisplay(new LanguageMap());
