@@ -20,6 +20,8 @@ import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
 import lombok.Data;
 
 import org.joda.time.Period;
+import org.joda.time.format.ISOPeriodFormat;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -40,5 +42,13 @@ public class ResultTest {
         res.getScore().setRaw(0.43);
         res.setSuccess(false);
         assertSerializeDeserialize(res);
+    }
+
+    @Test
+    public void testToJSONResultDurationTruncation() throws Exception {
+        Result res = new Result();
+        res.setDuration(new Period(1, 2, 16, 43));
+
+        Assert.assertEquals("{\"duration\":\"PT1H2M16.04S\"}", res.toJSON());
     }
 }

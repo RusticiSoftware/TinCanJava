@@ -94,7 +94,14 @@ public class Result extends JSONBase {
             node.put("completion", this.getCompletion());
         }
         if (this.duration != null) {
-            node.put("duration", ISOPeriodFormat.standard().print(this.getDuration()));
+            //
+            // ISOPeriodFormat includes milliseconds but the spec only allows
+            // hundredths of a second here, so get the normal string, then truncate
+            // the last digit to provide the proper precision
+            //
+            String shortenedDuration = ISOPeriodFormat.standard().print(this.getDuration()).replaceAll("(\\.\\d\\d)\\dS", "$1S");
+
+            node.put("duration", shortenedDuration);
         }
         if (this.response != null) {
             node.put("response", this.getResponse());
