@@ -200,7 +200,6 @@ public class RemoteLRSTest {
 
         AboutLRSResponse lrsRes = obj.about();
         Assert.assertFalse(lrsRes.getSuccess());
-        log.info("TestAboutFailure - errMsg: " + lrsRes.getResponse().getStatusMsg());
     }
 
     @Test
@@ -230,6 +229,33 @@ public class RemoteLRSTest {
     }
 
     @Test
+    public void TestSaveStatementWithContext() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+        statement.setContext(context);
+
+        StatementLRSResponse lrsRes = lrs.saveStatement(statement);
+        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertEquals(statement, lrsRes.getContent());
+    }
+
+    @Test
+    public void TestSaveStatementWithResult() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+        statement.setContext(context);
+        statement.setResult(result);
+
+        StatementLRSResponse lrsRes = lrs.saveStatement(statement);
+        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertEquals(statement, lrsRes.getContent());
+    }
+
+    @Test
     public void TestSaveStatementStatementRef() throws Exception {
         Statement statement = new Statement();
         statement.stamp();
@@ -249,8 +275,6 @@ public class RemoteLRSTest {
         statement.setActor(agent);
         statement.setVerb(verb);
         statement.setObject(subStatement);
-
-        log.info(statement.toJSON(true));
 
         StatementLRSResponse lrsRes = lrs.saveStatement(statement);
         Assert.assertTrue(lrsRes.getSuccess());
@@ -305,13 +329,9 @@ public class RemoteLRSTest {
         statement.setResult(result);
 
         StatementLRSResponse saveRes = lrs.saveStatement(statement);
-        if (saveRes.getSuccess()) {
-            StatementLRSResponse retRes = lrs.retrieveStatement(saveRes.getContent().getId().toString());
-            Assert.assertTrue(retRes.getSuccess());
-            log.info("TestRetrieveStatement - statement: " + retRes.getContent().toJSON(true));
-        } else {
-            // TODO: skipped?
-        }
+        Assert.assertTrue(saveRes.getSuccess());
+        StatementLRSResponse retRes = lrs.retrieveStatement(saveRes.getContent().getId().toString());
+        Assert.assertTrue(retRes.getSuccess());
     }
 
     @Test
@@ -327,7 +347,6 @@ public class RemoteLRSTest {
 
         StatementsResultLRSResponse lrsRes = lrs.queryStatements(query);
         Assert.assertTrue(lrsRes.getSuccess());
-        log.info("TestQueryStatements - statement count: " + lrsRes.getContent().getStatements().size());
     }
 
     @Test
@@ -337,13 +356,10 @@ public class RemoteLRSTest {
         query.setLimit(2);
 
         StatementsResultLRSResponse queryRes = lrs.queryStatements(query);
-        if (queryRes.getSuccess() && queryRes.getContent().getMoreURL() != null) {
-            StatementsResultLRSResponse moreRes = lrs.moreStatements(queryRes.getContent().getMoreURL());
-            Assert.assertTrue(moreRes.getSuccess());
-            log.info("TestMoreStatements - statement count: " + moreRes.getContent().getStatements().size());
-        } else {
-            // TODO: skipped?
-        }
+        Assert.assertTrue(queryRes.getSuccess());
+        Assert.assertNotNull(queryRes.getContent().getMoreURL());
+        StatementsResultLRSResponse moreRes = lrs.moreStatements(queryRes.getContent().getMoreURL());
+        Assert.assertTrue(moreRes.getSuccess());
     }
 
     @Test
