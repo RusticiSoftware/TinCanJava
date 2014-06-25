@@ -238,9 +238,6 @@ public class RemoteLRS implements LRS {
             lrsResponse.setContent(new Statement(new StringOfJSON(response.getContent())));
             lrsResponse.setSuccess(true);
         }
-        else if (status == 404) {
-            lrsResponse.setSuccess(true);
-        }
         else {
             lrsResponse.setSuccess(false);
         }
