@@ -69,23 +69,23 @@ public class RemoteLRSTest {
         verb.getDisplay().put("en-US", "experienced");
 
         activity = new Activity();
-        activity.setId(new URI("http://tincanapi.com/TinCanCSharp/Test/Unit/0"));
+        activity.setId(new URI("http://tincanapi.com/TinCanJava/Test/Unit/0"));
         activity.setDefinition(new ActivityDefinition());
         activity.getDefinition().setType(new URI("http://id.tincanapi.com/activitytype/unit-test"));
         activity.getDefinition().setName(new LanguageMap());
-        activity.getDefinition().getName().put("en-US", "Tin Can C# Tests: Unit 0");
+        activity.getDefinition().getName().put("en-US", "TinCanJava Tests: Unit 0");
         activity.getDefinition().setDescription(new LanguageMap());
-        activity.getDefinition().getDescription().put("en-US", "Unit test 0 in the test suite for the Tin Can C# library.");
+        activity.getDefinition().getDescription().put("en-US", "Unit test 0 in the test suite for the Tin Can Java library.");
 
         parent = new Activity();
-        parent.setId(new URI("http://tincanapi.com/TinCanCSharp/Test"));
+        parent.setId(new URI("http://tincanapi.com/TinCanJava/Test"));
         parent.setDefinition(new ActivityDefinition());
         parent.getDefinition().setType(new URI("http://id.tincanapi.com/activitytype/unit-test-suite"));
-        //parent.getDefinition().setMoreInfo(new URI("http://rusticisoftware.github.io/TinCanCSharp/"));
+        //parent.getDefinition().setMoreInfo(new URI("http://rusticisoftware.github.io/TinCanJava/"));
         parent.getDefinition().setName(new LanguageMap());
-        parent.getDefinition().getName().put("en-US", "Tin Can C# Tests");
+        parent.getDefinition().getName().put("en-US", "TinCanJavava Tests");
         parent.getDefinition().setDescription(new LanguageMap());
-        parent.getDefinition().getDescription().put("en-US", "Unit test suite for the Tin Can C# library.");
+        parent.getDefinition().getDescription().put("en-US", "Unit test suite for the Tin Can Java library.");
 
         statementRef = new StatementRef(UUID.randomUUID());
 
