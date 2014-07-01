@@ -1,0 +1,2 @@
+language: java
+before_script: cp src/test/resources/travis-ci.properties src/test/resources/lrs.properties
