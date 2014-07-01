@@ -46,7 +46,7 @@ public class HTTPResponse {
     }
 
     public String getContentType() { return this.getHeader("Content-Type"); }
-    public String getEtag() { return this.getHeader("Etag"); }
+    public String getEtag() { return this.getHeader("ETag"); }
     public DateTime getLastModified() {
         DateTimeFormatter RFC1123_DATE_TIME_FORMATTER =
                 DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'").withZoneUTC();

@@ -371,7 +371,20 @@ public class RemoteLRSTest {
     @Test
     public void testRetrieveState() throws Exception
     {
+        LRSResponse clear = lrs.clearState(activity, agent, null);
+        Assert.assertTrue(clear.getSuccess());
+
+        StateDocument doc = new StateDocument();
+        doc.setActivity(activity);
+        doc.setAgent(agent);
+        doc.setId("test");
+        doc.setContent("Test value".getBytes("UTF-8"));
+
+        LRSResponse save = lrs.saveState(doc);
+        Assert.assertTrue(save.getSuccess());
+
         StateLRSResponse lrsRes = lrs.retrieveState("test", activity, agent, null);
+        Assert.assertEquals("\"C140F82CB70E3884AD729B5055B7EAA81C795F1F\"", lrsRes.getContent().getEtag());
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
@@ -386,6 +399,31 @@ public class RemoteLRSTest {
 
         LRSResponse lrsRes = lrs.saveState(doc);
         Assert.assertTrue(lrsRes.getSuccess());
+    }
+
+    @Test
+    public void testOverwriteState() throws Exception
+    {
+        LRSResponse clear = lrs.clearState(activity, agent, null);
+        Assert.assertTrue(clear.getSuccess());
+
+        StateDocument doc = new StateDocument();
+        doc.setActivity(activity);
+        doc.setAgent(agent);
+        doc.setId("test");
+        doc.setContent("Test value".getBytes("UTF-8"));
+
+        LRSResponse save = lrs.saveState(doc);
+        Assert.assertTrue(save.getSuccess());
+
+        StateLRSResponse retrieve = lrs.retrieveState("test", activity, agent, null);
+        Assert.assertTrue(retrieve.getSuccess());
+
+        doc.setEtag(retrieve.getContent().getEtag());
+        doc.setId("testing");
+        doc.setActivity(parent);
+        LRSResponse lrsResp = lrs.saveState(doc);
+        Assert.assertTrue(lrsResp.getSuccess());
     }
 
     @Test
@@ -417,7 +455,20 @@ public class RemoteLRSTest {
     @Test
     public void testRetrieveActivityProfile() throws Exception
     {
+        ActivityProfileDocument doc = new ActivityProfileDocument();
+        doc.setActivity(activity);
+        doc.setId("test");
+
+        LRSResponse clear = lrs.deleteActivityProfile(doc);
+        Assert.assertTrue(clear.getSuccess());
+
+        doc.setContent("Test value2".getBytes("UTF-8"));
+
+        LRSResponse save = lrs.saveActivityProfile(doc);
+        Assert.assertTrue(save.getSuccess());
+
         ActivityProfileLRSResponse lrsRes = lrs.retrieveActivityProfile("test", activity);
+        Assert.assertEquals("\"6E6E6C11D7E0BFFE0369873A2A5FD751AB2EA64F\"", lrsRes.getContent().getEtag());
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
@@ -427,10 +478,40 @@ public class RemoteLRSTest {
         ActivityProfileDocument doc = new ActivityProfileDocument();
         doc.setActivity(activity);
         doc.setId("test");
-        doc.setContent("Test value".getBytes("UTF-8"));
+
+        LRSResponse clear = lrs.deleteActivityProfile(doc);
+        Assert.assertTrue(clear.getSuccess());
+
+        doc.setContent("Test value2".getBytes("UTF-8"));
 
         LRSResponse lrsRes = lrs.saveActivityProfile(doc);
         Assert.assertTrue(lrsRes.getSuccess());
+    }
+
+    @Test
+    public void testOverwriteActivityProfile() throws Exception
+    {
+        ActivityProfileDocument doc = new ActivityProfileDocument();
+        doc.setActivity(activity);
+        doc.setId("test");
+
+        LRSResponse clear = lrs.deleteActivityProfile(doc);
+        Assert.assertTrue(clear.getSuccess());
+
+        doc.setContent("Test value2".getBytes("UTF-8"));
+
+        LRSResponse save = lrs.saveActivityProfile(doc);
+        Assert.assertTrue(save.getSuccess());
+
+        ActivityProfileLRSResponse retrieve = lrs.retrieveActivityProfile("test", activity);
+        Assert.assertTrue(retrieve.getSuccess());
+
+        doc.setEtag(retrieve.getContent().getEtag());
+        doc.setId("test2");
+        doc.setContent("Test value3".getBytes("UTF-8"));
+
+        LRSResponse lrsResp = lrs.saveActivityProfile(doc);
+        Assert.assertTrue(lrsResp.getSuccess());
     }
 
     @Test
@@ -454,7 +535,20 @@ public class RemoteLRSTest {
     @Test
     public void testRetrieveAgentProfile() throws Exception
     {
+        AgentProfileDocument doc = new AgentProfileDocument();
+        doc.setAgent(agent);
+        doc.setId("test");
+
+        LRSResponse clear = lrs.deleteAgentProfile(doc);
+        Assert.assertTrue(clear.getSuccess());
+
+        doc.setContent("Test value4".getBytes("UTF-8"));
+
+        LRSResponse save = lrs.saveAgentProfile(doc);
+        Assert.assertTrue(save.getSuccess());
+
         AgentProfileLRSResponse lrsRes = lrs.retrieveAgentProfile("test", agent);
+        Assert.assertEquals("\"DA16D3E0CBD55E0F13558AD0ECFD2605E2238C71\"", lrsRes.getContent().getEtag());
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
@@ -468,6 +562,32 @@ public class RemoteLRSTest {
 
         LRSResponse lrsRes = lrs.saveAgentProfile(doc);
         Assert.assertTrue(lrsRes.getSuccess());
+    }
+
+    @Test
+    public void testOverwriteAgentProfile() throws Exception
+    {
+        AgentProfileDocument doc = new AgentProfileDocument();
+        doc.setAgent(agent);
+        doc.setId("test");
+
+        LRSResponse clear = lrs.deleteAgentProfile(doc);
+        Assert.assertTrue(clear.getSuccess());
+
+        doc.setContent("Test value4".getBytes("UTF-8"));
+
+        LRSResponse save = lrs.saveAgentProfile(doc);
+        Assert.assertTrue(save.getSuccess());
+
+        AgentProfileLRSResponse retrieve = lrs.retrieveAgentProfile("test", agent);
+        Assert.assertTrue(retrieve.getSuccess());
+
+        doc.setEtag(retrieve.getContent().getEtag());
+        doc.setId("test2");
+        doc.setContent("Test value5".getBytes("UTF-8"));
+
+        LRSResponse lrsResp = lrs.saveAgentProfile(doc);
+        Assert.assertTrue(lrsResp.getSuccess());
     }
 
     @Test

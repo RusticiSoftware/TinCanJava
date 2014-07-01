@@ -301,6 +301,10 @@ public class RemoteLRS implements LRS {
         request.setQueryParams(queryParams);
         request.setContentType(document.getContentType());
         request.setContent(document.getContent());
+        if(document.getEtag() != null) {
+            request.setHeaders(new HashMap<String, String>());
+            request.getHeaders().put("If-Match", document.getEtag());
+        }
 
         HTTPResponse response = makeSyncRequest(request);
 
