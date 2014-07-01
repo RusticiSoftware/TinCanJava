@@ -21,7 +21,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
 

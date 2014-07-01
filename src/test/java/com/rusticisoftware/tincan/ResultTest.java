@@ -20,7 +20,6 @@ import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
 import lombok.Data;
 
 import org.joda.time.Period;
-import org.joda.time.format.ISOPeriodFormat;
 import org.junit.Assert;
 import org.junit.Test;
 
