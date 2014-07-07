@@ -49,18 +49,10 @@ public class LanguageMapTest {
             lmCopy.put(entry);
         }
 
-        String lmContent = "";
-        try {
-            lmContent = lm.toJSON();
-        } catch (IOException e) {
-            lmContent = "";
-        }
-        String lmCopyContent = "";
-        try {
-            lmCopyContent = lmCopy.toJSON();
-        } catch (IOException e) {
-            lmCopyContent = ""; 
-            }
+        String lmContent = lm.toJSON();
+
+        String lmCopyContent = lmCopy.toJSON();
+
         assertEquals(lmContent, lmCopyContent);
 
         boolean hasKey = lm.containsKey("und");
