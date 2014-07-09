@@ -1,5 +1,5 @@
 /*
-    Copyright 2013 Rustici Software
+    Copyright 2014 Rustici Software
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -13,29 +13,23 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-package com.rusticisoftware.tincan.http;
+package com.rusticisoftware.tincan.lrsresponses;
 
+import com.rusticisoftware.tincan.http.HTTPRequest;
+import com.rusticisoftware.tincan.http.HTTPResponse;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.eclipse.jetty.client.ContentExchange;
-import org.eclipse.jetty.io.Buffer;
-import org.eclipse.jetty.io.ByteArrayBuffer;
+import lombok.NoArgsConstructor;
 
-import java.io.IOException;
-import java.util.Map;
+import java.util.List;
 
-/**
- * HTTPRequest Class Description
- */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class HTTPRequest {
-    private String method;
-    private String resource;
-    private Map<String, String> queryParams;
-    private Map<String, String> headers;
-    private String contentType;
-    private ByteArrayBuffer contentBuffer;
-    private byte[] content;
-    private HTTPResponse response;
+@NoArgsConstructor
+public class ProfileKeysLRSResponse extends LRSResponse{
+    private List<String> content;
+
+    public ProfileKeysLRSResponse(HTTPRequest initRequest, HTTPResponse initResponse) {
+        super(initRequest, initResponse);
+    }
 }

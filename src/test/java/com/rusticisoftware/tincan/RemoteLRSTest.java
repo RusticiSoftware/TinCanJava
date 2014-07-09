@@ -15,40 +15,103 @@
 */
 package com.rusticisoftware.tincan;
 
-import java.io.IOException;
+
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-import java.util.logging.Level;
+import java.util.*;
 
+import com.rusticisoftware.tincan.documents.ActivityProfileDocument;
+import com.rusticisoftware.tincan.documents.AgentProfileDocument;
+import com.rusticisoftware.tincan.documents.StateDocument;
+import com.rusticisoftware.tincan.lrsresponses.*;
 import lombok.extern.java.Log;
 
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.v10x.StatementsQuery;
 
 @Log
 public class RemoteLRSTest {
-    private static final Properties config = new Properties();
+    private static RemoteLRS lrs;
+    private static Agent agent;
+    private static Verb verb;
+    private static Activity activity;
+    private static Activity parent;
+    private static Context context;
+    private static Result result;
+    private static Score score;
+    private static StatementRef statementRef;
+    private static SubStatement subStatement;
+
+    private static Properties config = new Properties();
 
     @BeforeClass
-    public static void setupOnce() throws IOException {
+    public static void Init() throws Exception {
+        lrs = new RemoteLRS(TCAPIVersion.V100);
+
         InputStream is = RemoteLRSTest.class.getResourceAsStream("/lrs.properties");
         config.load(is);
         is.close();
+
+        lrs.setEndpoint(config.getProperty("endpoint"));
+        lrs.setUsername(config.getProperty("username"));
+        lrs.setPassword(config.getProperty("password"));
+
+        agent = new Agent();
+        agent.setMbox("mailto:tincanjava@tincanapi.com");
+
+        verb = new Verb("http://adlnet.gov/expapi/verbs/experienced");
+        verb.setDisplay(new LanguageMap());
+        verb.getDisplay().put("en-US", "experienced");
+
+        activity = new Activity();
+        activity.setId(new URI("http://tincanapi.com/TinCanJava/Test/Unit/0"));
+        activity.setDefinition(new ActivityDefinition());
+        activity.getDefinition().setType(new URI("http://id.tincanapi.com/activitytype/unit-test"));
+        activity.getDefinition().setName(new LanguageMap());
+        activity.getDefinition().getName().put("en-US", "TinCanJava Tests: Unit 0");
+        activity.getDefinition().setDescription(new LanguageMap());
+        activity.getDefinition().getDescription().put("en-US", "Unit test 0 in the test suite for the Tin Can Java library.");
+
+        parent = new Activity();
+        parent.setId(new URI("http://tincanapi.com/TinCanJava/Test"));
+        parent.setDefinition(new ActivityDefinition());
+        parent.getDefinition().setType(new URI("http://id.tincanapi.com/activitytype/unit-test-suite"));
+        //parent.getDefinition().setMoreInfo(new URI("http://rusticisoftware.github.io/TinCanJava/"));
+        parent.getDefinition().setName(new LanguageMap());
+        parent.getDefinition().getName().put("en-US", "TinCanJavava Tests");
+        parent.getDefinition().setDescription(new LanguageMap());
+        parent.getDefinition().getDescription().put("en-US", "Unit test suite for the Tin Can Java library.");
+
+        statementRef = new StatementRef(UUID.randomUUID());
+
+        context = new Context();
+        context.setRegistration(UUID.randomUUID());
+        context.setStatement(statementRef);
+        context.setContextActivities(new ContextActivities());
+        context.getContextActivities().setParent(new ArrayList<Activity>());
+        context.getContextActivities().getParent().add(parent);
+
+        score = new Score();
+        score.setRaw(97.0);
+        score.setScaled(0.97);
+        score.setMax(100.0);
+        score.setMin(0.0);
+
+        result = new Result();
+        result.setScore(score);
+        result.setSuccess(true);
+        result.setCompletion(true);
+        result.setDuration(new Period(1, 2, 16, 43));
+
+        subStatement = new SubStatement();
+        subStatement.setActor(agent);
+        subStatement.setVerb(verb);
+        subStatement.setObject(parent);
     }
 
     @Test
@@ -73,8 +136,8 @@ public class RemoteLRSTest {
         RemoteLRS obj = new RemoteLRS();
         Assert.assertNull(obj.getVersion());
 
-        obj.setVersion(TCAPIVersion.V095);
-        Assert.assertEquals(TCAPIVersion.V095, obj.getVersion());
+        obj.setVersion(TCAPIVersion.V100);
+        Assert.assertEquals(TCAPIVersion.V100, lrs.getVersion());
     }
 
     @Test
@@ -125,280 +188,416 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testSaveStatement() throws Exception {
-        RemoteLRS obj = getLRS();
-
-        Statement st = new Statement();
-        st.stamp(); // triggers a PUT
-        st.setActor(mockAgent());
-        st.setVerb(mockVerbDisplay());
-        st.setObject(mockActivity("testSaveStatement"));
-
-        obj.saveStatement(st);
+    public void testAbout() throws Exception {
+        AboutLRSResponse lrsRes = lrs.about();
+        Assert.assertTrue(lrsRes.getSuccess());
     }
 
-    /*
-     * Tests calling saveStatement without an ID which triggers a POST request
-     */
     @Test
-    public void testSaveStatementNoID() throws Exception {
-        RemoteLRS obj = getLRS();
+    public void testAboutFailure() throws Exception {
+        RemoteLRS obj = new RemoteLRS(TCAPIVersion.V100);
+        obj.setEndpoint(new URI("http://cloud.scorm.com/tc/3TQLAI9/sandbox/").toString());
 
-        Statement st = new Statement();
-        st.setActor(mockAgent());
-        st.setVerb(mockVerbDisplay());
-        st.setObject(mockActivity("testSaveStatementNoID"));
+        AboutLRSResponse lrsRes = obj.about();
+        Assert.assertFalse(lrsRes.getSuccess());
+    }
 
-        obj.saveStatement(st);
+    @Test
+    public void testSaveStatement() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+
+        StatementLRSResponse lrsRes = lrs.saveStatement(statement);
+        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertEquals(statement, lrsRes.getContent());
+        Assert.assertNotNull(lrsRes.getContent().getId());
+    }
+
+    @Test
+    public void testSaveStatementWithID() throws Exception {
+        Statement statement = new Statement();
+        statement.stamp();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+
+        StatementLRSResponse lrsRes = lrs.saveStatement(statement);
+        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertEquals(statement, lrsRes.getContent());
+    }
+
+    @Test
+    public void testSaveStatementWithContext() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+        statement.setContext(context);
+
+        StatementLRSResponse lrsRes = lrs.saveStatement(statement);
+        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertEquals(statement, lrsRes.getContent());
+    }
+
+    @Test
+    public void testSaveStatementWithResult() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+        statement.setContext(context);
+        statement.setResult(result);
+
+        StatementLRSResponse lrsRes = lrs.saveStatement(statement);
+        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertEquals(statement, lrsRes.getContent());
+    }
+
+    @Test
+    public void testSaveStatementStatementRef() throws Exception {
+        Statement statement = new Statement();
+        statement.stamp();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(statementRef);
+
+        StatementLRSResponse lrsRes = lrs.saveStatement(statement);
+        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertEquals(statement, lrsRes.getContent());
+    }
+
+    @Test
+    public void testSaveStatementSubStatement() throws Exception {
+        Statement statement = new Statement();
+        statement.stamp();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(subStatement);
+
+        StatementLRSResponse lrsRes = lrs.saveStatement(statement);
+        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertEquals(statement, lrsRes.getContent());
     }
 
     @Test
     public void testSaveStatements() throws Exception {
-        RemoteLRS obj = getLRS();
+        Statement statement1 = new Statement();
+        statement1.setActor(agent);
+        statement1.setVerb(verb);
+        statement1.setObject(parent);
 
-        List<Statement> sts = new ArrayList<Statement>();
+        Statement statement2 = new Statement();
+        statement2.setActor(agent);
+        statement2.setVerb(verb);
+        statement2.setObject(activity);
+        statement2.setContext(context);
 
-        Statement st0 = new Statement();
-        st0.stamp();
-        st0.setActor(mockAgent());
-        st0.setVerb(mockVerbDisplay());
-        st0.setObject(mockActivity("testSaveStatements1"));
+        List<Statement> statements = new ArrayList<Statement>();
+        statements.add(statement1);
+        statements.add(statement2);
 
-        sts.add(st0);
+        StatementsResultLRSResponse lrsRes = lrs.saveStatements(statements);
+        Assert.assertTrue(lrsRes.getSuccess());
 
-        Statement st1 = new Statement();
-        st1.stamp();
-        st1.setActor(mockAgent());
-        st1.setVerb(mockVerbDisplay());
-        st1.setObject(mockActivity("testSaveStatements2"));
+        Statement s1 = lrsRes.getContent().getStatements().get(0);
+        Statement s2 = lrsRes.getContent().getStatements().get(1);
 
-        sts.add(st1);
+        Assert.assertNotNull(s1.getId());
+        Assert.assertNotNull(s2.getId());
 
-        List<String> ids = obj.saveStatements(sts);
-        for(String id: ids) {
-            log.info("id: " + id);
-        }
-    }
+        Assert.assertEquals(s1.getActor(), agent);
+        Assert.assertEquals(s1.getVerb(), verb);
+        Assert.assertEquals(s1.getObject(), parent);
 
-    @Test
-    public void testSaveStatementsNoIDs() throws Exception {
-        RemoteLRS obj = getLRS();
-
-        List<Statement> sts = new ArrayList<Statement>();
-
-        Statement st0 = new Statement();
-        st0.setActor(mockAgent());
-        st0.setVerb(mockVerbDisplay());
-        st0.setObject(mockActivity("testSaveStatementsNoIDs1"));
-
-        sts.add(st0);
-
-        Statement st1 = new Statement();
-        st1.setActor(mockAgent());
-        st1.setVerb(mockVerbDisplay());
-        st1.setObject(mockActivity("testSaveStatementsNoIDs2"));
-
-        sts.add(st1);
-
-        List<String> ids = obj.saveStatements(sts);
-        for(String id: ids) {
-            log.info("id: " + id);
-        }
-    }
-
-    @Test
-    public void testSaveStatementsMixed() throws Exception {
-        RemoteLRS obj = getLRS();
-
-        List<Statement> sts = new ArrayList<Statement>();
-
-        Statement st0 = new Statement();
-        st0.stamp();
-        st0.setActor(mockAgent());
-        st0.setVerb(mockVerbDisplay());
-        st0.setObject(mockActivity("testSaveStatements1"));
-
-        sts.add(st0);
-
-        Statement st1 = new Statement();
-        st1.setActor(mockAgent());
-        st1.setVerb(mockVerbDisplay());
-        st1.setObject(mockActivity("testSaveStatements2"));
-
-        sts.add(st1);
-
-        List<String> ids = obj.saveStatements(sts);
-        for(String id: ids) {
-            log.info("id: " + id);
-        }
+        Assert.assertEquals(s2.getActor(), agent);
+        Assert.assertEquals(s2.getVerb(), verb);
+        Assert.assertEquals(s2.getObject(), activity);
+        Assert.assertEquals(s2.getContext(), context);
     }
 
     @Test
     public void testRetrieveStatement() throws Exception {
-        RemoteLRS obj = getLRS();
+        Statement statement = new Statement();
+        statement.stamp();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+        statement.setContext(context);
+        statement.setResult(result);
 
-        Statement st = new Statement();
-        st.stamp();
-        st.setActor(mockAgent());
-        st.setVerb(mockVerb());
-        st.setObject(mockActivity("testRetrieveStatement"));
-        obj.saveStatement(st);
-
-        Statement result = obj.retrieveStatement(st.getId().toString());
-        log.info("statement: " + result.toJSON(true));
-    }
-    
-    @Test
-    public void testRetrieveVoidedStatement() throws Exception {
-        RemoteLRS obj = getLRS();
-
-        Statement st = new Statement();
-        st.stamp();
-        st.setActor(mockAgent());
-        st.setVerb(mockVerb());
-        st.setObject(mockActivity("testRetrieveVoidedStatement"));
-        obj.saveStatement(st);
-        
-        Statement voiding = new Statement();
-        voiding.stamp();
-        voiding.setActor(mockAgent());
-        voiding.setVerb(new Verb("http://adlnet.gov/expapi/verbs/voided"));
-        voiding.setObject(new StatementRef(st.getId()));
-        obj.saveStatement(voiding);
-
-        //Should be null for 1.0
-        Statement result = obj.retrieveStatement(st.getId().toString());
-        log.info("statement: " + ((result == null) ? "null" : result.toJSON(true)));
-        
-        result = obj.retrieveVoidedStatement(st.getId().toString());
-        log.info("voided statement: " + result.toJSON(true));
+        StatementLRSResponse saveRes = lrs.saveStatement(statement);
+        Assert.assertTrue(saveRes.getSuccess());
+        StatementLRSResponse retRes = lrs.retrieveStatement(saveRes.getContent().getId().toString());
+        Assert.assertTrue(retRes.getSuccess());
     }
 
-    @Test
-    public void testQueryStatementsNull() throws Exception {
-        RemoteLRS obj = getLRS();
-        StatementsResult result = obj.queryStatements(null);
-        log.info(result.toJSON(true));
-    }
-
-    @Test
-    public void testQueryStatements_V095() throws Exception {
-        RemoteLRS obj = getLRS(TCAPIVersion.V095);
-
-        com.rusticisoftware.tincan.v095.StatementsQuery query;
-        query = new com.rusticisoftware.tincan.v095.StatementsQuery();
-        
-        query.setSince(new DateTime("2013-03-13T14:17:42.610Z"));
-        //query.setLimit(3);
-        query.setActor(mockAgent());
-        query.setObject(mockActivity("testSaveStatement"));
-
-        StatementsResult result = obj.queryStatements(query);
-        log.info(result.toJSON(true));
-    }
-    
     @Test
     public void testQueryStatements() throws Exception {
-        RemoteLRS obj = getLRS();
-
         StatementsQuery query = new StatementsQuery();
-        query.setSince(new DateTime("2013-03-13T14:17:42.610Z"));
-        //query.setLimit(3);
-        query.setAgent(mockAgent());
-        query.setActivityID(mockActivity("testSaveStatement").getId());
+        query.setAgent(agent);
+        query.setVerbID(verb.getId().toString());
+        query.setActivityID(parent.getId());
+        query.setRelatedActivities(true);
+        query.setRelatedAgents(true);
+        query.setFormat(QueryResultFormat.IDS);
+        query.setLimit(10);
 
-        StatementsResult result = obj.queryStatements(query);
-        log.info(result.toJSON(true));
+        StatementsResultLRSResponse lrsRes = lrs.queryStatements(query);
+        Assert.assertTrue(lrsRes.getSuccess());
     }
 
     @Test
     public void testMoreStatements() throws Exception {
-        RemoteLRS obj = getLRS();
-
         StatementsQuery query = new StatementsQuery();
-        query.setLimit(3);
-        StatementsResult queryResult = obj.queryStatements(query);
-        log.info("statement count: " + queryResult.getStatements().size());
-        log.info("result - more: " + queryResult.getMoreURL());
+        query.setFormat(QueryResultFormat.IDS);
+        query.setLimit(2);
 
-        StatementsResult moreResult = obj.moreStatements(queryResult.getMoreURL());
-        log.info("statement count: " + moreResult.getStatements().size());
-        log.info("result - more: " + moreResult.getMoreURL());
+        StatementsResultLRSResponse queryRes = lrs.queryStatements(query);
+        Assert.assertTrue(queryRes.getSuccess());
+        Assert.assertNotNull(queryRes.getContent().getMoreURL());
+        StatementsResultLRSResponse moreRes = lrs.moreStatements(queryRes.getContent().getMoreURL());
+        Assert.assertTrue(moreRes.getSuccess());
     }
 
     @Test
-    public void testSaveState() throws Exception {
-        RemoteLRS obj = getLRS();
-
-        String key = "testRetrieveState";
-        String value = "Test";
-        Agent agent = mockAgent();
-        URI activityId = mockActivity(key).getId();
-
-        State state = new State(key, value, activityId, agent, null);
-        obj.saveState(state, mockActivity(key).getId().toString(), mockAgent(), null);
+    public void testRetrieveStateIds() throws Exception
+    {
+        ProfileKeysLRSResponse lrsRes = lrs.retrieveStateIds(activity, agent, null);
+        Assert.assertTrue(lrsRes.getSuccess());
     }
 
     @Test
-    public void testRetrieveState() throws Exception {
-        RemoteLRS obj = getLRS();
+    public void testRetrieveState() throws Exception
+    {
+        LRSResponse clear = lrs.clearState(activity, agent, null);
+        Assert.assertTrue(clear.getSuccess());
 
-        String key = "testRetrieveState";
-        String value = "Test";
-        Agent agent = mockAgent();
-        URI activityId = mockActivity(key).getId();
+        StateDocument doc = new StateDocument();
+        doc.setActivity(activity);
+        doc.setAgent(agent);
+        doc.setId("test");
+        doc.setContent("Test value".getBytes("UTF-8"));
 
-        State state = new State(key, value, activityId, agent, null);
-        obj.saveState(state, mockActivity(key).getId().toString(), mockAgent(), null);
+        LRSResponse save = lrs.saveState(doc);
+        Assert.assertTrue(save.getSuccess());
 
-        State retrievedState = obj.retrieveState(key, mockActivity(key).getId().toString(), mockAgent(), null);
-        Assert.assertEquals(key, retrievedState.getId());
-        Assert.assertEquals(value, new String(retrievedState.getContents()));
+        StateLRSResponse lrsRes = lrs.retrieveState("test", activity, agent, null);
+        Assert.assertEquals("\"C140F82CB70E3884AD729B5055B7EAA81C795F1F\"", lrsRes.getContent().getEtag());
+        Assert.assertTrue(lrsRes.getSuccess());
     }
 
-    private RemoteLRS getLRS() throws Exception {
-        return getLRS(TCAPIVersion.V100);
-    }
-    
-    private RemoteLRS getLRS(TCAPIVersion version) throws Exception {
-        RemoteLRS obj = new RemoteLRS();
-        obj.setEndpoint(config.getProperty("endpoint"));
-        obj.setVersion(version);
-        obj.setUsername(config.getProperty("username"));
-        obj.setPassword(config.getProperty("password"));
+    @Test
+    public void testSaveState() throws Exception
+    {
+        StateDocument doc = new StateDocument();
+        doc.setActivity(activity);
+        doc.setAgent(agent);
+        doc.setId("test");
+        doc.setContent("Test value".getBytes("UTF-8"));
 
-        return obj;
-    }
-
-    private Statement mockStatement() {
-        Statement obj = new Statement();
-
-        return obj;
+        LRSResponse lrsRes = lrs.saveState(doc);
+        Assert.assertTrue(lrsRes.getSuccess());
     }
 
-    private Agent mockAgent() {
-        Agent obj = new Agent();
-        obj.setMbox("mailto:tincanjava-test-tincan@tincanapi.com");
+    @Test
+    public void testOverwriteState() throws Exception
+    {
+        LRSResponse clear = lrs.clearState(activity, agent, null);
+        Assert.assertTrue(clear.getSuccess());
 
-        return obj;
+        StateDocument doc = new StateDocument();
+        doc.setActivity(activity);
+        doc.setAgent(agent);
+        doc.setId("test");
+        doc.setContent("Test value".getBytes("UTF-8"));
+
+        LRSResponse save = lrs.saveState(doc);
+        Assert.assertTrue(save.getSuccess());
+
+        StateLRSResponse retrieve = lrs.retrieveState("test", activity, agent, null);
+        Assert.assertTrue(retrieve.getSuccess());
+
+        doc.setEtag(retrieve.getContent().getEtag());
+        doc.setId("testing");
+        doc.setActivity(parent);
+        LRSResponse lrsResp = lrs.saveState(doc);
+        Assert.assertTrue(lrsResp.getSuccess());
     }
 
-    private Verb mockVerb() throws URISyntaxException {
-        return new Verb("http://adlnet.gov/expapi/verbs/attempted");
+    @Test
+    public void testDeleteState() throws Exception
+    {
+        StateDocument doc = new StateDocument();
+        doc.setActivity(activity);
+        doc.setAgent(agent);
+        doc.setId("test");
+
+        LRSResponse lrsRes = lrs.deleteState(doc);
+        Assert.assertTrue(lrsRes.getSuccess());
     }
 
-    private Verb mockVerbDisplay() throws URISyntaxException {
-        Verb obj = mockVerb();
-        LanguageMap display = new LanguageMap();
-        display.put("und", obj.getId().toString());
-        display.put("en-US", "attempted");
-
-        obj.setDisplay(display);
-
-        return obj;
+    @Test
+    public void testClearState() throws Exception
+    {
+        LRSResponse lrsRes = lrs.clearState(activity, agent, null);
+        Assert.assertTrue(lrsRes.getSuccess());
     }
 
-    private Activity mockActivity(String suffix) throws URISyntaxException {
-        return new Activity("http://tincanapi.com/TinCanJava/Test/RemoteLRSTest_mockActivity/" + suffix);
+    @Test
+    public void testRetrieveActivityProfileIds() throws Exception
+    {
+        ProfileKeysLRSResponse lrsRes = lrs.retrieveActivityProfileIds(activity);
+        Assert.assertTrue(lrsRes.getSuccess());
+    }
+
+    @Test
+    public void testRetrieveActivityProfile() throws Exception
+    {
+        ActivityProfileDocument doc = new ActivityProfileDocument();
+        doc.setActivity(activity);
+        doc.setId("test");
+
+        LRSResponse clear = lrs.deleteActivityProfile(doc);
+        Assert.assertTrue(clear.getSuccess());
+
+        doc.setContent("Test value2".getBytes("UTF-8"));
+
+        LRSResponse save = lrs.saveActivityProfile(doc);
+        Assert.assertTrue(save.getSuccess());
+
+        ActivityProfileLRSResponse lrsRes = lrs.retrieveActivityProfile("test", activity);
+        Assert.assertEquals("\"6E6E6C11D7E0BFFE0369873A2A5FD751AB2EA64F\"", lrsRes.getContent().getEtag());
+        Assert.assertTrue(lrsRes.getSuccess());
+    }
+
+    @Test
+    public void testSaveActivityProfile() throws Exception
+    {
+        ActivityProfileDocument doc = new ActivityProfileDocument();
+        doc.setActivity(activity);
+        doc.setId("test");
+
+        LRSResponse clear = lrs.deleteActivityProfile(doc);
+        Assert.assertTrue(clear.getSuccess());
+
+        doc.setContent("Test value2".getBytes("UTF-8"));
+
+        LRSResponse lrsRes = lrs.saveActivityProfile(doc);
+        Assert.assertTrue(lrsRes.getSuccess());
+    }
+
+    @Test
+    public void testOverwriteActivityProfile() throws Exception
+    {
+        ActivityProfileDocument doc = new ActivityProfileDocument();
+        doc.setActivity(activity);
+        doc.setId("test");
+
+        LRSResponse clear = lrs.deleteActivityProfile(doc);
+        Assert.assertTrue(clear.getSuccess());
+
+        doc.setContent("Test value2".getBytes("UTF-8"));
+
+        LRSResponse save = lrs.saveActivityProfile(doc);
+        Assert.assertTrue(save.getSuccess());
+
+        ActivityProfileLRSResponse retrieve = lrs.retrieveActivityProfile("test", activity);
+        Assert.assertTrue(retrieve.getSuccess());
+
+        doc.setEtag(retrieve.getContent().getEtag());
+        doc.setId("test2");
+        doc.setContent("Test value3".getBytes("UTF-8"));
+
+        LRSResponse lrsResp = lrs.saveActivityProfile(doc);
+        Assert.assertTrue(lrsResp.getSuccess());
+    }
+
+    @Test
+    public void testDeleteActivityProfile() throws Exception
+    {
+        ActivityProfileDocument doc = new ActivityProfileDocument();
+        doc.setActivity(activity);
+        doc.setId("test");
+
+        LRSResponse lrsRes = lrs.deleteActivityProfile(doc);
+        Assert.assertTrue(lrsRes.getSuccess());
+    }
+
+    @Test
+    public void testRetrieveAgentProfileIds() throws Exception
+    {
+        ProfileKeysLRSResponse lrsRes = lrs.retrieveAgentProfileIds(agent);
+        Assert.assertTrue(lrsRes.getSuccess());
+    }
+
+    @Test
+    public void testRetrieveAgentProfile() throws Exception
+    {
+        AgentProfileDocument doc = new AgentProfileDocument();
+        doc.setAgent(agent);
+        doc.setId("test");
+
+        LRSResponse clear = lrs.deleteAgentProfile(doc);
+        Assert.assertTrue(clear.getSuccess());
+
+        doc.setContent("Test value4".getBytes("UTF-8"));
+
+        LRSResponse save = lrs.saveAgentProfile(doc);
+        Assert.assertTrue(save.getSuccess());
+
+        AgentProfileLRSResponse lrsRes = lrs.retrieveAgentProfile("test", agent);
+        Assert.assertEquals("\"DA16D3E0CBD55E0F13558AD0ECFD2605E2238C71\"", lrsRes.getContent().getEtag());
+        Assert.assertTrue(lrsRes.getSuccess());
+    }
+
+    @Test
+    public void testSaveAgentProfile() throws Exception
+    {
+        AgentProfileDocument doc = new AgentProfileDocument();
+        doc.setAgent(agent);
+        doc.setId("test");
+        doc.setContent("Test value".getBytes("UTF-8"));
+
+        LRSResponse lrsRes = lrs.saveAgentProfile(doc);
+        Assert.assertTrue(lrsRes.getSuccess());
+    }
+
+    @Test
+    public void testOverwriteAgentProfile() throws Exception
+    {
+        AgentProfileDocument doc = new AgentProfileDocument();
+        doc.setAgent(agent);
+        doc.setId("test");
+
+        LRSResponse clear = lrs.deleteAgentProfile(doc);
+        Assert.assertTrue(clear.getSuccess());
+
+        doc.setContent("Test value4".getBytes("UTF-8"));
+
+        LRSResponse save = lrs.saveAgentProfile(doc);
+        Assert.assertTrue(save.getSuccess());
+
+        AgentProfileLRSResponse retrieve = lrs.retrieveAgentProfile("test", agent);
+        Assert.assertTrue(retrieve.getSuccess());
+
+        doc.setEtag(retrieve.getContent().getEtag());
+        doc.setId("test2");
+        doc.setContent("Test value5".getBytes("UTF-8"));
+
+        LRSResponse lrsResp = lrs.saveAgentProfile(doc);
+        Assert.assertTrue(lrsResp.getSuccess());
+    }
+
+    @Test
+    public void testDeleteAgentProfile() throws Exception
+    {
+        AgentProfileDocument doc = new AgentProfileDocument();
+        doc.setAgent(agent);
+        doc.setId("test");
+
+        LRSResponse lrsRes = lrs.deleteAgentProfile(doc);
+        Assert.assertTrue(lrsRes.getSuccess());
     }
 }

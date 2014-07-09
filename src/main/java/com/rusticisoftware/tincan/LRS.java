@@ -15,6 +15,9 @@
 */
 package com.rusticisoftware.tincan;
 
+import com.rusticisoftware.tincan.documents.*;
+import com.rusticisoftware.tincan.lrsresponses.*;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -22,13 +25,28 @@ import java.util.UUID;
  * Define the interface that must be satisfied to talk to an LRS
  */
 public interface LRS {
-    Statement retrieveStatement(String id) throws Exception;
-    Statement retrieveVoidedStatement(String id) throws Exception;
-    StatementsResult queryStatements(StatementsQueryInterface query) throws Exception;
-    StatementsResult moreStatements(String moreURL) throws Exception;
-    UUID saveStatement(Statement statement) throws Exception;
-    List<String> saveStatements(List<Statement> statements) throws Exception;
+    AboutLRSResponse about() throws Exception;
 
-    State retrieveState(String id, String activityId, Agent agent, UUID registration) throws Exception;
-    void saveState(State state, String activityId, Agent agent, UUID registration) throws Exception;
+    StatementLRSResponse saveStatement(Statement statement) throws Exception;
+    StatementsResultLRSResponse saveStatements(List<Statement> statements) throws Exception;
+    StatementLRSResponse retrieveStatement(String id) throws Exception;
+    StatementLRSResponse retrieveVoidedStatement(String id) throws Exception;
+    StatementsResultLRSResponse queryStatements(StatementsQueryInterface query) throws Exception;
+    StatementsResultLRSResponse moreStatements(String moreURL) throws Exception;
+
+    ProfileKeysLRSResponse retrieveStateIds(Activity activity, Agent agent, UUID registration) throws Exception;
+    StateLRSResponse retrieveState(String id, Activity activity, Agent agent, UUID registration) throws Exception;
+    LRSResponse saveState(StateDocument state) throws Exception;
+    LRSResponse deleteState(StateDocument state) throws Exception;
+    LRSResponse clearState(Activity activity, Agent agent, UUID registration) throws Exception;
+
+    ProfileKeysLRSResponse retrieveActivityProfileIds(Activity activity) throws Exception;
+    ActivityProfileLRSResponse retrieveActivityProfile(String id, Activity activity) throws Exception;
+    LRSResponse saveActivityProfile(ActivityProfileDocument profile) throws Exception;
+    LRSResponse deleteActivityProfile(ActivityProfileDocument profile) throws Exception;
+
+    ProfileKeysLRSResponse retrieveAgentProfileIds(Agent agent) throws Exception;
+    AgentProfileLRSResponse retrieveAgentProfile(String id, Agent agent) throws Exception;
+    LRSResponse saveAgentProfile(AgentProfileDocument profile) throws Exception;
+    LRSResponse deleteAgentProfile(AgentProfileDocument profile) throws Exception;
 }

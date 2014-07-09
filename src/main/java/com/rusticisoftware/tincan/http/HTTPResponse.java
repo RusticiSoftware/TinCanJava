@@ -17,6 +17,10 @@ package com.rusticisoftware.tincan.http;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.util.HashMap;
 
 /**
@@ -40,8 +44,22 @@ public class HTTPResponse {
     public String getContent() {
         return new String(this.getContentBytes());
     }
+
+    public String getContentType() { return this.getHeader("Content-Type"); }
+    public String getEtag() { return this.getHeader("ETag"); }
+    public DateTime getLastModified() {
+        DateTimeFormatter RFC1123_DATE_TIME_FORMATTER =
+                DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'").withZoneUTC();
+        try {
+            return DateTime.parse(this.getHeader("Last-Modified"), RFC1123_DATE_TIME_FORMATTER);
+        }
+        catch (Exception parseException) {
+            return null;
+        }
+    }
+
     public Boolean isBinary() {
-        String contentType = this.getHeader("Content-Type");
+        String contentType = this.getContentType();
         if (contentType == null) {
             return false;
         }
