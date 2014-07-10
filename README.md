@@ -1,5 +1,7 @@
 A Java library for implementing with the Tin Can API.
 
+[![Build Status](https://travis-ci.org/RusticiSoftware/TinCanJava.png)](https://travis-ci.org/RusticiSoftware/TinCanJava)
+
 For hosted API documentation, basic usage instructions, supported version listing, etc. visit the main project website at:
 
 http://rusticisoftware.github.io/TinCanJava/

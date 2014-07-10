@@ -4,7 +4,7 @@
 
     <groupId>com.rusticisoftware</groupId>
     <artifactId>tincan</artifactId>
-    <version>0.3.2-SNAPSHOT</version>
+    <version>0.6.0-SNAPSHOT</version>
     <name>TinCan Java Library</name>
     <url>http://tincanapi.com/</url>
     <description>Library used to interact with Learning Record Stores (LRS) speaking the TinCanAPI protocol.</description>
@@ -51,7 +51,7 @@
                 </configuration>
                 <version>3.0</version>
             </plugin>
-            <plugin>
+            <!--<plugin>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok-maven-plugin</artifactId>
                 <version>0.11.6.0</version>
@@ -67,7 +67,7 @@
                     <addOutputDirectory>false</addOutputDirectory>
                     <sourceDirectory>src/main/java</sourceDirectory>
                 </configuration>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>

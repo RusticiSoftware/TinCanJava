@@ -61,6 +61,7 @@ public class LanguageMapTest {
         } catch (IOException e) {
             lmCopyContent = ""; 
             }
+
         assertEquals(lmContent, lmCopyContent);
 
         boolean hasKey = lm.containsKey("und");

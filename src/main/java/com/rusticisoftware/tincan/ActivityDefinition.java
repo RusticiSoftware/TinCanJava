@@ -43,6 +43,7 @@ public class ActivityDefinition extends JSONBase {
     private LanguageMap name;
     private LanguageMap description;
     private URI type;
+    private URI moreInfo;
     private Extensions extensions;
     private InteractionType interactionType;
     private ArrayList<String> correctResponsesPattern;
@@ -51,13 +52,18 @@ public class ActivityDefinition extends JSONBase {
     private ArrayList<InteractionComponent> source;
     private ArrayList<InteractionComponent> target;
     private ArrayList<InteractionComponent> steps;
-    
+
     public ActivityDefinition(JsonNode jsonNode) throws URISyntaxException {
         this();
 
         JsonNode typeNode = jsonNode.path("type");
         if (! typeNode.isMissingNode()) {
             this.setType(new URI(typeNode.textValue()));
+        }
+
+        JsonNode moreInfoNode = jsonNode.path("moreInfo");
+        if (! moreInfoNode.isMissingNode()) {
+            this.setMoreInfo(new URI(moreInfoNode.textValue()));
         }
 
         JsonNode nameNode = jsonNode.path("name");
@@ -156,6 +162,9 @@ public class ActivityDefinition extends JSONBase {
         if (this.type != null) {
             node.put("type", this.getType().toString());
         }
+        if (this.moreInfo != null) {
+            node.put("moreInfo", this.getMoreInfo().toString());
+        }
         if (this.extensions != null) {
             node.put("extensions", this.getExtensions().toJSONNode(version));
         }
@@ -233,12 +242,20 @@ public class ActivityDefinition extends JSONBase {
         }
         return node;
     }
-    
+
     public void setType(URI type) {
         this.type = type;
     }
 
     public void setType(String type) throws URISyntaxException {
         this.setType(new URI(type));
+    }
+
+    public void setMoreInfo(URI moreInfo) {
+        this.moreInfo = moreInfo;
+    }
+
+    public void setMoreInfo(String moreInfo) throws URISyntaxException {
+        this.setMoreInfo(new URI(moreInfo));
     }
 }

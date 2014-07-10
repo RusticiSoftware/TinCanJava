@@ -15,6 +15,7 @@
 */
 package com.rusticisoftware.tincan.json;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
@@ -34,25 +35,28 @@ public abstract class JSONBase implements JSON {
     }
 
     @Override
-    public String toJSON(TCAPIVersion version, Boolean pretty) throws IOException {
+    public String toJSON(TCAPIVersion version, Boolean pretty) {
         ObjectWriter writer = Mapper.getWriter(pretty);
-
-        return writer.writeValueAsString(this.toJSONNode(version));
+        try {
+            return writer.writeValueAsString(this.toJSONNode(version));
+        } catch (JsonProcessingException ex) {
+            return "Exception in JSONBase Class: " + ex.toString();
+        }
     }
 
 
     @Override
-    public String toJSON(TCAPIVersion version) throws IOException {
+    public String toJSON(TCAPIVersion version) {
         return this.toJSON(version, false);
     }
 
     @Override
-    public String toJSON(Boolean pretty) throws IOException {
+    public String toJSON(Boolean pretty) {
         return this.toJSON(TCAPIVersion.latest(), pretty);
     }
 
     @Override
-    public String toJSON() throws IOException {
+    public String toJSON() {
         return this.toJSON(TCAPIVersion.latest(), false);
     }
 }
