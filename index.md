@@ -4,7 +4,7 @@ layout: index
 
 ### Supported API Versions
 
-**1.0.0**, 0.95
+1.0.1, **1.0.0**, 0.95
 
 ### Getting Started
 
@@ -36,8 +36,13 @@ st.setActor(agent);
 st.setVerb(verb);
 st.setObject(activity);
 
-lrs.saveStatement(st);
-
+StatementLRSResponse lrsRes = lrs.saveStatement(st);
+if (lrsRes.getSuccess()) {
+    // success, use lrsRes.getContent() to get the statement back
+}
+else {
+    // failure, error information is available in lrsRes.getErrMsg()
+}
 ```
 
 ### Query to Get Latest Statements
@@ -51,5 +56,15 @@ import com.rusticisoftware.tincan.v10x.StatementsQuery;
 StatementsQuery query = new StatementsQuery();
 query.setSince(new DateTime("2013-09-30T13:15:00.000Z"));
 
-StatementsResult result = obj.queryStatements(query);
+StatementsResultLRSResponse lrsRes = obj.queryStatements(query);
+if (lrsRes.getSuccess()) {
+    // success, use lrsRes.getContent() to get the StatementsResult object
+}
+else {
+    // failure, error information is available in lrsRes.getErrMsg()
+}
 ```
+
+### More Examples
+
+For more examples of calls to the LRS including use of the Document APIs, look at the [`RemoteLRSTest`](https://github.com/RusticiSoftware/TinCanJava/blob/master/src/test/java/com/rusticisoftware/tincan/RemoteLRSTest.java) unit test file.
