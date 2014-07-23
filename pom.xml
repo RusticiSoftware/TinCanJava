@@ -5,9 +5,9 @@
     <groupId>com.rusticisoftware</groupId>
     <artifactId>tincan</artifactId>
     <version>0.6.1-SNAPSHOT</version>
-    <name>TinCan Java Library</name>
+    <name>Tin Can Java Library</name>
     <url>http://tincanapi.com/</url>
-    <description>Library used to interact with Learning Record Stores (LRS) speaking the TinCanAPI protocol.</description>
+    <description>Library used to interact with Learning Record Stores (LRS) speaking the Tin Can API protocol.</description>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -26,7 +26,7 @@
             <name>Brian J. Miller</name>
             <email>brian.miller@tincanapi.com</email>
             <organization>Rustici Software</organization>
-            <organizationUrl>http://tincanapi.com</organizationUrl>
+            <organizationUrl>http://tincanapi.com/</organizationUrl>
             <roles>
                 <role>maintainer</role>
             </roles>
