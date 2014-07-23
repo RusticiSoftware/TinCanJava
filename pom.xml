@@ -6,7 +6,7 @@
     <artifactId>tincan</artifactId>
     <version>0.6.1-SNAPSHOT</version>
     <name>Tin Can Java Library</name>
-    <url>http://tincanapi.com/</url>
+    <url>http://rusticisoftware.github.io/TinCanJava/</url>
     <description>Library used to interact with Learning Record Stores (LRS) speaking the Tin Can API protocol.</description>
     <licenses>
         <license>
