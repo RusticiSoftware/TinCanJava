@@ -25,28 +25,28 @@ import java.util.UUID;
  * Define the interface that must be satisfied to talk to an LRS
  */
 public interface LRS {
-    AboutLRSResponse about() throws Exception;
+    AboutLRSResponse about();
 
-    StatementLRSResponse saveStatement(Statement statement) throws Exception;
-    StatementsResultLRSResponse saveStatements(List<Statement> statements) throws Exception;
-    StatementLRSResponse retrieveStatement(String id) throws Exception;
-    StatementLRSResponse retrieveVoidedStatement(String id) throws Exception;
-    StatementsResultLRSResponse queryStatements(StatementsQueryInterface query) throws Exception;
-    StatementsResultLRSResponse moreStatements(String moreURL) throws Exception;
+    StatementLRSResponse saveStatement(Statement statement);
+    StatementsResultLRSResponse saveStatements(List<Statement> statements);
+    StatementLRSResponse retrieveStatement(String id);
+    StatementLRSResponse retrieveVoidedStatement(String id);
+    StatementsResultLRSResponse queryStatements(StatementsQueryInterface query);
+    StatementsResultLRSResponse moreStatements(String moreURL);
 
-    ProfileKeysLRSResponse retrieveStateIds(Activity activity, Agent agent, UUID registration) throws Exception;
-    StateLRSResponse retrieveState(String id, Activity activity, Agent agent, UUID registration) throws Exception;
-    LRSResponse saveState(StateDocument state) throws Exception;
-    LRSResponse deleteState(StateDocument state) throws Exception;
-    LRSResponse clearState(Activity activity, Agent agent, UUID registration) throws Exception;
+    ProfileKeysLRSResponse retrieveStateIds(Activity activity, Agent agent, UUID registration);
+    StateLRSResponse retrieveState(String id, Activity activity, Agent agent, UUID registration);
+    LRSResponse saveState(StateDocument state);
+    LRSResponse deleteState(StateDocument state);
+    LRSResponse clearState(Activity activity, Agent agent, UUID registration);
 
-    ProfileKeysLRSResponse retrieveActivityProfileIds(Activity activity) throws Exception;
-    ActivityProfileLRSResponse retrieveActivityProfile(String id, Activity activity) throws Exception;
-    LRSResponse saveActivityProfile(ActivityProfileDocument profile) throws Exception;
-    LRSResponse deleteActivityProfile(ActivityProfileDocument profile) throws Exception;
+    ProfileKeysLRSResponse retrieveActivityProfileIds(Activity activity);
+    ActivityProfileLRSResponse retrieveActivityProfile(String id, Activity activity);
+    LRSResponse saveActivityProfile(ActivityProfileDocument profile);
+    LRSResponse deleteActivityProfile(ActivityProfileDocument profile);
 
-    ProfileKeysLRSResponse retrieveAgentProfileIds(Agent agent) throws Exception;
-    AgentProfileLRSResponse retrieveAgentProfile(String id, Agent agent) throws Exception;
-    LRSResponse saveAgentProfile(AgentProfileDocument profile) throws Exception;
-    LRSResponse deleteAgentProfile(AgentProfileDocument profile) throws Exception;
+    ProfileKeysLRSResponse retrieveAgentProfileIds(Agent agent);
+    AgentProfileLRSResponse retrieveAgentProfile(String id, Agent agent);
+    LRSResponse saveAgentProfile(AgentProfileDocument profile);
+    LRSResponse deleteAgentProfile(AgentProfileDocument profile);
 }
