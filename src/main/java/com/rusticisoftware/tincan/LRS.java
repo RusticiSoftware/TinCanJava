@@ -43,10 +43,12 @@ public interface LRS {
     ProfileKeysLRSResponse retrieveActivityProfileIds(Activity activity);
     ActivityProfileLRSResponse retrieveActivityProfile(String id, Activity activity);
     LRSResponse saveActivityProfile(ActivityProfileDocument profile);
+    LRSResponse updateActivityProfile(ActivityProfileDocument profile);
     LRSResponse deleteActivityProfile(ActivityProfileDocument profile);
 
     ProfileKeysLRSResponse retrieveAgentProfileIds(Agent agent);
     AgentProfileLRSResponse retrieveAgentProfile(String id, Agent agent);
     LRSResponse saveAgentProfile(AgentProfileDocument profile);
+    LRSResponse updateAgentProfile(AgentProfileDocument profile);
     LRSResponse deleteAgentProfile(AgentProfileDocument profile);
 }

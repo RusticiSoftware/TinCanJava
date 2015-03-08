@@ -27,6 +27,7 @@ target/test-classes/
 .settings/
 bin/
 errors.txt
+README.pdf
 pom.orig
 pom.save
 pom_save.xml
