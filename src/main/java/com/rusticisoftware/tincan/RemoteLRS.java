@@ -333,6 +333,33 @@ public class RemoteLRS implements LRS {
 
         return lrsResponse;
     }
+    
+    private LRSResponse updateDocument(String resource, Map<String, String> queryParams, Document document)
+    {
+    	HTTPRequest request = new HTTPRequest();
+    	request.setMethod(HttpMethods.POST);
+    	request.setResource(resource);
+    	request.setQueryParams(queryParams);
+    	request.setContentType(document.getContentType());
+    	request.setContent(document.getContent());
+    	if(document.getEtag() != null) {
+    		request.setHeaders(new HashMap<String, String>());
+    		request.getHeaders().put("If-Match", document.getEtag());
+    	}
+    	
+    	HTTPResponse response = makeSyncRequest(request);
+    	
+    	LRSResponse lrsResponse = new LRSResponse(request, response);
+    	
+    	if(response.getStatus() == 204) {
+    		lrsResponse.setSuccess(true);
+    	}
+    	else {
+    		lrsResponse.setSuccess(false);
+    	}
+    	
+    	return lrsResponse;
+    }
 
     private ProfileKeysLRSResponse getProfileKeys(String resource, HashMap<String, String> queryParams) {
         HTTPRequest request = new HTTPRequest();
@@ -698,6 +725,15 @@ public class RemoteLRS implements LRS {
 
         return saveDocument("activities/profile", queryParams, profile);
     }
+    
+    @Override
+    public LRSResponse updateActivityProfile(ActivityProfileDocument profile) {
+    	HashMap<String, String> queryParams = new HashMap<String, String>();
+    	queryParams.put("profileId", profile.getId());
+    	queryParams.put("activityId", profile.getActivity().getId().toString());
+    	
+    	return updateDocument("activities/profile", queryParams, profile);
+    }
 
     @Override
     public LRSResponse deleteActivityProfile(ActivityProfileDocument profile) {
@@ -746,6 +782,14 @@ public class RemoteLRS implements LRS {
         queryParams.put("agent", profile.getAgent().toJSON(this.getVersion(), this.usePrettyJSON()));
 
         return saveDocument("agents/profile", queryParams, profile);    }
+    
+    @Override
+    public LRSResponse updateAgentProfile(AgentProfileDocument profile) {
+    	HashMap<String, String> queryParams = new HashMap<String, String>();
+    	queryParams.put("profileId", profile.getId());
+    	queryParams.put("agent", profile.getAgent().toJSON(this.getVersion(), this.usePrettyJSON()));
+    	
+    	return updateDocument("agents/profile", queryParams, profile);    }
 
     @Override
     public LRSResponse deleteAgentProfile(AgentProfileDocument profile) {

@@ -50,7 +50,6 @@ public class LanguageMapTest {
         }
 
         String lmContent = lm.toJSON();
-
         String lmCopyContent = lmCopy.toJSON();
 
         assertEquals(lmContent, lmCopyContent);

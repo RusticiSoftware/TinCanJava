@@ -22,7 +22,13 @@ target/javadoc-bundle-options
 target/maven-archiver/
 target/maven-status/maven-compiler-plugin
 target/test-classes/
-
 .classpath
 .project
 .settings/
+bin/
+errors.txt
+README.pdf
+pom.orig
+pom.save
+pom_save.xml
+src/main/java/com/rusticisoftware/tincan/lrs.properties
