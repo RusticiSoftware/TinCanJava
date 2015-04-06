@@ -366,15 +366,13 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testRetrieveStateIds() throws Exception
-    {
+    public void testRetrieveStateIds() throws Exception {
         ProfileKeysLRSResponse lrsRes = lrs.retrieveStateIds(activity, agent, null);
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
     @Test
-    public void testRetrieveState() throws Exception
-    {
+    public void testRetrieveState() throws Exception {
         LRSResponse clear = lrs.clearState(activity, agent, null);
         Assert.assertTrue(clear.getSuccess());
 
@@ -393,8 +391,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testSaveState() throws Exception
-    {
+    public void testSaveState() throws Exception {
         StateDocument doc = new StateDocument();
         doc.setActivity(activity);
         doc.setAgent(agent);
@@ -406,8 +403,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testOverwriteState() throws Exception
-    {
+    public void testOverwriteState() throws Exception {
         LRSResponse clear = lrs.clearState(activity, agent, null);
         Assert.assertTrue(clear.getSuccess());
 
@@ -431,8 +427,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testDeleteState() throws Exception
-    {
+    public void testDeleteState() throws Exception {
         StateDocument doc = new StateDocument();
         doc.setActivity(activity);
         doc.setAgent(agent);
@@ -443,22 +438,19 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testClearState() throws Exception
-    {
+    public void testClearState() throws Exception {
         LRSResponse lrsRes = lrs.clearState(activity, agent, null);
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
     @Test
-    public void testRetrieveActivityProfileIds() throws Exception
-    {
+    public void testRetrieveActivityProfileIds() throws Exception {
         ProfileKeysLRSResponse lrsRes = lrs.retrieveActivityProfileIds(activity);
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
     @Test
-    public void testRetrieveActivityProfile() throws Exception
-    {
+    public void testRetrieveActivityProfile() throws Exception {
         ActivityProfileDocument doc = new ActivityProfileDocument();
         doc.setActivity(activity);
         doc.setId("test");
@@ -477,8 +469,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testSaveActivityProfile() throws Exception
-    {
+    public void testSaveActivityProfile() throws Exception {
         ActivityProfileDocument doc = new ActivityProfileDocument();
         doc.setActivity(activity);
         doc.setId("test");
@@ -491,88 +482,86 @@ public class RemoteLRSTest {
         LRSResponse lrsRes = lrs.saveActivityProfile(doc);
         Assert.assertTrue(lrsRes.getSuccess());
     }
-    
+
     @Test
-    public void testUpdateActivityProfile() throws Exception
-    {
-    	if (lrs == null) {
-    		RemoteLRSTest.Init();
-    	}
-    	
-    	ObjectMapper mapper = Mapper.getInstance();
-    	ObjectNode changeSet = mapper.createObjectNode();  // What changes are to be made
-    	ObjectNode correctSet = mapper.createObjectNode(); // What the correct content should be after change
-    	ObjectNode currentSet = mapper.createObjectNode(); // What the actual content is ater change
-    	
-    	// Load initial change set
-    	String data = "{ \"x\" : \"foo\", \"y\" : \"bar\" }";
-    	Map<String, String> changeSetMap = mapper.readValue(data, Map.class);
-    	for (String k : changeSetMap.keySet()) {
-    		String v = changeSetMap.get(k);
-    		changeSet.put(k, v);
-    	}
-    	Map<String, String> correctSetMap = changeSetMap; // In the beginning, these are equal
-    	for (String k : correctSetMap.keySet()) {
-    		String v = correctSetMap.get(k);
-    		correctSet.put(k, v);
-    	}
-    	
-    	ActivityProfileDocument doc = new ActivityProfileDocument();
-    	doc.setActivity(activity);
-    	doc.setId("test");
-    	
-    	LRSResponse clear = lrs.deleteActivityProfile(doc);
-    	Assert.assertTrue(clear.getSuccess());
-    	
-    	doc.setContentType("application/json");
-    	doc.setContent(changeSet.toString().getBytes("UTF-8"));
-    	
-    	LRSResponse save = lrs.saveActivityProfile(doc);
-    	Assert.assertTrue(save.getSuccess());
-    	ActivityProfileLRSResponse retrieveBeforeUpdate = lrs.retrieveActivityProfile("test", activity);
-    	Assert.assertTrue(retrieveBeforeUpdate.getSuccess());
-    	ActivityProfileDocument beforeDoc = retrieveBeforeUpdate.getContent();
-    	Map<String, String> c = mapper.readValue(new String(beforeDoc.getContent(), "UTF-8"), Map.class);
-    	for (String k : c.keySet()) {
-    		String v = c.get(k);
-    		currentSet.put(k, v);
-    	}
-    	Assert.assertTrue(currentSet.equals(correctSet));
-    	
-    	doc.setContentType("application/json");
-    	data = "{ \"x\" : \"bash\", \"z\" : \"faz\" }";
-    	changeSet.removeAll();
-    	changeSetMap = mapper.readValue(data, Map.class);
-    	for (String k : changeSetMap.keySet()) {
-    		String v = changeSetMap.get(k);
-    		changeSet.put(k, v);
-    	}
+    public void testUpdateActivityProfile() throws Exception {
+        if (lrs == null) {
+            RemoteLRSTest.Init();
+        }
 
-    	doc.setContent(changeSet.toString().getBytes("UTF-8"));
-    	
-    	// Update the correct set with the changes
-    	for (String k : changeSetMap.keySet()) {
-    		String v = changeSetMap.get(k);
-    		correctSet.put(k, v);
-    	}
+        ObjectMapper mapper = Mapper.getInstance();
+        ObjectNode changeSet = mapper.createObjectNode();  // What changes are to be made
+        ObjectNode correctSet = mapper.createObjectNode(); // What the correct content should be after change
+        ObjectNode currentSet = mapper.createObjectNode(); // What the actual content is ater change
 
-    	currentSet.removeAll();
-    	LRSResponse update = lrs.updateActivityProfile(doc);
-    	Assert.assertTrue(update.getSuccess());
-    	ActivityProfileLRSResponse retrieveAfterUpdate = lrs.retrieveActivityProfile("test", activity);
-    	Assert.assertTrue(retrieveAfterUpdate.getSuccess());
-    	ActivityProfileDocument afterDoc = retrieveAfterUpdate.getContent();
-       	Map<String, String> ac = mapper.readValue(new String(afterDoc.getContent(), "UTF-8"), Map.class);
-    	for (String k : ac.keySet()) {
-    		String v = ac.get(k);
-    		currentSet.put(k, v);
-    	}
-    	Assert.assertTrue(currentSet.equals(correctSet));
+        // Load initial change set
+        String data = "{ \"x\" : \"foo\", \"y\" : \"bar\" }";
+        Map<String, String> changeSetMap = mapper.readValue(data, Map.class);
+        for (String k : changeSetMap.keySet()) {
+            String v = changeSetMap.get(k);
+            changeSet.put(k, v);
+        }
+        Map<String, String> correctSetMap = changeSetMap; // In the beginning, these are equal
+        for (String k : correctSetMap.keySet()) {
+            String v = correctSetMap.get(k);
+            correctSet.put(k, v);
+        }
+
+        ActivityProfileDocument doc = new ActivityProfileDocument();
+        doc.setActivity(activity);
+        doc.setId("test");
+
+        LRSResponse clear = lrs.deleteActivityProfile(doc);
+        Assert.assertTrue(clear.getSuccess());
+
+        doc.setContentType("application/json");
+        doc.setContent(changeSet.toString().getBytes("UTF-8"));
+
+        LRSResponse save = lrs.saveActivityProfile(doc);
+        Assert.assertTrue(save.getSuccess());
+        ActivityProfileLRSResponse retrieveBeforeUpdate = lrs.retrieveActivityProfile("test", activity);
+        Assert.assertTrue(retrieveBeforeUpdate.getSuccess());
+        ActivityProfileDocument beforeDoc = retrieveBeforeUpdate.getContent();
+        Map<String, String> c = mapper.readValue(new String(beforeDoc.getContent(), "UTF-8"), Map.class);
+        for (String k : c.keySet()) {
+            String v = c.get(k);
+            currentSet.put(k, v);
+        }
+        Assert.assertTrue(currentSet.equals(correctSet));
+
+        doc.setContentType("application/json");
+        data = "{ \"x\" : \"bash\", \"z\" : \"faz\" }";
+        changeSet.removeAll();
+        changeSetMap = mapper.readValue(data, Map.class);
+        for (String k : changeSetMap.keySet()) {
+            String v = changeSetMap.get(k);
+            changeSet.put(k, v);
+        }
+
+        doc.setContent(changeSet.toString().getBytes("UTF-8"));
+
+        // Update the correct set with the changes
+        for (String k : changeSetMap.keySet()) {
+            String v = changeSetMap.get(k);
+            correctSet.put(k, v);
+        }
+
+        currentSet.removeAll();
+        LRSResponse update = lrs.updateActivityProfile(doc);
+        Assert.assertTrue(update.getSuccess());
+        ActivityProfileLRSResponse retrieveAfterUpdate = lrs.retrieveActivityProfile("test", activity);
+        Assert.assertTrue(retrieveAfterUpdate.getSuccess());
+        ActivityProfileDocument afterDoc = retrieveAfterUpdate.getContent();
+           Map<String, String> ac = mapper.readValue(new String(afterDoc.getContent(), "UTF-8"), Map.class);
+        for (String k : ac.keySet()) {
+            String v = ac.get(k);
+            currentSet.put(k, v);
+        }
+        Assert.assertTrue(currentSet.equals(correctSet));
     }
 
     @Test
-    public void testOverwriteActivityProfile() throws Exception
-    {
+    public void testOverwriteActivityProfile() throws Exception {
         ActivityProfileDocument doc = new ActivityProfileDocument();
         doc.setActivity(activity);
         doc.setId("test");
@@ -597,8 +586,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testDeleteActivityProfile() throws Exception
-    {
+    public void testDeleteActivityProfile() throws Exception {
         ActivityProfileDocument doc = new ActivityProfileDocument();
         doc.setActivity(activity);
         doc.setId("test");
@@ -608,15 +596,13 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testRetrieveAgentProfileIds() throws Exception
-    {
+    public void testRetrieveAgentProfileIds() throws Exception {
         ProfileKeysLRSResponse lrsRes = lrs.retrieveAgentProfileIds(agent);
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
     @Test
-    public void testRetrieveAgentProfile() throws Exception
-    {
+    public void testRetrieveAgentProfile() throws Exception {
         AgentProfileDocument doc = new AgentProfileDocument();
         doc.setAgent(agent);
         doc.setId("test");
@@ -635,12 +621,11 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testSaveAgentProfile() throws Exception
-    {
+    public void testSaveAgentProfile() throws Exception {
         AgentProfileDocument doc = new AgentProfileDocument();
         doc.setAgent(agent);
         doc.setId("test");
-        
+
         LRSResponse clear = lrs.deleteAgentProfile(doc);
         Assert.assertTrue(clear.getSuccess());
 
@@ -649,87 +634,85 @@ public class RemoteLRSTest {
         LRSResponse lrsRes = lrs.saveAgentProfile(doc);
         Assert.assertTrue(lrsRes.getSuccess());
     }
-    
+
     @Test
-    public void testUpdateAgentProfile() throws Exception
-    {
-    	if (lrs == null) {
-    		RemoteLRSTest.Init(); // for single test runs
-    	}
-    	ObjectMapper mapper = Mapper.getInstance();
-    	ObjectNode changeSet = mapper.createObjectNode();  // What changes are to be made
-    	ObjectNode correctSet = mapper.createObjectNode(); // What the correct content should be after change
-    	ObjectNode currentSet = mapper.createObjectNode(); // What the actual content is ater change
-		
-    	// Load initial change set
-    	String data = "{ \"firstName\" : \"Dave\", \"lastName\" : \"Smith\", \"State\" : \"CO\" }";
-    	Map<String, String> changeSetMap = mapper.readValue(data, Map.class);
-    	for (String k : changeSetMap.keySet()) {
-    		String v = changeSetMap.get(k);
-    		changeSet.put(k, v);
-    	}
-    	Map<String, String> correctSetMap = changeSetMap; // In the beginning, these are equal
-    	for (String k : correctSetMap.keySet()) {
-    		String v = correctSetMap.get(k);
-    		correctSet.put(k, v);
-    	}
-		
-    	AgentProfileDocument doc = new AgentProfileDocument();
-    	doc.setAgent(agent);
-    	doc.setId("test");
-    	
+    public void testUpdateAgentProfile() throws Exception {
+        if (lrs == null) {
+            RemoteLRSTest.Init(); // for single test runs
+        }
+        ObjectMapper mapper = Mapper.getInstance();
+        ObjectNode changeSet = mapper.createObjectNode();  // What changes are to be made
+        ObjectNode correctSet = mapper.createObjectNode(); // What the correct content should be after change
+        ObjectNode currentSet = mapper.createObjectNode(); // What the actual content is ater change
+
+        // Load initial change set
+        String data = "{ \"firstName\" : \"Dave\", \"lastName\" : \"Smith\", \"State\" : \"CO\" }";
+        Map<String, String> changeSetMap = mapper.readValue(data, Map.class);
+        for (String k : changeSetMap.keySet()) {
+            String v = changeSetMap.get(k);
+            changeSet.put(k, v);
+        }
+        Map<String, String> correctSetMap = changeSetMap; // In the beginning, these are equal
+        for (String k : correctSetMap.keySet()) {
+            String v = correctSetMap.get(k);
+            correctSet.put(k, v);
+        }
+
+        AgentProfileDocument doc = new AgentProfileDocument();
+        doc.setAgent(agent);
+        doc.setId("test");
+
         LRSResponse clear = lrs.deleteAgentProfile(doc);
         Assert.assertTrue(clear.getSuccess());
 
         doc.setContentType("application/json");
-    	doc.setContent(changeSet.toString().getBytes("UTF-8"));
-    	
-    	LRSResponse save = lrs.saveAgentProfile(doc);
-    	Assert.assertTrue(save.getSuccess());
-    	AgentProfileLRSResponse retrieveBeforeUpdate = lrs.retrieveAgentProfile("test", agent);
-    	Assert.assertTrue(retrieveBeforeUpdate.getSuccess());
-    	AgentProfileDocument beforeDoc = retrieveBeforeUpdate.getContent();
-    	Map<String, String> c = mapper.readValue(new String(beforeDoc.getContent(), "UTF-8"), Map.class);
-    	for (String k : c.keySet()) {
-    		String v = c.get(k);
-    		currentSet.put(k, v);
-    	}
-    	Assert.assertTrue(currentSet.equals(correctSet));
-    	
-    	doc.setContentType("application/json");
-    	data = "{ \"lastName\" : \"Jones\", \"City\" : \"Colorado Springs\" }";
-    	changeSet.removeAll();
-    	changeSetMap = mapper.readValue(data, Map.class);
-    	for (String k : changeSetMap.keySet()) {
-    		String v = changeSetMap.get(k);
-    		changeSet.put(k, v);
-    	}
+        doc.setContent(changeSet.toString().getBytes("UTF-8"));
 
-    	doc.setContent(changeSet.toString().getBytes("UTF-8"));
-    	
-    	// Update the correct set with the changes
-    	for (String k : changeSetMap.keySet()) {
-    		String v = changeSetMap.get(k);
-    		correctSet.put(k, v);
-    	}
+        LRSResponse save = lrs.saveAgentProfile(doc);
+        Assert.assertTrue(save.getSuccess());
+        AgentProfileLRSResponse retrieveBeforeUpdate = lrs.retrieveAgentProfile("test", agent);
+        Assert.assertTrue(retrieveBeforeUpdate.getSuccess());
+        AgentProfileDocument beforeDoc = retrieveBeforeUpdate.getContent();
+        Map<String, String> c = mapper.readValue(new String(beforeDoc.getContent(), "UTF-8"), Map.class);
+        for (String k : c.keySet()) {
+            String v = c.get(k);
+            currentSet.put(k, v);
+        }
+        Assert.assertTrue(currentSet.equals(correctSet));
 
-    	currentSet.removeAll();
-    	LRSResponse update = lrs.updateAgentProfile(doc);
-    	Assert.assertTrue(update.getSuccess());
-    	AgentProfileLRSResponse retrieveAfterUpdate = lrs.retrieveAgentProfile("test", agent);
-    	Assert.assertTrue(retrieveAfterUpdate.getSuccess());
-    	AgentProfileDocument afterDoc = retrieveAfterUpdate.getContent();
-       	Map<String, String> ac = mapper.readValue(new String(afterDoc.getContent(), "UTF-8"), Map.class);
-    	for (String k : ac.keySet()) {
-    		String v = ac.get(k);
-    		currentSet.put(k, v);
-    	}
-    	Assert.assertTrue(currentSet.equals(correctSet));
+        doc.setContentType("application/json");
+        data = "{ \"lastName\" : \"Jones\", \"City\" : \"Colorado Springs\" }";
+        changeSet.removeAll();
+        changeSetMap = mapper.readValue(data, Map.class);
+        for (String k : changeSetMap.keySet()) {
+            String v = changeSetMap.get(k);
+            changeSet.put(k, v);
+        }
+
+        doc.setContent(changeSet.toString().getBytes("UTF-8"));
+
+        // Update the correct set with the changes
+        for (String k : changeSetMap.keySet()) {
+            String v = changeSetMap.get(k);
+            correctSet.put(k, v);
+        }
+
+        currentSet.removeAll();
+        LRSResponse update = lrs.updateAgentProfile(doc);
+        Assert.assertTrue(update.getSuccess());
+        AgentProfileLRSResponse retrieveAfterUpdate = lrs.retrieveAgentProfile("test", agent);
+        Assert.assertTrue(retrieveAfterUpdate.getSuccess());
+        AgentProfileDocument afterDoc = retrieveAfterUpdate.getContent();
+           Map<String, String> ac = mapper.readValue(new String(afterDoc.getContent(), "UTF-8"), Map.class);
+        for (String k : ac.keySet()) {
+            String v = ac.get(k);
+            currentSet.put(k, v);
+        }
+        Assert.assertTrue(currentSet.equals(correctSet));
     }
 
     @Test
-    public void testOverwriteAgentProfile() throws Exception
-    {
+    public void testOverwriteAgentProfile() throws Exception {
         AgentProfileDocument doc = new AgentProfileDocument();
         doc.setAgent(agent);
         doc.setId("test");
@@ -754,8 +737,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testDeleteAgentProfile() throws Exception
-    {
+    public void testDeleteAgentProfile() throws Exception {
         AgentProfileDocument doc = new AgentProfileDocument();
         doc.setAgent(agent);
         doc.setId("test");
