@@ -134,7 +134,7 @@ public class RemoteLRS implements LRS {
     private HTTPResponse makeSyncRequest(HTTPRequest req) {
         String url;
 
-        if (req.getResource().toLowerCase().startsWith("http")){
+        if (req.getResource().toLowerCase().startsWith("http")) {
             url = req.getResource();
         }
         else {
@@ -191,8 +191,7 @@ public class RemoteLRS implements LRS {
         webReq.setMethod(req.getMethod());
 
         webReq.addRequestHeader("X-Experience-API-Version", this.version.toString());
-        if (this.auth != null)
-        {
+        if (this.auth != null) {
             webReq.addRequestHeader("Authorization", this.auth);
         }
         if (req.getHeaders() != null) {
@@ -269,7 +268,7 @@ public class RemoteLRS implements LRS {
 
         LRSResponse lrsResponse = new LRSResponse(request, response);
 
-        if(response.getStatus() == 200) {
+        if (response.getStatus() == 200) {
             document.setContent(response.getContentBytes());
             document.setContentType(response.getContentType());
             document.setTimestamp(response.getLastModified());
@@ -287,7 +286,6 @@ public class RemoteLRS implements LRS {
     }
 
     private LRSResponse deleteDocument(String resource, Map<String, String> queryParams) {
-
         HTTPRequest request = new HTTPRequest();
 
         request.setMethod(HttpMethods.DELETE);
@@ -298,7 +296,7 @@ public class RemoteLRS implements LRS {
 
         LRSResponse lrsResponse = new LRSResponse(request, response);
 
-        if(response.getStatus() == 204) {
+        if (response.getStatus() == 204) {
             lrsResponse.setSuccess(true);
         }
         else {
@@ -315,7 +313,7 @@ public class RemoteLRS implements LRS {
         request.setQueryParams(queryParams);
         request.setContentType(document.getContentType());
         request.setContent(document.getContent());
-        if(document.getEtag() != null) {
+        if (document.getEtag() != null) {
             request.setHeaders(new HashMap<String, String>());
             request.getHeaders().put("If-Match", document.getEtag());
         }
@@ -324,7 +322,33 @@ public class RemoteLRS implements LRS {
 
         LRSResponse lrsResponse = new LRSResponse(request, response);
 
-        if(response.getStatus() == 204) {
+        if (response.getStatus() == 204) {
+            lrsResponse.setSuccess(true);
+        }
+        else {
+            lrsResponse.setSuccess(false);
+        }
+
+        return lrsResponse;
+    }
+
+    private LRSResponse updateDocument(String resource, Map<String, String> queryParams, Document document) {
+        HTTPRequest request = new HTTPRequest();
+        request.setMethod(HttpMethods.POST);
+        request.setResource(resource);
+        request.setQueryParams(queryParams);
+        request.setContentType(document.getContentType());
+        request.setContent(document.getContent());
+        if (document.getEtag() != null) {
+            request.setHeaders(new HashMap<String, String>());
+            request.getHeaders().put("If-Match", document.getEtag());
+        }
+
+        HTTPResponse response = makeSyncRequest(request);
+
+        LRSResponse lrsResponse = new LRSResponse(request, response);
+
+        if (response.getStatus() == 204) {
             lrsResponse.setSuccess(true);
         }
         else {
@@ -344,7 +368,7 @@ public class RemoteLRS implements LRS {
 
         ProfileKeysLRSResponse lrsResponse = new ProfileKeysLRSResponse(request, response);
 
-        if(response.getStatus() == 200){
+        if (response.getStatus() == 200) {
             lrsResponse.setSuccess(true);
             try {
                 Iterator it = Mapper.getInstance().readValue(response.getContent(), ArrayNode.class).elements();
@@ -505,18 +529,18 @@ public class RemoteLRS implements LRS {
 
     @Override
     public StatementsResultLRSResponse queryStatements(StatementsQueryInterface query) {
-        //Setup empty query object if null was passed in
-        if (query == null) { 
-            query = (this.getVersion() == TCAPIVersion.V095) ? 
-                        new com.rusticisoftware.tincan.v095.StatementsQuery() :
-                        new StatementsQuery();
+        // Setup empty query object if null was passed in
+        if (query == null) {
+            query = (this.getVersion() == TCAPIVersion.V095) ?
+                new com.rusticisoftware.tincan.v095.StatementsQuery() :
+                new StatementsQuery();
         }
-        
-        //Choke if the query parameters don't match the LRS version
+
+        // Choke if the query parameters don't match the LRS version
         if (this.getVersion() != query.getVersion()) {
             throw new IncompatibleTCAPIVersion(
-                    "Attempted to issue " + this.getVersion() + " query using a " +
-                    query.getVersion() + " set of query parameters.");
+                "Attempted to issue " + this.getVersion() + " query using a " +
+                query.getVersion() + " set of query parameters.");
         }
 
         StatementsResultLRSResponse lrsResponse = new StatementsResultLRSResponse();
@@ -560,7 +584,7 @@ public class RemoteLRS implements LRS {
 
         // moreURL is relative to the endpoint's server root
         URL endpoint = this.getEndpoint();
-        String url = endpoint.getProtocol() + "://" + endpoint.getHost() + (endpoint.getPort() == -1 ? "" : endpoint.getPort()) + moreURL;
+        String url = endpoint.getProtocol() + "://" + endpoint.getHost() + (endpoint.getPort() == -1 ? "" : ":" + endpoint.getPort()) + moreURL;
 
         HTTPRequest request = new HTTPRequest();
         request.setResource(url);
@@ -590,7 +614,7 @@ public class RemoteLRS implements LRS {
         HashMap<String, String> queryParams = new HashMap<String, String>();
         queryParams.put("activityId", activity.getId().toString());
         queryParams.put("agent", agent.toJSON(this.getVersion(), this.usePrettyJSON()));
-        if(registration != null) {
+        if (registration != null) {
             queryParams.put("registration", registration.toString());
         }
 
@@ -633,6 +657,17 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
+    public LRSResponse updateState(StateDocument state) {
+        HashMap<String,String> queryParams = new HashMap<String,String>();
+
+        queryParams.put("stateId", state.getId());
+        queryParams.put("activityId", state.getActivity().getId().toString());
+        queryParams.put("agent", state.getAgent().toJSON(this.getVersion(), this.usePrettyJSON()));
+
+        return updateDocument("activities/state", queryParams, state);
+    }
+
+    @Override
     public LRSResponse deleteState(StateDocument state) {
         Map queryParams = new HashMap<String, String>();
 
@@ -640,7 +675,7 @@ public class RemoteLRS implements LRS {
         queryParams.put("activityId", state.getActivity().getId().toString());
         queryParams.put("agent", state.getAgent().toJSON());
 
-        if(state.getRegistration() != null ) {
+        if (state.getRegistration() != null ) {
             queryParams.put("registration", state.getRegistration().toString());
         }
 
@@ -653,7 +688,7 @@ public class RemoteLRS implements LRS {
 
         queryParams.put("activityId", activity.getId().toString());
         queryParams.put("agent", agent.toJSON(this.getVersion(), this.usePrettyJSON()));
-        if(registration != null) {
+        if (registration != null) {
             queryParams.put("registration", registration.toString());
         }
         return deleteDocument("activities/state", queryParams);
@@ -683,7 +718,7 @@ public class RemoteLRS implements LRS {
         ActivityProfileLRSResponse lrsResponse = new ActivityProfileLRSResponse(lrsResp.getRequest(), lrsResp.getResponse());
         lrsResponse.setSuccess(lrsResp.getSuccess());
 
-        if(lrsResponse.getResponse().getStatus() == 200) {
+        if (lrsResponse.getResponse().getStatus() == 200) {
             lrsResponse.setContent(profileDocument);
         }
 
@@ -697,6 +732,15 @@ public class RemoteLRS implements LRS {
         queryParams.put("activityId", profile.getActivity().getId().toString());
 
         return saveDocument("activities/profile", queryParams, profile);
+    }
+
+    @Override
+    public LRSResponse updateActivityProfile(ActivityProfileDocument profile) {
+        HashMap<String, String> queryParams = new HashMap<String, String>();
+        queryParams.put("profileId", profile.getId());
+        queryParams.put("activityId", profile.getActivity().getId().toString());
+
+        return updateDocument("activities/profile", queryParams, profile);
     }
 
     @Override
@@ -732,7 +776,7 @@ public class RemoteLRS implements LRS {
         AgentProfileLRSResponse lrsResponse = new AgentProfileLRSResponse(lrsResp.getRequest(), lrsResp.getResponse());
         lrsResponse.setSuccess(lrsResp.getSuccess());
 
-        if(lrsResponse.getResponse().getStatus() == 200) {
+        if (lrsResponse.getResponse().getStatus() == 200) {
             lrsResponse.setContent(profileDocument);
         }
 
@@ -745,7 +789,17 @@ public class RemoteLRS implements LRS {
         queryParams.put("profileId", profile.getId());
         queryParams.put("agent", profile.getAgent().toJSON(this.getVersion(), this.usePrettyJSON()));
 
-        return saveDocument("agents/profile", queryParams, profile);    }
+        return saveDocument("agents/profile", queryParams, profile);
+    }
+
+    @Override
+    public LRSResponse updateAgentProfile(AgentProfileDocument profile) {
+        HashMap<String, String> queryParams = new HashMap<String, String>();
+        queryParams.put("profileId", profile.getId());
+        queryParams.put("agent", profile.getAgent().toJSON(this.getVersion(), this.usePrettyJSON()));
+
+        return updateDocument("agents/profile", queryParams, profile);
+    }
 
     @Override
     public LRSResponse deleteAgentProfile(AgentProfileDocument profile) {
@@ -754,5 +808,6 @@ public class RemoteLRS implements LRS {
         queryParams.put("agent", profile.getAgent().toJSON(this.getVersion(), this.usePrettyJSON()));
         // TODO: need to pass Etag?
 
-        return deleteDocument("agents/profile", queryParams);    }
+        return deleteDocument("agents/profile", queryParams);
+    }
 }

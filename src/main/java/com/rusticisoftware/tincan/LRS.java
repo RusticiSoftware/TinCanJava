@@ -37,16 +37,19 @@ public interface LRS {
     ProfileKeysLRSResponse retrieveStateIds(Activity activity, Agent agent, UUID registration);
     StateLRSResponse retrieveState(String id, Activity activity, Agent agent, UUID registration);
     LRSResponse saveState(StateDocument state);
+    LRSResponse updateState(StateDocument state);
     LRSResponse deleteState(StateDocument state);
     LRSResponse clearState(Activity activity, Agent agent, UUID registration);
 
     ProfileKeysLRSResponse retrieveActivityProfileIds(Activity activity);
     ActivityProfileLRSResponse retrieveActivityProfile(String id, Activity activity);
     LRSResponse saveActivityProfile(ActivityProfileDocument profile);
+    LRSResponse updateActivityProfile(ActivityProfileDocument profile);
     LRSResponse deleteActivityProfile(ActivityProfileDocument profile);
 
     ProfileKeysLRSResponse retrieveAgentProfileIds(Agent agent);
     AgentProfileLRSResponse retrieveAgentProfile(String id, Agent agent);
     LRSResponse saveAgentProfile(AgentProfileDocument profile);
+    LRSResponse updateAgentProfile(AgentProfileDocument profile);
     LRSResponse deleteAgentProfile(AgentProfileDocument profile);
 }
