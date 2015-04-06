@@ -492,7 +492,7 @@ public class RemoteLRSTest {
         ObjectMapper mapper = Mapper.getInstance();
         ObjectNode changeSet = mapper.createObjectNode();  // What changes are to be made
         ObjectNode correctSet = mapper.createObjectNode(); // What the correct content should be after change
-        ObjectNode currentSet = mapper.createObjectNode(); // What the actual content is ater change
+        ObjectNode currentSet = mapper.createObjectNode(); // What the actual content is after change
 
         // Load initial change set
         String data = "{ \"x\" : \"foo\", \"y\" : \"bar\" }";
@@ -643,7 +643,7 @@ public class RemoteLRSTest {
         ObjectMapper mapper = Mapper.getInstance();
         ObjectNode changeSet = mapper.createObjectNode();  // What changes are to be made
         ObjectNode correctSet = mapper.createObjectNode(); // What the correct content should be after change
-        ObjectNode currentSet = mapper.createObjectNode(); // What the actual content is ater change
+        ObjectNode currentSet = mapper.createObjectNode(); // What the actual content is after change
 
         // Load initial change set
         String data = "{ \"firstName\" : \"Dave\", \"lastName\" : \"Smith\", \"State\" : \"CO\" }";
