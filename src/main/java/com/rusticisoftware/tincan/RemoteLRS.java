@@ -584,7 +584,7 @@ public class RemoteLRS implements LRS {
 
         // moreURL is relative to the endpoint's server root
         URL endpoint = this.getEndpoint();
-        String url = endpoint.getProtocol() + "://" + endpoint.getHost() + (endpoint.getPort() == -1 ? "" : endpoint.getPort()) + moreURL;
+        String url = endpoint.getProtocol() + "://" + endpoint.getHost() + (endpoint.getPort() == -1 ? "" : ":" + endpoint.getPort()) + moreURL;
 
         HTTPRequest request = new HTTPRequest();
         request.setResource(url);
