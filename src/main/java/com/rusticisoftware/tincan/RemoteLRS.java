@@ -657,6 +657,17 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
+    public LRSResponse updateState(StateDocument state) {
+        HashMap<String,String> queryParams = new HashMap<String,String>();
+
+        queryParams.put("stateId", state.getId());
+        queryParams.put("activityId", state.getActivity().getId().toString());
+        queryParams.put("agent", state.getAgent().toJSON(this.getVersion(), this.usePrettyJSON()));
+
+        return updateDocument("activities/state", queryParams, state);
+    }
+
+    @Override
     public LRSResponse deleteState(StateDocument state) {
         Map queryParams = new HashMap<String, String>();
 

@@ -37,6 +37,7 @@ public interface LRS {
     ProfileKeysLRSResponse retrieveStateIds(Activity activity, Agent agent, UUID registration);
     StateLRSResponse retrieveState(String id, Activity activity, Agent agent, UUID registration);
     LRSResponse saveState(StateDocument state);
+    LRSResponse updateState(StateDocument state);
     LRSResponse deleteState(StateDocument state);
     LRSResponse clearState(Activity activity, Agent agent, UUID registration);
 
