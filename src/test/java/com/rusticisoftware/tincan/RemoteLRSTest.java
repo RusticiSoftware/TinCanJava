@@ -26,7 +26,10 @@ import com.rusticisoftware.tincan.documents.AgentProfileDocument;
 import com.rusticisoftware.tincan.documents.StateDocument;
 import com.rusticisoftware.tincan.lrsresponses.*;
 import com.rusticisoftware.tincan.json.*;
+
 import lombok.extern.java.Log;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -518,6 +521,29 @@ public class RemoteLRSTest {
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
+    @Test
+    public void testRetrieveActivity() throws Exception {
+        ActivityProfileLRSResponse lrsResponse = lrs.retrieveActivity(activity);
+    	Assert.assertTrue(lrsResponse.getSuccess());
+
+    	ActivityProfileDocument returnedDoc = lrsResponse.getContent();
+    	Assert.assertNull(returnedDoc.getId());    // Retrieving the full Activity does not return a profile ID
+    	Activity returnedActivity = returnedDoc.getActivity();
+    	Assert.assertTrue(activity.getId().toString().equals(returnedActivity.getId().toString()));
+    	
+    	// Test for non-existent activity
+    	Activity noActivity = new Activity();
+    	noActivity.setId("https://brindlewaye.com/xAPITerms/Activity/NeverGonnaHappen/");
+    	
+        ActivityProfileLRSResponse lrsResponse2 = lrs.retrieveActivity(noActivity);
+        // Report success even though response status was 404
+    	Assert.assertTrue(lrsResponse2.getSuccess());
+    	Assert.assertTrue(lrsResponse2.getResponse().getStatus() == 404);
+
+    	ActivityProfileDocument returnedDoc2 = lrsResponse2.getContent();
+    	Assert.assertNull(returnedDoc2);
+    }
+    
     @Test
     public void testRetrieveActivityProfileIds() throws Exception {
         ProfileKeysLRSResponse lrsRes = lrs.retrieveActivityProfileIds(activity);
