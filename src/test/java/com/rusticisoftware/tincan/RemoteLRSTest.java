@@ -70,6 +70,7 @@ public class RemoteLRSTest {
 
         agent = new Agent();
         agent.setMbox("mailto:tincanjava@tincanapi.com");
+        agent.setName("Test Agent");
 
         verb = new Verb("http://adlnet.gov/expapi/verbs/experienced");
         verb.setDisplay(new LanguageMap());
@@ -522,8 +523,8 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testRetrieveActivity() throws Exception {
-        ActivityProfileLRSResponse lrsResponse = lrs.retrieveActivity(activity);
+    public void testRetrieveFullActivity() throws Exception {
+        ActivityProfileLRSResponse lrsResponse = lrs.retrieveFullActivity(activity);
     	Assert.assertTrue(lrsResponse.getSuccess());
 
     	ActivityProfileDocument returnedDoc = lrsResponse.getContent();
@@ -535,7 +536,7 @@ public class RemoteLRSTest {
     	Activity noActivity = new Activity();
     	noActivity.setId("https://brindlewaye.com/xAPITerms/Activity/NeverGonnaHappen/");
     	
-        ActivityProfileLRSResponse lrsResponse2 = lrs.retrieveActivity(noActivity);
+        ActivityProfileLRSResponse lrsResponse2 = lrs.retrieveFullActivity(noActivity);
         // Report success even though response status was 404
     	Assert.assertTrue(lrsResponse2.getSuccess());
     	Assert.assertTrue(lrsResponse2.getResponse().getStatus() == 404);
@@ -693,6 +694,30 @@ public class RemoteLRSTest {
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
+    @Test
+    public void testRetrieveCombinedPerson() throws Exception {
+        AgentProfileLRSResponse lrsResponse = lrs.retrieveCombinedPerson(agent);
+    	Assert.assertTrue(lrsResponse.getSuccess());
+
+    	AgentProfileDocument returnedDoc = lrsResponse.getContent();
+    	Assert.assertNull(returnedDoc.getId());    // Retrieving the full Agent does not return a profile ID
+    	Agent returnedAgent = returnedDoc.getAgent();
+    	Assert.assertTrue(agent.getName().equals(returnedAgent.getName()));
+    	
+    	// Test for non-existent agent
+    	Agent noAgent = new Agent();
+    	noAgent.setMbox("mailto:noone@example.com");
+    	noAgent.setName("No One");
+    	
+        AgentProfileLRSResponse lrsResponse2 = lrs.retrieveCombinedPerson(noAgent);
+    	Assert.assertTrue(lrsResponse2.getSuccess());
+    	Assert.assertTrue(lrsResponse2.getResponse().getStatus() == 200);
+    	
+    	Agent returnedAgent2 = lrsResponse2.getContent().getAgent();
+    	// The spec says that this call will return an object built from the information provided in the parameter Agent if it finds nothing matching at the endpoint
+    	Assert.assertTrue(returnedAgent2.equals(noAgent));
+    }
+    
     @Test
     public void testRetrieveAgentProfileIds() throws Exception {
         ProfileKeysLRSResponse lrsRes = lrs.retrieveAgentProfileIds(agent);
