@@ -697,7 +697,7 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
-    public ActivityProfileLRSResponse retrieveFullActivity(Activity activity) {
+    public ActivityProfileLRSResponse retrieveActivity(Activity activity) {
     	HashMap<String, String> queryParams = new HashMap<String, String>();
     	queryParams.put("activityId", activity.getId().toString());
     	ActivityProfileDocument profileDocument = new ActivityProfileDocument();
@@ -776,7 +776,7 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
-    public AgentProfileLRSResponse retrieveCombinedPerson(Agent agent) {
+    public AgentProfileLRSResponse retrievePerson(Agent agent) {
     	HashMap<String, String> queryParams = new HashMap<String, String>();
     	queryParams.put("agent", agent.toJSON(TCAPIVersion.V100));
     	AgentProfileDocument profileDocument = new AgentProfileDocument();
