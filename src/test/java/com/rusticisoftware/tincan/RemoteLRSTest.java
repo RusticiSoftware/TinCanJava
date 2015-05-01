@@ -523,8 +523,8 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testRetrieveFullActivity() throws Exception {
-        ActivityProfileLRSResponse lrsResponse = lrs.retrieveFullActivity(activity);
+    public void testRetrieveActivity() throws Exception {
+        ActivityProfileLRSResponse lrsResponse = lrs.retrieveActivity(activity);
     	Assert.assertTrue(lrsResponse.getSuccess());
 
     	ActivityProfileDocument returnedDoc = lrsResponse.getContent();
@@ -536,7 +536,7 @@ public class RemoteLRSTest {
     	Activity noActivity = new Activity();
     	noActivity.setId("https://brindlewaye.com/xAPITerms/Activity/NeverGonnaHappen/");
     	
-        ActivityProfileLRSResponse lrsResponse2 = lrs.retrieveFullActivity(noActivity);
+        ActivityProfileLRSResponse lrsResponse2 = lrs.retrieveActivity(noActivity);
         // Report success even though response status was 404
     	Assert.assertTrue(lrsResponse2.getSuccess());
     	Assert.assertTrue(lrsResponse2.getResponse().getStatus() == 404);
@@ -695,8 +695,8 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testRetrieveCombinedPerson() throws Exception {
-        AgentProfileLRSResponse lrsResponse = lrs.retrieveCombinedPerson(agent);
+    public void testRetrievePerson() throws Exception {
+        AgentProfileLRSResponse lrsResponse = lrs.retrievePerson(agent);
     	Assert.assertTrue(lrsResponse.getSuccess());
 
     	AgentProfileDocument returnedDoc = lrsResponse.getContent();
@@ -709,7 +709,7 @@ public class RemoteLRSTest {
     	noAgent.setMbox("mailto:noone@example.com");
     	noAgent.setName("No One");
     	
-        AgentProfileLRSResponse lrsResponse2 = lrs.retrieveCombinedPerson(noAgent);
+        AgentProfileLRSResponse lrsResponse2 = lrs.retrievePerson(noAgent);
     	Assert.assertTrue(lrsResponse2.getSuccess());
     	Assert.assertTrue(lrsResponse2.getResponse().getStatus() == 200);
     	
