@@ -15,18 +15,56 @@
 */
 package com.rusticisoftware.tincan.documents;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import org.joda.time.DateTime;
 
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class Document {
     private String id;
     private String etag;
     private DateTime timestamp;
     private String contentType;
     private byte[] content;
+
+	public Document() {
+	}
+	
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getEtag() {
+		return etag;
+	}
+
+	public void setEtag(String etag) {
+		this.etag = etag;
+	}
+
+	public DateTime getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(DateTime timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	public byte[] getContent() {
+		return content;
+	}
+
+	public void setContent(byte[] content) {
+		this.content = content;
+	}
 }

@@ -18,10 +18,6 @@ package com.rusticisoftware.tincan;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.internal.StatementBase;
@@ -30,13 +26,14 @@ import com.rusticisoftware.tincan.json.StringOfJSON;
 /**
  * SubStatement Class used when including a statement like object in another statement's 'object' property
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class SubStatement extends StatementBase implements StatementTarget {
-    private final String objectType = "SubStatement";
+    private String objectType = "SubStatement";
 
-    public SubStatement (JsonNode jsonNode) throws MalformedURLException, URISyntaxException {
+	public SubStatement() throws URISyntaxException, MalformedURLException {
+		super();
+	}
+
+	public SubStatement (JsonNode jsonNode) throws MalformedURLException, URISyntaxException {
         super(jsonNode);
     }
 
@@ -50,4 +47,12 @@ public class SubStatement extends StatementBase implements StatementTarget {
         node.put("objectType", this.getObjectType());
         return node;
     }
+
+	public String getObjectType() {
+		return objectType;
+	}
+
+	public void setObjectType(String objectType) {
+		this.objectType = objectType;
+	}
 }

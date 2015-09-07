@@ -18,10 +18,6 @@ package com.rusticisoftware.tincan;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.json.JSONBase;
@@ -30,12 +26,13 @@ import com.rusticisoftware.tincan.json.Mapper;
 /**
  * Verb model class
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class Verb extends JSONBase {
     private URI id;
     private LanguageMap display;
+
+	public Verb() {
+	}
+	
 
     public Verb(URI id) {
         this.id = id;
@@ -74,10 +71,10 @@ public class Verb extends JSONBase {
     @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
         ObjectNode node = Mapper.getInstance().createObjectNode();
-        if (this.id != null) {
+        if (this.getId() != null) {
             node.put("id", this.getId().toString());
         }
-        if (this.display != null) {
+        if (this.getDisplay() != null) {
             node.put("display", this.getDisplay().toJSONNode(version));
         }
 
@@ -91,4 +88,16 @@ public class Verb extends JSONBase {
     public void setId(String id) throws URISyntaxException {
         this.setId(new URI(id));
     }
+
+	public URI getId() {
+		return id;
+	}
+
+	public LanguageMap getDisplay() {
+		return display;
+	}
+
+	public void setDisplay(LanguageMap display) {
+		this.display = display;
+	}
 }

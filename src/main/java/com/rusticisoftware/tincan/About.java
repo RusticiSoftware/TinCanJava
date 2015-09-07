@@ -21,8 +21,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -30,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-@Data
-@EqualsAndHashCode(callSuper = false)
 public class About extends JSONBase{
     private List<TCAPIVersion> version;
     private Extensions extensions;
@@ -56,13 +52,13 @@ public class About extends JSONBase{
             Iterator it = jsonNode.get("version").elements();
 
             while(it.hasNext()){
-                if(version == null) { version = new ArrayList<TCAPIVersion>(); }
-                version.add(TCAPIVersion.fromString(((JsonNode)it.next()).textValue()));
+                if(getVersion() == null) { setVersion(new ArrayList<TCAPIVersion>()); }
+                getVersion().add(TCAPIVersion.fromString(((JsonNode)it.next()).textValue()));
             }
         }
 
         if(jsonNode.hasNonNull("extensions")) {
-            extensions = new Extensions(jsonNode.get("extensions"));
+            setExtensions(new Extensions(jsonNode.get("extensions")));
         }
     }
 
@@ -77,11 +73,26 @@ public class About extends JSONBase{
             result.put("version", versions);
         }
 
-        if(extensions != null){
-            result.put("extensions", extensions.toJSONNode());
+        if(getExtensions() != null){
+            result.put("extensions", getExtensions().toJSONNode());
         }
 
         return result;
     }
 
+    public List<TCAPIVersion> getVersion() {
+        return version;
+    }
+
+    public void setVersion(List<TCAPIVersion> version) {
+        this.version = version;
+    }
+
+    public Extensions getExtensions() {
+        return extensions;
+    }
+
+    public void setExtensions(Extensions extensions) {
+        this.extensions = extensions;
+    }
 }

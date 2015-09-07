@@ -17,7 +17,6 @@ package com.rusticisoftware.tincan;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.NoArgsConstructor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -29,9 +28,11 @@ import com.rusticisoftware.tincan.json.Mapper;
 /**
  * Language map
  */
-@NoArgsConstructor
 public class LanguageMap extends JSONBase implements Iterable<Map.Entry<String, String>> {
     private final HashMap<String,String> _map = new HashMap<String, String>();
+
+    public LanguageMap() {
+    }
 
     private class LanguageMapIterator implements Iterator<Map.Entry<String, String>> {
         private Iterator<Map.Entry<String, String>> iterator;

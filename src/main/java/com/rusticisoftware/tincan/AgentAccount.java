@@ -17,22 +17,19 @@ package com.rusticisoftware.tincan;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
 
 /**
  * Agent Account model class
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class AgentAccount extends JSONBase {
     private String homePage;
     private String name;
 
+	public AgentAccount() {
+	}
+	
     public AgentAccount(JsonNode jsonNode) {
         this();
 
@@ -50,13 +47,29 @@ public class AgentAccount extends JSONBase {
     @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
         ObjectNode node = Mapper.getInstance().createObjectNode();
-        if (this.homePage != null) {
+        if (this.getHomePage() != null) {
             node.put("homePage", this.getHomePage());
         }
-        if (this.name != null) {
+        if (this.getName() != null) {
             node.put("name", this.getName());
         }
 
         return node;
     }
+
+	public String getHomePage() {
+		return homePage;
+	}
+
+	public void setHomePage(String homePage) {
+		this.homePage = homePage;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 }

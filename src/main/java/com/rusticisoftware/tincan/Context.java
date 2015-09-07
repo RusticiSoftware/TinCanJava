@@ -19,9 +19,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -31,9 +28,6 @@ import com.rusticisoftware.tincan.json.Mapper;
 /**
  * Context Class Description
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class Context extends JSONBase {
     private UUID registration;
     private Agent instructor;
@@ -44,6 +38,10 @@ public class Context extends JSONBase {
     private String language;
     private StatementRef statement;
     private Extensions extensions;
+
+	public Context() {
+	}
+	
 
     public Context(JsonNode jsonNode) throws MalformedURLException, URISyntaxException {
         this();
@@ -99,34 +97,106 @@ public class Context extends JSONBase {
     public ObjectNode toJSONNode(TCAPIVersion version) {
         ObjectNode node = Mapper.getInstance().createObjectNode();
 
-        if (this.registration != null) {
+        if (this.getRegistration() != null) {
             node.put("registration", this.getRegistration().toString());
         }
-        if (this.instructor != null) {
+        if (this.getInstructor() != null) {
             node.put("instructor", this.getInstructor().toJSONNode(version));
         }
-        if (this.team != null) {
+        if (this.getTeam() != null) {
             node.put("team", this.getTeam().toJSONNode(version));
         }
-        if (this.contextActivities != null) {
+        if (this.getContextActivities() != null) {
             node.put("contextActivities", this.getContextActivities().toJSONNode(version));
         }
-        if (this.revision != null) {
+        if (this.getRevision() != null) {
             node.put("revision", this.getRevision());
         }
-        if (this.platform != null) {
+        if (this.getPlatform() != null) {
             node.put("platform", this.getPlatform());
         }
-        if (this.language != null) {
+        if (this.getLanguage() != null) {
             node.put("language", this.getLanguage());
         }
-        if (this.statement != null) {
+        if (this.getStatement() != null) {
             node.put("statement", this.getStatement().toJSONNode(version));
         }
-        if (this.extensions != null) {
+        if (this.getExtensions() != null) {
             node.put("extensions", this.getExtensions().toJSONNode(version));
         }
 
         return node;
     }
+
+	public UUID getRegistration() {
+		return registration;
+	}
+
+	public void setRegistration(UUID registration) {
+		this.registration = registration;
+	}
+
+	public Agent getInstructor() {
+		return instructor;
+	}
+
+	public void setInstructor(Agent instructor) {
+		this.instructor = instructor;
+	}
+
+	public Agent getTeam() {
+		return team;
+	}
+
+	public void setTeam(Agent team) {
+		this.team = team;
+	}
+
+	public ContextActivities getContextActivities() {
+		return contextActivities;
+	}
+
+	public void setContextActivities(ContextActivities contextActivities) {
+		this.contextActivities = contextActivities;
+	}
+
+	public String getRevision() {
+		return revision;
+	}
+
+	public void setRevision(String revision) {
+		this.revision = revision;
+	}
+
+	public String getPlatform() {
+		return platform;
+	}
+
+	public void setPlatform(String platform) {
+		this.platform = platform;
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
+	}
+
+	public StatementRef getStatement() {
+		return statement;
+	}
+
+	public void setStatement(StatementRef statement) {
+		this.statement = statement;
+	}
+
+	public Extensions getExtensions() {
+		return extensions;
+	}
+
+	public void setExtensions(Extensions extensions) {
+		this.extensions = extensions;
+	}
 }

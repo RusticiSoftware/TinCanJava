@@ -19,9 +19,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,14 +31,15 @@ import com.rusticisoftware.tincan.json.Mapper;
 /**
  * ContextActivities Model class
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class ContextActivities extends JSONBase {
     private List<Activity> parent;
     private List<Activity> grouping;
     private List<Activity> other;
     private List<Activity> category;
+
+	public ContextActivities() {
+	}
+	
 
     public ContextActivities(JsonNode jsonNode) throws URISyntaxException {
         this();
@@ -108,7 +106,7 @@ public class ContextActivities extends JSONBase {
         ObjectMapper mapper = Mapper.getInstance();
         ObjectNode node = mapper.createObjectNode();
 
-        if (this.parent != null && this.parent.size() > 0) {
+        if (this.getParent() != null && this.getParent().size() > 0) {
             if (version.equals(TCAPIVersion.V095) && this.getParent().size() > 1) {
                 throw new IncompatibleTCAPIVersion("Version " + TCAPIVersion.V095.toString() + " doesn't support lists of activities (parent)");
             }
@@ -125,7 +123,7 @@ public class ContextActivities extends JSONBase {
                 }
             }
         }
-        if (this.grouping != null && this.grouping.size() > 0) {
+        if (this.getGrouping() != null && this.getGrouping().size() > 0) {
             if (version.equals(TCAPIVersion.V095) && this.getGrouping().size() > 1) {
                 throw new IncompatibleTCAPIVersion("Version " + TCAPIVersion.V095.toString() + " doesn't support lists of activities (grouping)");
             }
@@ -142,7 +140,7 @@ public class ContextActivities extends JSONBase {
                 }
             }
         }
-        if (this.other != null && this.other.size() > 0) {
+        if (this.getOther() != null && this.getOther().size() > 0) {
             if (version.equals(TCAPIVersion.V095) && this.getOther().size() > 1) {
                 throw new IncompatibleTCAPIVersion("Version " + TCAPIVersion.V095.toString() + " doesn't support lists of activities (other)");
             }
@@ -159,7 +157,7 @@ public class ContextActivities extends JSONBase {
                 }
             }
         }
-        if (this.category != null && this.category.size() > 0) {
+        if (this.getCategory() != null && this.getCategory().size() > 0) {
             if (version.ordinal() <= TCAPIVersion.V100.ordinal()) {
                 ArrayNode category = mapper.createArrayNode();
                 node.put("category", category);
@@ -174,4 +172,36 @@ public class ContextActivities extends JSONBase {
 
         return node;
     }
+
+	public List<Activity> getParent() {
+		return parent;
+	}
+
+	public void setParent(List<Activity> parent) {
+		this.parent = parent;
+	}
+
+	public List<Activity> getGrouping() {
+		return grouping;
+	}
+
+	public void setGrouping(List<Activity> grouping) {
+		this.grouping = grouping;
+	}
+
+	public List<Activity> getOther() {
+		return other;
+	}
+
+	public void setOther(List<Activity> other) {
+		this.other = other;
+	}
+
+	public List<Activity> getCategory() {
+		return category;
+	}
+
+	public void setCategory(List<Activity> category) {
+		this.category = category;
+	}
 }

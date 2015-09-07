@@ -16,14 +16,10 @@
 package com.rusticisoftware.tincan.exceptions;
 
 import com.rusticisoftware.tincan.http.HTTPResponse;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * UnexpectedHTTPResponse
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
 public class UnexpectedHTTPResponse extends RuntimeException {
     private HTTPResponse response;
 
@@ -47,4 +43,12 @@ public class UnexpectedHTTPResponse extends RuntimeException {
             + (response.isBinary() ? "binary" : response.getContent().substring(0, (response.getContent().length() > 1000 ? 1000 : response.getContent().length())))
         ;
     }
+
+	public HTTPResponse getResponse() {
+		return response;
+	}
+
+	public void setResponse(HTTPResponse response) {
+		this.response = response;
+	}
 }

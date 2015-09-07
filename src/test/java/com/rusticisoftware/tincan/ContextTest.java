@@ -21,13 +21,11 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import lombok.Data;
 import org.junit.Test;
 
 /**
  * ContextTest Class Description
  */
-@Data
 public class ContextTest {
     @Test
     public void serializeDeserialize() throws Exception {

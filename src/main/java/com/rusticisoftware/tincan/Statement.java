@@ -21,10 +21,6 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.UUID;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -37,14 +33,15 @@ import com.rusticisoftware.tincan.json.StringOfJSON;
 /**
  * Statement Class
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class Statement extends StatementBase {
     private UUID id;
     private DateTime stored;
     private Agent authority;
     private TCAPIVersion version;
+
+	public Statement() throws URISyntaxException, MalformedURLException {
+		super();
+	}
     
     @Deprecated
     private Boolean voided;
@@ -95,13 +92,13 @@ public class Statement extends StatementBase {
         ObjectNode node = super.toJSONNode(version);
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 
-        if (this.id != null) {
+        if (this.getId() != null) {
             node.put("id", this.getId().toString());
         }
-        if (this.stored != null) {
+        if (this.getStored() != null) {
             node.put("stored", fmt.print(this.getStored()));
         }
-        if (this.authority != null) {
+        if (this.getAuthority() != null) {
             node.put("authority", this.getAuthority().toJSONNode(version));
         }
         
@@ -133,4 +130,44 @@ public class Statement extends StatementBase {
             this.setTimestamp(new DateTime());
         }
     }
+
+	public UUID getId() {
+		return id;
+	}
+
+	public void setId(UUID id) {
+		this.id = id;
+	}
+
+	public DateTime getStored() {
+		return stored;
+	}
+
+	public void setStored(DateTime stored) {
+		this.stored = stored;
+	}
+
+	public Agent getAuthority() {
+		return authority;
+	}
+
+	public void setAuthority(Agent authority) {
+		this.authority = authority;
+	}
+
+	public TCAPIVersion getVersion() {
+		return version;
+	}
+
+	public void setVersion(TCAPIVersion version) {
+		this.version = version;
+	}
+
+	public Boolean getVoided() {
+		return voided;
+	}
+
+	public void setVoided(Boolean voided) {
+		this.voided = voided;
+	}
 }

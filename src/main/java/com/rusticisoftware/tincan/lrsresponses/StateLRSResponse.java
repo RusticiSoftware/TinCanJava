@@ -18,17 +18,23 @@ package com.rusticisoftware.tincan.lrsresponses;
 import com.rusticisoftware.tincan.documents.StateDocument;
 import com.rusticisoftware.tincan.http.HTTPRequest;
 import com.rusticisoftware.tincan.http.HTTPResponse;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class StateLRSResponse extends LRSResponse{
     private StateDocument content;
+
+	public StateLRSResponse() {
+	}
+	
 
     public StateLRSResponse(HTTPRequest initRequest, HTTPResponse initResponse) {
         super(initRequest, initResponse);
     }
+
+	public StateDocument getContent() {
+		return content;
+	}
+
+	public void setContent(StateDocument content) {
+		this.content = content;
+	}
 }

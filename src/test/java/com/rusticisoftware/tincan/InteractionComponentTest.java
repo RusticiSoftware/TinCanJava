@@ -16,14 +16,12 @@
 package com.rusticisoftware.tincan;
 
 import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
-import lombok.Data;
 
 import org.junit.Test;
 
 /**
  * InteractionComponentTest Class Description
  */
-@Data
 public class InteractionComponentTest {
     @Test
     public void serializeDeserialize() throws Exception {

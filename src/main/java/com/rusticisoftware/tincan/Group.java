@@ -1,3 +1,4 @@
+
 /*
     Copyright 2013 Rustici Software
 
@@ -24,24 +25,20 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.json.Mapper;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
 /**
  * Group model class
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
 public class Group extends Agent {
-    protected final String objectType = "Group";
     private List<Agent> members;
     
     public Group() {
         super();
+		this.objectType = "Group";
     }
     
     public Group(JsonNode jsonNode) {
         super(jsonNode);
+		this.objectType = "Group";
         
         JsonNode memberNode = jsonNode.path("member");
         if (! memberNode.isMissingNode()) {
@@ -65,4 +62,12 @@ public class Group extends Agent {
         }
         return node;
     }
+
+	public List<Agent> getMembers() {
+		return members;
+	}
+
+	public void setMembers(List<Agent> members) {
+		this.members = members;
+	}
 }

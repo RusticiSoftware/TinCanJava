@@ -16,14 +16,8 @@
 package com.rusticisoftware.tincan;
 
 import java.net.URISyntaxException;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -33,9 +27,6 @@ import com.rusticisoftware.tincan.json.Mapper;
 /**
  * Result Model class
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class Result extends JSONBase {
     private Score score;
     private Boolean success;
@@ -43,6 +34,10 @@ public class Result extends JSONBase {
     private Period duration;
     private String response;
     private Extensions extensions;
+
+	public Result() {
+	}
+	
 
     public Result(JsonNode jsonNode) throws URISyntaxException {
         this();
@@ -83,16 +78,16 @@ public class Result extends JSONBase {
         ObjectMapper mapper = Mapper.getInstance();
         ObjectNode node = mapper.createObjectNode();
 
-        if (this.score != null) {
+        if (this.getScore() != null) {
             node.put("score", this.getScore().toJSONNode(version));
         }
-        if (this.success != null) {
+        if (this.getSuccess() != null) {
             node.put("success", this.getSuccess());
         }
-        if (this.completion != null) {
+        if (this.getCompletion() != null) {
             node.put("completion", this.getCompletion());
         }
-        if (this.duration != null) {
+        if (this.getDuration() != null) {
             //
             // ISOPeriodFormat includes milliseconds but the spec only allows
             // hundredths of a second here, so get the normal string, then truncate
@@ -102,13 +97,61 @@ public class Result extends JSONBase {
 
             node.put("duration", shortenedDuration);
         }
-        if (this.response != null) {
+        if (this.getResponse() != null) {
             node.put("response", this.getResponse());
         }
-        if (this.extensions != null) {
+        if (this.getExtensions() != null) {
             node.put("extensions", this.getExtensions().toJSONNode(version));
         }
 
         return node;
     }
+
+	public Score getScore() {
+		return score;
+	}
+
+	public void setScore(Score score) {
+		this.score = score;
+	}
+
+	public Boolean getSuccess() {
+		return success;
+	}
+
+	public void setSuccess(Boolean success) {
+		this.success = success;
+	}
+
+	public Boolean getCompletion() {
+		return completion;
+	}
+
+	public void setCompletion(Boolean completion) {
+		this.completion = completion;
+	}
+
+	public Period getDuration() {
+		return duration;
+	}
+
+	public void setDuration(Period duration) {
+		this.duration = duration;
+	}
+
+	public String getResponse() {
+		return response;
+	}
+
+	public void setResponse(String response) {
+		this.response = response;
+	}
+
+	public Extensions getExtensions() {
+		return extensions;
+	}
+
+	public void setExtensions(Extensions extensions) {
+		this.extensions = extensions;
+	}
 }

@@ -18,10 +18,6 @@ package com.rusticisoftware.tincan;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.json.JSONBase;
@@ -30,14 +26,14 @@ import com.rusticisoftware.tincan.json.Mapper;
 /**
  * Activity model class
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class Activity extends JSONBase implements QueryableStatementTarget {
-    private final String objectType = "Activity";
+    private String objectType = "Activity";
 
     private URI id;
     private ActivityDefinition definition;
+
+    public Activity() {
+    }
 
     public Activity(URI id) {
         this.id = id;
@@ -72,10 +68,10 @@ public class Activity extends JSONBase implements QueryableStatementTarget {
         ObjectNode node = Mapper.getInstance().createObjectNode();
         node.put("objectType", this.getObjectType());
 
-        if (this.id != null) {
+        if (this.getId() != null) {
             node.put("id", this.getId().toString());
         }
-        if (this.definition != null) {
+        if (this.getDefinition() != null) {
             node.put("definition", this.getDefinition().toJSONNode());
         }
 
@@ -88,5 +84,25 @@ public class Activity extends JSONBase implements QueryableStatementTarget {
 
     public void setId(String id) throws URISyntaxException {
         this.setId(new URI(id));
+    }
+
+    public String getObjectType() {
+        return objectType;
+    }
+
+    public void setObjectType(String objectType) {
+        this.objectType = objectType;
+    }
+
+    public URI getId() {
+        return id;
+    }
+
+    public ActivityDefinition getDefinition() {
+        return definition;
+    }
+
+    public void setDefinition(ActivityDefinition definition) {
+        this.definition = definition;
     }
 }

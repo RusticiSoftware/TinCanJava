@@ -25,16 +25,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 /**
  * Attachment Class
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class Attachment extends JSONBase {
     private URI usageType;
     private LanguageMap display;
@@ -43,6 +37,10 @@ public class Attachment extends JSONBase {
     private Integer length;
     private String sha2;
     private URL fileUrl;
+
+	public Attachment() {
+	}
+	
     
     public Attachment(JsonNode jsonNode) throws URISyntaxException, MalformedURLException {
         JsonNode usageTypeNode = jsonNode.path("usageType");
@@ -107,4 +105,60 @@ public class Attachment extends JSONBase {
         }
         return node;
     }
+
+	public URI getUsageType() {
+		return usageType;
+	}
+
+	public void setUsageType(URI usageType) {
+		this.usageType = usageType;
+	}
+
+	public LanguageMap getDisplay() {
+		return display;
+	}
+
+	public void setDisplay(LanguageMap display) {
+		this.display = display;
+	}
+
+	public LanguageMap getDescription() {
+		return description;
+	}
+
+	public void setDescription(LanguageMap description) {
+		this.description = description;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	public Integer getLength() {
+		return length;
+	}
+
+	public void setLength(Integer length) {
+		this.length = length;
+	}
+
+	public String getSha2() {
+		return sha2;
+	}
+
+	public void setSha2(String sha2) {
+		this.sha2 = sha2;
+	}
+
+	public URL getFileUrl() {
+		return fileUrl;
+	}
+
+	public void setFileUrl(URL fileUrl) {
+		this.fileUrl = fileUrl;
+	}
 }

@@ -17,19 +17,25 @@ package com.rusticisoftware.tincan.lrsresponses;
 
 import com.rusticisoftware.tincan.http.HTTPRequest;
 import com.rusticisoftware.tincan.http.HTTPResponse;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class ProfileKeysLRSResponse extends LRSResponse{
     private List<String> content;
+
+	public ProfileKeysLRSResponse() {
+	}
+	
 
     public ProfileKeysLRSResponse(HTTPRequest initRequest, HTTPResponse initResponse) {
         super(initRequest, initResponse);
     }
+
+	public List<String> getContent() {
+		return content;
+	}
+
+	public void setContent(List<String> content) {
+		this.content = content;
+	}
 }

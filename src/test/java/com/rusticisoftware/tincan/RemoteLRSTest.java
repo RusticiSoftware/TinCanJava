@@ -26,10 +26,8 @@ import com.rusticisoftware.tincan.documents.AgentProfileDocument;
 import com.rusticisoftware.tincan.documents.StateDocument;
 import com.rusticisoftware.tincan.lrsresponses.*;
 import com.rusticisoftware.tincan.json.*;
-import lombok.extern.java.Log;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import org.joda.time.Period;
 import org.junit.Assert;
@@ -38,7 +36,6 @@ import org.junit.Test;
 
 import com.rusticisoftware.tincan.v10x.StatementsQuery;
 
-@Log
 public class RemoteLRSTest {
     private static RemoteLRS lrs;
     private static Agent agent;
@@ -539,7 +536,7 @@ public class RemoteLRSTest {
         Assert.assertTrue(save.getSuccess());
 
         ActivityProfileLRSResponse lrsRes = lrs.retrieveActivityProfile("test", activity);
-        Assert.assertEquals("\"6E6E6C11D7E0BFFE0369873A2A5FD751AB2EA64F\"", lrsRes.getContent().getEtag());
+        Assert.assertEquals("\"6E6E6C11D7E0BFFE0369873A2A5FD751AB2EA64F\"", lrsRes.getContent().getEtag().toUpperCase());
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
@@ -688,7 +685,7 @@ public class RemoteLRSTest {
         Assert.assertTrue(save.getSuccess());
 
         AgentProfileLRSResponse lrsRes = lrs.retrieveAgentProfile("test", agent);
-        Assert.assertEquals("\"DA16D3E0CBD55E0F13558AD0ECFD2605E2238C71\"", lrsRes.getContent().getEtag());
+        Assert.assertEquals("\"DA16D3E0CBD55E0F13558AD0ECFD2605E2238C71\"", lrsRes.getContent().getEtag().toUpperCase());
         Assert.assertTrue(lrsRes.getSuccess());
     }
 

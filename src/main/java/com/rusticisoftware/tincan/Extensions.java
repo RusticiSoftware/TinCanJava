@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import lombok.NoArgsConstructor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -33,16 +32,17 @@ import com.rusticisoftware.tincan.json.StringOfJSON;
 /**
  * Extensions model class
  */
-@NoArgsConstructor
 public class Extensions extends JSONBase {
     private final HashMap<URI,JsonNode> _map = new HashMap<URI,JsonNode>();
 
+	public Extensions() {
+	}
     public Extensions(JsonNode jsonNode) throws URISyntaxException {
         Iterator<Map.Entry<String,JsonNode>> items = jsonNode.fields();
         while(items.hasNext()) {
             Map.Entry<String,JsonNode> item = items.next();
 
-            this.put(new URI(item.getKey()), item.getValue());
+            this.put(new URI(item.getKey()), item.getValue());	
         }
     }
 

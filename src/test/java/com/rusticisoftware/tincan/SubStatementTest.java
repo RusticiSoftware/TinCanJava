@@ -17,7 +17,6 @@ package com.rusticisoftware.tincan;
 
 import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
 import static com.rusticisoftware.tincan.TestUtils.getAgent;
-import lombok.Data;
 
 import org.joda.time.DateTime;
 import org.junit.Test;
@@ -25,7 +24,6 @@ import org.junit.Test;
 /**
  * SubStatementTest Class Description
  */
-@Data
 public class SubStatementTest {
     
     @Test

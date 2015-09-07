@@ -15,8 +15,6 @@
 */
 package com.rusticisoftware.tincan.http;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -26,19 +24,21 @@ import java.util.HashMap;
 /**
  * HTTPResponse Class Description
  */
-@Data
-@NoArgsConstructor
 public class HTTPResponse {
     private int status;
     private String statusMsg;
-    private final HashMap<String,String> headers = new HashMap<String, String>();
+    private HashMap<String,String> headers = new HashMap<String, String>();
     private byte[] contentBytes;
 
+	public HTTPResponse() {
+	}
+	
+
     public String getHeader(String key) {
-        return this.headers.get(key);
+        return this.getHeaders().get(key);
     }
     public void setHeader(String key, String val) {
-        this.headers.put(key, val);
+		this.getHeaders().put(key, val);
     }
 
     public String getContent() {
@@ -71,4 +71,36 @@ public class HTTPResponse {
 
         return true;
     }
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	public String getStatusMsg() {
+		return statusMsg;
+	}
+
+	public void setStatusMsg(String statusMsg) {
+		this.statusMsg = statusMsg;
+	}
+
+	public HashMap<String,String> getHeaders() {
+		return headers;
+	}
+
+	public void setHeaders(HashMap<String,String> headers) {
+		this.headers = headers;
+	}
+
+	public byte[] getContentBytes() {
+		return contentBytes;
+	}
+
+	public void setContentBytes(byte[] contentBytes) {
+		this.contentBytes = contentBytes;
+	}
 }

@@ -14,14 +14,11 @@
     limitations under the License.
 */
 package com.rusticisoftware.tincan;
-
-import lombok.Data;
 import org.junit.Test;
 
 /**
  * StateTest Class Description
  */
-@Data
 public class StateTest {
     @Test
     public void testGetId() throws Exception {

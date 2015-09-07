@@ -17,22 +17,52 @@ package com.rusticisoftware.tincan.lrsresponses;
 
 import com.rusticisoftware.tincan.http.HTTPRequest;
 import com.rusticisoftware.tincan.http.HTTPResponse;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class LRSResponse {
     private Boolean success;
     private String errMsg;
     private HTTPRequest request;
     private HTTPResponse response;
 
+	public LRSResponse() {
+	}
+	
+
     public LRSResponse(HTTPRequest initRequest, HTTPResponse initResponse)
     {
         request = initRequest;
         response = initResponse;
     }
+
+	public Boolean getSuccess() {
+		return success;
+	}
+
+	public void setSuccess(Boolean success) {
+		this.success = success;
+	}
+
+	public String getErrMsg() {
+		return errMsg;
+	}
+
+	public void setErrMsg(String errMsg) {
+		this.errMsg = errMsg;
+	}
+
+	public HTTPRequest getRequest() {
+		return request;
+	}
+
+	public void setRequest(HTTPRequest request) {
+		this.request = request;
+	}
+
+	public HTTPResponse getResponse() {
+		return response;
+	}
+
+	public void setResponse(HTTPResponse response) {
+		this.response = response;
+	}
 }
