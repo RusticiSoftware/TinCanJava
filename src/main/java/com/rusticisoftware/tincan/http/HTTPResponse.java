@@ -28,7 +28,7 @@ public class HTTPResponse {
     private int status;
     private String statusMsg;
     private HashMap<String,String> headers = new HashMap<String, String>();
-    private byte[] contentBytes;
+    private byte[] contentBytes = new byte[0];
 
 	public HTTPResponse() {
 	}
