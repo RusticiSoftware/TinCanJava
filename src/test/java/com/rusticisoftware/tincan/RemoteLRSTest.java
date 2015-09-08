@@ -371,7 +371,7 @@ public class RemoteLRSTest {
     @Test
     public void testRetrieveState() throws Exception {
         LRSResponse clear = lrs.clearState(activity, agent, null);
-        Assert.assertTrue(clear.getSuccess());
+        Assert.assertTrue(clear.getResponse().getContent(), clear.getSuccess());
 
         StateDocument doc = new StateDocument();
         doc.setActivity(activity);
@@ -383,7 +383,7 @@ public class RemoteLRSTest {
         Assert.assertTrue(save.getSuccess());
 
         StateLRSResponse lrsRes = lrs.retrieveState("test", activity, agent, null);
-        Assert.assertEquals("\"C140F82CB70E3884AD729B5055B7EAA81C795F1F\"", lrsRes.getContent().getEtag());
+        Assert.assertEquals("\"C140F82CB70E3884AD729B5055B7EAA81C795F1F\"", lrsRes.getContent().getEtag().toUpperCase());
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
@@ -402,7 +402,7 @@ public class RemoteLRSTest {
     @Test
     public void testOverwriteState() throws Exception {
         LRSResponse clear = lrs.clearState(activity, agent, null);
-        Assert.assertTrue(clear.getSuccess());
+        Assert.assertTrue(clear.getResponse().getContent(), clear.getSuccess());
 
         StateDocument doc = new StateDocument();
         doc.setActivity(activity);
@@ -420,7 +420,7 @@ public class RemoteLRSTest {
         doc.setId("testing");
         doc.setActivity(parent);
         LRSResponse lrsResp = lrs.saveState(doc);
-        Assert.assertTrue(lrsResp.getSuccess());
+        Assert.assertTrue(lrsResp.getResponse().getContent(), lrsResp.getSuccess());
     }
 
     @Test
@@ -512,7 +512,7 @@ public class RemoteLRSTest {
     @Test
     public void testClearState() throws Exception {
         LRSResponse lrsRes = lrs.clearState(activity, agent, null);
-        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertTrue(lrsRes.getResponse().getContent(), lrsRes.getSuccess());
     }
 
     @Test
@@ -617,7 +617,7 @@ public class RemoteLRSTest {
         currentSet.removeAll();
 
         LRSResponse update = lrs.updateActivityProfile(doc);
-        Assert.assertTrue(update.getSuccess());
+        Assert.assertTrue(update.getResponse().getContent(), update.getSuccess());
         ActivityProfileLRSResponse retrieveAfterUpdate = lrs.retrieveActivityProfile("test", activity);
         Assert.assertTrue(retrieveAfterUpdate.getSuccess());
         ActivityProfileDocument afterDoc = retrieveAfterUpdate.getContent();
@@ -651,7 +651,7 @@ public class RemoteLRSTest {
         doc.setContent("Test value3".getBytes("UTF-8"));
 
         LRSResponse lrsResp = lrs.saveActivityProfile(doc);
-        Assert.assertTrue(lrsResp.getSuccess());
+        Assert.assertTrue(lrsResp.getResponse().getContent(), lrsResp.getSuccess());
     }
 
     @Test
@@ -765,7 +765,7 @@ public class RemoteLRSTest {
 
         currentSet.removeAll();
         LRSResponse update = lrs.updateAgentProfile(doc);
-        Assert.assertTrue(update.getSuccess());
+        Assert.assertTrue(update.getResponse().getContent(), update.getSuccess());
         AgentProfileLRSResponse retrieveAfterUpdate = lrs.retrieveAgentProfile("test", agent);
         Assert.assertTrue(retrieveAfterUpdate.getSuccess());
         AgentProfileDocument afterDoc = retrieveAfterUpdate.getContent();
@@ -799,7 +799,7 @@ public class RemoteLRSTest {
         doc.setContent("Test value5".getBytes("UTF-8"));
 
         LRSResponse lrsResp = lrs.saveAgentProfile(doc);
-        Assert.assertTrue(lrsResp.getSuccess());
+        Assert.assertTrue(lrsResp.getResponse().getContent(), lrsResp.getSuccess());
     }
 
     @Test
