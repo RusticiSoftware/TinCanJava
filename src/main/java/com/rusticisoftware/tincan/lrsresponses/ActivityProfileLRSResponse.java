@@ -23,9 +23,8 @@ public class ActivityProfileLRSResponse extends LRSResponse{
     private ActivityProfileDocument content;
 
 	public ActivityProfileLRSResponse() {
-		super(null, null);
-	}
-	
+		super();
+	}	
 
     public ActivityProfileLRSResponse(HTTPRequest initRequest, HTTPResponse initResponse) {
         super(initRequest, initResponse);
