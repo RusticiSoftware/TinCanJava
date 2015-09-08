@@ -164,17 +164,15 @@ public class RemoteLRS implements LRS {
 
         if (req.getQueryParams() != null) {
             String qs = "";
-            Iterator it = req.getQueryParams().entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
-                if (qs != "") {
-                    qs += "&";
-                }
-                try {
-                    qs += URLEncoder.encode(entry.getKey().toString(), "UTF-8") + "=" + URLEncoder.encode(entry.getValue().toString(), "UTF-8");
-                } catch (UnsupportedEncodingException ex) {}
-            }
-            if (qs != "") {
+			for (Map.Entry entry : req.getQueryParams().entrySet()) {
+				if (!"".equals(qs)) {
+					qs += "&";
+				}
+				try {
+					qs += URLEncoder.encode(entry.getKey().toString(), "UTF-8") + "=" + URLEncoder.encode(entry.getValue().toString(), "UTF-8");
+				} catch (UnsupportedEncodingException ex) {}
+			}
+            if (!"".equals(qs)) {
                 url += "?" + qs;
             }
         }
@@ -212,11 +210,9 @@ public class RemoteLRS implements LRS {
             webReq.addRequestHeader("Authorization", this.getAuth());
         }
         if (req.getHeaders() != null) {
-            Iterator it = req.getHeaders().entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
-                webReq.addRequestHeader(entry.getKey().toString(), entry.getValue().toString());
-            }
+			for (Map.Entry entry : req.getHeaders().entrySet()) {
+				webReq.addRequestHeader(entry.getKey().toString(), entry.getValue().toString());
+			}
         }
 
         if (req.getContentType() != null) {
@@ -486,7 +482,7 @@ public class RemoteLRS implements LRS {
     @Override
     public StatementsResultLRSResponse saveStatements(List<Statement> statements) {
         StatementsResultLRSResponse lrsResponse = new StatementsResultLRSResponse();
-        if (statements.size() == 0) {
+        if (statements.isEmpty()) {
             lrsResponse.setSuccess(true);
             return lrsResponse;
         }
