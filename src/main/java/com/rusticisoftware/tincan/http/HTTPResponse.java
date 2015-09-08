@@ -101,6 +101,10 @@ public class HTTPResponse {
 	}
 
 	public void setContentBytes(byte[] contentBytes) {
-		this.contentBytes = contentBytes;
+		if (contentBytes == null) {
+			contentBytes = new byte[0];
+		} else {
+			this.contentBytes = contentBytes;
+		}
 	}
 }
