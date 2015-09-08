@@ -416,7 +416,6 @@ public class RemoteLRSTest {
         StateLRSResponse retrieve = lrs.retrieveState("test", activity, agent, null);
         Assert.assertTrue(retrieve.getSuccess());
 
-        doc.setEtag(retrieve.getContent().getEtag());
         doc.setId("testing");
         doc.setActivity(parent);
         LRSResponse lrsResp = lrs.saveState(doc);
@@ -556,7 +555,7 @@ public class RemoteLRSTest {
     }
 
     @Test
-    public void testUpdateActivityProfile() throws Exception {
+    public void testUpdateActivityProfile() throws Exception {		
         ObjectMapper mapper = Mapper.getInstance();
         ObjectNode changeSet = mapper.createObjectNode();  // What changes are to be made
         ObjectNode correctSet = mapper.createObjectNode(); // What the correct content should be after change
@@ -577,13 +576,12 @@ public class RemoteLRSTest {
 
         ActivityProfileDocument doc = new ActivityProfileDocument();
         doc.setActivity(activity);
+		doc.setContent(data.getBytes("UTF-8"));
+		doc.setContentType("application/json");
         doc.setId("test");
 
         LRSResponse clear = lrs.deleteActivityProfile(doc);
         Assert.assertTrue(clear.getSuccess());
-
-        doc.setContentType("application/json");
-        doc.setContent(changeSet.toString().getBytes("UTF-8"));
 
         LRSResponse save = lrs.saveActivityProfile(doc);
         Assert.assertTrue(save.getSuccess());
@@ -606,7 +604,8 @@ public class RemoteLRSTest {
             changeSet.put(k, v);
         }
 
-        doc.setContent(changeSet.toString().getBytes("UTF-8"));
+		doc.setEtag(beforeDoc.getEtag());
+        doc.setContent(data.getBytes("UTF-8"));
 
         // Update the correct set with the changes
         for (String k : changeSetMap.keySet()) {
@@ -731,8 +730,8 @@ public class RemoteLRSTest {
         LRSResponse clear = lrs.deleteAgentProfile(doc);
         Assert.assertTrue(clear.getSuccess());
 
-        doc.setContentType("application/json");
-        doc.setContent(changeSet.toString().getBytes("UTF-8"));
+		doc.setContent(data.getBytes("UTF-8"));
+		doc.setContentType("application/json");
 
         LRSResponse save = lrs.saveAgentProfile(doc);
         Assert.assertTrue(save.getSuccess());
@@ -755,6 +754,7 @@ public class RemoteLRSTest {
             changeSet.put(k, v);
         }
 
+		doc.setEtag(beforeDoc.getEtag());
         doc.setContent(changeSet.toString().getBytes("UTF-8"));
 
         // Update the correct set with the changes
