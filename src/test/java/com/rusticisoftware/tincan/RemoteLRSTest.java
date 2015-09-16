@@ -160,7 +160,7 @@ public class RemoteLRSTest {
 
         obj.setUsername("test");
         Assert.assertEquals("test", obj.getUsername());
-        Assert.assertEquals(obj.getAuth(), "Basic dGVzdDpwYXNz");
+        Assert.assertEquals("Basic dGVzdDpwYXNz", obj.getAuth());
     }
 
     @Test
@@ -631,13 +631,14 @@ public class RemoteLRSTest {
     @Test
     public void testOverwriteActivityProfile() throws Exception {
         ActivityProfileDocument doc = new ActivityProfileDocument();
+		doc.setContentType("application/json");
         doc.setActivity(activity);
         doc.setId("test");
 
         LRSResponse clear = lrs.deleteActivityProfile(doc);
         Assert.assertTrue(clear.getSuccess());
 
-        doc.setContent("Test value2".getBytes("UTF-8"));
+        doc.setContent("{\"test\" : \"Test value 2\"}".getBytes("UTF-8"));
 
         LRSResponse save = lrs.saveActivityProfile(doc);
         Assert.assertTrue(save.getSuccess());
@@ -646,10 +647,10 @@ public class RemoteLRSTest {
         Assert.assertTrue(retrieve.getSuccess());
 
         doc.setEtag(retrieve.getContent().getEtag());
-        doc.setId("test2");
-        doc.setContent("Test value3".getBytes("UTF-8"));
+        doc.setId("test");
+        doc.setContent("{\"test\" : \"Test value 3\"}".getBytes("UTF-8"));
 
-        LRSResponse lrsResp = lrs.saveActivityProfile(doc);
+        LRSResponse lrsResp = lrs.updateActivityProfile(doc);
         Assert.assertTrue(lrsResp.getResponse().getContent(), lrsResp.getSuccess());
     }
 
@@ -780,13 +781,14 @@ public class RemoteLRSTest {
     @Test
     public void testOverwriteAgentProfile() throws Exception {
         AgentProfileDocument doc = new AgentProfileDocument();
+		doc.setContentType("application/json");
         doc.setAgent(agent);
         doc.setId("test");
 
         LRSResponse clear = lrs.deleteAgentProfile(doc);
         Assert.assertTrue(clear.getSuccess());
-
-        doc.setContent("Test value4".getBytes("UTF-8"));
+		
+        doc.setContent("{\"test\":\"Test value 4\"}".getBytes("UTF-8"));
 
         LRSResponse save = lrs.saveAgentProfile(doc);
         Assert.assertTrue(save.getSuccess());
@@ -794,17 +796,18 @@ public class RemoteLRSTest {
         AgentProfileLRSResponse retrieve = lrs.retrieveAgentProfile("test", agent);
         Assert.assertTrue(retrieve.getSuccess());
 
-        doc.setEtag(retrieve.getContent().getEtag());
-        doc.setId("test2");
-        doc.setContent("Test value5".getBytes("UTF-8"));
+        doc.setEtag(retrieve.getContent().getEtag());		
+        doc.setId("test");
+        doc.setContent("{\"test\":\"Test value 5\"}".getBytes("UTF-8"));
 
-        LRSResponse lrsResp = lrs.saveAgentProfile(doc);
+        LRSResponse lrsResp = lrs.updateAgentProfile(doc);
         Assert.assertTrue(lrsResp.getResponse().getContent(), lrsResp.getSuccess());
     }
 
     @Test
     public void testDeleteAgentProfile() throws Exception {
         AgentProfileDocument doc = new AgentProfileDocument();
+		doc.setContentType("application/json");
         doc.setAgent(agent);
         doc.setId("test");
 
