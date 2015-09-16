@@ -21,9 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-
-import com.rusticisoftware.tincan.json.StringOfJSON;
-
 import static org.junit.Assert.assertEquals;
 
 public class GroupTest {

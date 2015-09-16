@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import lombok.Data;
-
 import org.joda.time.DateTime;
 import org.junit.Test;
 
@@ -35,7 +33,6 @@ import com.rusticisoftware.tincan.v10x.StatementsQuery;
 /**
  * StatementsQueryTest Class Description
  */
-@Data
 public class StatementsQueryTest {
     @Test
     public void v10SerializeDeserialize() throws Exception {

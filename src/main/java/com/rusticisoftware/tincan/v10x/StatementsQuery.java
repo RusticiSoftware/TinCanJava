@@ -15,9 +15,6 @@
 */
 package com.rusticisoftware.tincan.v10x;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -39,11 +36,8 @@ import java.util.UUID;
 /**
  * Query model class used for building query parameters passed to get statements from LRS
  */
-@Data
-@NoArgsConstructor
 public class StatementsQuery implements StatementsQueryInterface {
-    @Getter private TCAPIVersion version = TCAPIVersion.V100;
-    
+    private TCAPIVersion version = TCAPIVersion.V100;
     private Agent agent;
     private URI verbID;
     private URI activityID;
@@ -58,8 +52,12 @@ public class StatementsQuery implements StatementsQueryInterface {
     //private Boolean attachments;
     private Boolean ascending;
 
+	public StatementsQuery() {
+	}
+	
+
     public void setVerbID(String verbID) throws URISyntaxException {
-        this.verbID = new URI(verbID);
+		this.setVerbID(new URI(verbID));
     }
 
     public void setVerbID(Verb verb) throws URISyntaxException {
@@ -71,7 +69,7 @@ public class StatementsQuery implements StatementsQueryInterface {
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 
         if (this.getAgent() != null) {
-            params.put("agent", this.getAgent().toJSON(version));
+            params.put("agent", this.getAgent().toJSON(getVersion()));
         }
         if (this.getVerbID() != null) {
             params.put("verb", this.getVerbID().toString());
@@ -106,4 +104,100 @@ public class StatementsQuery implements StatementsQueryInterface {
 
         return params;
     }
+
+	public TCAPIVersion getVersion() {
+		return version;
+	}
+
+	public void setVersion(TCAPIVersion version) {
+		this.version = version;
+	}
+
+	public Agent getAgent() {
+		return agent;
+	}
+
+	public void setAgent(Agent agent) {
+		this.agent = agent;
+	}
+
+	public URI getVerbID() {
+		return verbID;
+	}
+
+	public void setVerbID(URI verbID) {
+		this.verbID = verbID;
+	}
+
+	public URI getActivityID() {
+		return activityID;
+	}
+
+	public void setActivityID(URI activityID) {
+		this.activityID = activityID;
+	}
+
+	public UUID getRegistration() {
+		return registration;
+	}
+
+	public void setRegistration(UUID registration) {
+		this.registration = registration;
+	}
+
+	public Boolean getRelatedActivities() {
+		return relatedActivities;
+	}
+
+	public void setRelatedActivities(Boolean relatedActivities) {
+		this.relatedActivities = relatedActivities;
+	}
+
+	public Boolean getRelatedAgents() {
+		return relatedAgents;
+	}
+
+	public void setRelatedAgents(Boolean relatedAgents) {
+		this.relatedAgents = relatedAgents;
+	}
+
+	public DateTime getSince() {
+		return since;
+	}
+
+	public void setSince(DateTime since) {
+		this.since = since;
+	}
+
+	public DateTime getUntil() {
+		return until;
+	}
+
+	public void setUntil(DateTime until) {
+		this.until = until;
+	}
+
+	public Integer getLimit() {
+		return limit;
+	}
+
+	public void setLimit(Integer limit) {
+		this.limit = limit;
+	}
+
+	public QueryResultFormat getFormat() {
+		return format;
+	}
+
+	public void setFormat(QueryResultFormat format) {
+		this.format = format;
+	}
+
+	public Boolean getAscending() {
+		return ascending;
+	}
+
+	public void setAscending(Boolean ascending) {
+		this.ascending = ascending;
+	}
 }

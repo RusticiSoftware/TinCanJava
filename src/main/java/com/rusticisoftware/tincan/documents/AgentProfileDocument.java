@@ -16,13 +16,19 @@
 package com.rusticisoftware.tincan.documents;
 
 import com.rusticisoftware.tincan.Agent;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class AgentProfileDocument extends Document{
     private Agent agent;
+
+	public AgentProfileDocument() {
+	}
+	
+
+	public Agent getAgent() {
+		return agent;
+	}
+
+	public void setAgent(Agent agent) {
+		this.agent = agent;
+	}
 }

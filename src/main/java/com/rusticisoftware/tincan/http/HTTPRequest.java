@@ -15,8 +15,6 @@
 */
 package com.rusticisoftware.tincan.http;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.ByteArrayBuffer;
@@ -27,8 +25,6 @@ import java.util.Map;
 /**
  * HTTPRequest Class Description
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
 public class HTTPRequest {
     private String method;
     private String resource;
@@ -38,4 +34,72 @@ public class HTTPRequest {
     private ByteArrayBuffer contentBuffer;
     private byte[] content;
     private HTTPResponse response;
+
+	public HTTPRequest() {
+	}
+	
+
+	public String getMethod() {
+		return method;
+	}
+
+	public void setMethod(String method) {
+		this.method = method;
+	}
+
+	public String getResource() {
+		return resource;
+	}
+
+	public void setResource(String resource) {
+		this.resource = resource;
+	}
+
+	public Map<String, String> getQueryParams() {
+		return queryParams;
+	}
+
+	public void setQueryParams(Map<String, String> queryParams) {
+		this.queryParams = queryParams;
+	}
+
+	public Map<String, String> getHeaders() {
+		return headers;
+	}
+
+	public void setHeaders(Map<String, String> headers) {
+		this.headers = headers;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	public ByteArrayBuffer getContentBuffer() {
+		return contentBuffer;
+	}
+
+	public void setContentBuffer(ByteArrayBuffer contentBuffer) {
+		this.contentBuffer = contentBuffer;
+	}
+
+	public byte[] getContent() {
+		return content;
+	}
+
+	public void setContent(byte[] content) {
+		this.content = content;
+	}
+
+	public HTTPResponse getResponse() {
+		return response;
+	}
+
+	public void setResponse(HTTPResponse response) {
+		this.response = response;
+	}
 }

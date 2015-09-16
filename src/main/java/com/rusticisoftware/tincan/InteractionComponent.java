@@ -17,22 +17,18 @@ package com.rusticisoftware.tincan;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
 
 /**
  * InteractionComponent Class Description
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class InteractionComponent extends JSONBase {
     private String id;
     private LanguageMap description;
 
+	public InteractionComponent() {
+	}
     public InteractionComponent(JsonNode jsonNode) {
         this();
 
@@ -50,13 +46,29 @@ public class InteractionComponent extends JSONBase {
     @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
         ObjectNode node = Mapper.getInstance().createObjectNode();
-        if (this.id != null) {
+        if (this.getId() != null) {
             node.put("id", this.getId());
         }
-        if (this.description != null) {
+        if (this.getDescription() != null) {
             node.put("description", this.getDescription().toJSONNode(version));
         }
 
         return node;
     }
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public LanguageMap getDescription() {
+		return description;
+	}
+
+	public void setDescription(LanguageMap description) {
+		this.description = description;
+	}
 }

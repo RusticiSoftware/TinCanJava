@@ -17,26 +17,24 @@ package com.rusticisoftware.tincan;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
 
 /**
  * Agent model class
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class Agent extends JSONBase implements QueryableStatementTarget {
-    protected final String objectType = "Agent";
-    private String name;
-    private String mbox;
-    private String mboxSHA1Sum;
-    private String openID;
-    private AgentAccount account;
+    protected String objectType = "Agent";
+    protected String name;
+    protected String mbox;
+    protected String mboxSHA1Sum;
+    protected String openID;
+    protected AgentAccount account;
 
+    public Agent() {
+    }
+    
     public static Agent fromJson(JsonNode jsonNode) {
         
         String objectType = "Agent";
@@ -82,22 +80,70 @@ public class Agent extends JSONBase implements QueryableStatementTarget {
         ObjectNode node = Mapper.getInstance().createObjectNode();
         node.put("objectType", this.getObjectType());
 
-        if (this.name != null) {
+        if (this.getName() != null) {
             node.put("name", this.getName());
         }
-        if (this.mbox != null) {
+        if (this.getMbox() != null) {
             node.put("mbox", this.getMbox());
         }
-        if (this.mboxSHA1Sum != null) {
+        if (this.getMboxSHA1Sum() != null) {
             node.put("mbox_sha1sum", this.getMboxSHA1Sum());
         }
-        if (this.openID != null) {
+        if (this.getOpenID() != null) {
             node.put("openid", this.getOpenID());
         }
-        if (this.account != null) {
+        if (this.getAccount() != null) {
             node.put("account", this.getAccount().toJSONNode(version));
         }
 
         return node;
+    }
+
+    public String getObjectType() {
+        return objectType;
+    }
+
+    public void setObjectType(String objectType) {
+        this.objectType = objectType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getMbox() {
+        return mbox;
+    }
+
+    public void setMbox(String mbox) {
+        this.mbox = mbox;
+    }
+
+    public String getMboxSHA1Sum() {
+        return mboxSHA1Sum;
+    }
+
+    public void setMboxSHA1Sum(String mboxSHA1Sum) {
+        this.mboxSHA1Sum = mboxSHA1Sum;
+    }
+
+    public String getOpenID() {
+        return openID;
+    }
+
+    public void setOpenID(String openID) {
+        this.openID = openID;
+    }
+
+    public AgentAccount getAccount() {
+        return account;
+    }
+
+    public void setAccount(AgentAccount account) {
+        this.account = account;
     }
 }

@@ -22,10 +22,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -36,9 +32,6 @@ import com.rusticisoftware.tincan.json.Mapper;
 /**
  * Activity Definition model class
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class ActivityDefinition extends JSONBase {
     private LanguageMap name;
     private LanguageMap description;
@@ -52,6 +45,9 @@ public class ActivityDefinition extends JSONBase {
     private ArrayList<InteractionComponent> source;
     private ArrayList<InteractionComponent> target;
     private ArrayList<InteractionComponent> steps;
+
+    public ActivityDefinition() {
+    }
 
     public ActivityDefinition(JsonNode jsonNode) throws URISyntaxException {
         this();
@@ -153,28 +149,28 @@ public class ActivityDefinition extends JSONBase {
     public ObjectNode toJSONNode(TCAPIVersion version) {
         ObjectMapper mapper = Mapper.getInstance();
         ObjectNode node = mapper.createObjectNode();
-        if (this.name != null) {
+        if (this.getName() != null) {
             node.put("name", this.getName().toJSONNode(version));
         }
-        if (this.description != null) {
+        if (this.getDescription() != null) {
             node.put("description", this.getDescription().toJSONNode(version));
         }
-        if (this.type != null) {
+        if (this.getType() != null) {
             node.put("type", this.getType().toString());
         }
-        if (this.moreInfo != null) {
+        if (this.getMoreInfo() != null) {
             node.put("moreInfo", this.getMoreInfo().toString());
         }
-        if (this.extensions != null) {
+        if (this.getExtensions() != null) {
             node.put("extensions", this.getExtensions().toJSONNode(version));
         }
-        if (this.interactionType != null) {
+        if (this.getInteractionType() != null) {
             node.put("interactionType", this.getInteractionType().toString());
 
-            switch (this.interactionType) {
+            switch (this.getInteractionType()) {
                 case CHOICE:
                 case SEQUENCING:
-                    if (this.choices != null && this.choices.size() > 0) {
+                    if (this.getChoices() != null && this.getChoices().size() > 0) {
                         ArrayNode choices = mapper.createArrayNode();
                         node.put("choices", choices);
 
@@ -185,7 +181,7 @@ public class ActivityDefinition extends JSONBase {
                     break;
 
                 case LIKERT:
-                    if (this.scale != null && this.scale.size() > 0) {
+                    if (this.getScale() != null && this.getScale().size() > 0) {
                         ArrayNode scale = mapper.createArrayNode();
                         node.put("scale", scale);
 
@@ -196,7 +192,7 @@ public class ActivityDefinition extends JSONBase {
                     break;
 
                 case MATCHING:
-                    if (this.source != null && this.source.size() > 0) {
+                    if (this.getSource() != null && this.getSource().size() > 0) {
                         ArrayNode source = mapper.createArrayNode();
                         node.put("source", source);
 
@@ -204,7 +200,7 @@ public class ActivityDefinition extends JSONBase {
                             source.add(ic.toJSONNode(version));
                         }
                     }
-                    if (this.target != null && this.target.size() > 0) {
+                    if (this.getTarget() != null && this.getTarget().size() > 0) {
                         ArrayNode target = mapper.createArrayNode();
                         node.put("target", target);
 
@@ -215,7 +211,7 @@ public class ActivityDefinition extends JSONBase {
                     break;
 
                 case PERFORMANCE:
-                    if (this.steps != null && this.steps.size() > 0) {
+                    if (this.getSteps() != null && this.getSteps().size() > 0) {
                         ArrayNode steps = mapper.createArrayNode();
                         node.put("steps", steps);
 
@@ -232,7 +228,7 @@ public class ActivityDefinition extends JSONBase {
                     break;
             }
         }
-        if (this.correctResponsesPattern != null && this.correctResponsesPattern.size() > 0) {
+        if (this.getCorrectResponsesPattern() != null && this.getCorrectResponsesPattern().size() > 0) {
             ArrayNode responses = mapper.createArrayNode();
             node.put("correctResponsesPattern", responses);
 
@@ -257,5 +253,93 @@ public class ActivityDefinition extends JSONBase {
 
     public void setMoreInfo(String moreInfo) throws URISyntaxException {
         this.setMoreInfo(new URI(moreInfo));
+    }
+
+    public LanguageMap getName() {
+        return name;
+    }
+
+    public void setName(LanguageMap name) {
+        this.name = name;
+    }
+
+    public LanguageMap getDescription() {
+        return description;
+    }
+
+    public void setDescription(LanguageMap description) {
+        this.description = description;
+    }
+
+    public URI getType() {
+        return type;
+    }
+
+    public URI getMoreInfo() {
+        return moreInfo;
+    }
+
+    public Extensions getExtensions() {
+        return extensions;
+    }
+
+    public void setExtensions(Extensions extensions) {
+        this.extensions = extensions;
+    }
+
+    public InteractionType getInteractionType() {
+        return interactionType;
+    }
+
+    public void setInteractionType(InteractionType interactionType) {
+        this.interactionType = interactionType;
+    }
+
+    public ArrayList<String> getCorrectResponsesPattern() {
+        return correctResponsesPattern;
+    }
+
+    public void setCorrectResponsesPattern(ArrayList<String> correctResponsesPattern) {
+        this.correctResponsesPattern = correctResponsesPattern;
+    }
+
+    public ArrayList<InteractionComponent> getChoices() {
+        return choices;
+    }
+
+    public void setChoices(ArrayList<InteractionComponent> choices) {
+        this.choices = choices;
+    }
+
+    public ArrayList<InteractionComponent> getScale() {
+        return scale;
+    }
+
+    public void setScale(ArrayList<InteractionComponent> scale) {
+        this.scale = scale;
+    }
+
+    public ArrayList<InteractionComponent> getSource() {
+        return source;
+    }
+
+    public void setSource(ArrayList<InteractionComponent> source) {
+        this.source = source;
+    }
+
+    public ArrayList<InteractionComponent> getTarget() {
+        return target;
+    }
+
+    public void setTarget(ArrayList<InteractionComponent> target) {
+        this.target = target;
+    }
+
+    public ArrayList<InteractionComponent> getSteps() {
+        return steps;
+    }
+
+    public void setSteps(ArrayList<InteractionComponent> steps) {
+        this.steps = steps;
     }
 }

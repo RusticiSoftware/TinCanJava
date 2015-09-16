@@ -15,16 +15,16 @@
 */
 package com.rusticisoftware.tincan.exceptions;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * FailedHTTPExchange
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
 public class FailedHTTPExchange extends RuntimeException {
     private int status;
+
+	public FailedHTTPExchange() {
+	}
+	
 
     public FailedHTTPExchange(String message, int status) {
         super(message);
@@ -33,4 +33,12 @@ public class FailedHTTPExchange extends RuntimeException {
     public FailedHTTPExchange(int status) {
         this("Failed HTTP Exchange", status);
     }
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
 }

@@ -17,8 +17,6 @@ package com.rusticisoftware.tincan;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
 
@@ -30,10 +28,8 @@ import java.util.UUID;
  * StatementRef Class used when referencing another statement from a statement's
  * object property
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
 public class StatementRef extends JSONBase implements StatementTarget {
-    private final String objectType = "StatementRef";
+    private String objectType = "StatementRef";
     private UUID id;
 
     public StatementRef() {
@@ -55,8 +51,24 @@ public class StatementRef extends JSONBase implements StatementTarget {
     @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
         ObjectNode node = Mapper.getInstance().createObjectNode();
-        node.put("objectType", this.objectType);
+        node.put("objectType", this.getObjectType());
         node.put("id", this.getId().toString());
         return node;
     }
+
+	public String getObjectType() {
+		return objectType;
+	}
+
+	public void setObjectType(String objectType) {
+		this.objectType = objectType;
+	}
+
+	public UUID getId() {
+		return id;
+	}
+
+	public void setId(UUID id) {
+		this.id = id;
+	}
 }

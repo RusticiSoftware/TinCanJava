@@ -17,17 +17,39 @@ package com.rusticisoftware.tincan.documents;
 
 import com.rusticisoftware.tincan.Activity;
 import com.rusticisoftware.tincan.Agent;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class StateDocument extends Document{
     private Activity activity;
     private Agent agent;
     private UUID registration;
+
+	public StateDocument() {
+	}
+	
+
+	public Activity getActivity() {
+		return activity;
+	}
+
+	public void setActivity(Activity activity) {
+		this.activity = activity;
+	}
+
+	public Agent getAgent() {
+		return agent;
+	}
+
+	public void setAgent(Agent agent) {
+		this.agent = agent;
+	}
+
+	public UUID getRegistration() {
+		return registration;
+	}
+
+	public void setRegistration(UUID registration) {
+		this.registration = registration;
+	}
 }

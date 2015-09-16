@@ -17,13 +17,11 @@ package com.rusticisoftware.tincan;
 
 import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
 
-import lombok.Data;
 import org.junit.Test;
 
 /**
  * ScoreTest Class Description
  */
-@Data
 public class ScoreTest {
     
     @Test

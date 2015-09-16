@@ -15,9 +15,6 @@
 */
 package com.rusticisoftware.tincan.v095;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -38,10 +35,8 @@ import java.util.UUID;
 /**
  * Query model class used for building query parameters passed to get statements from LRS
  */
-@Data
-@NoArgsConstructor
 public class StatementsQuery implements StatementsQueryInterface {
-    @Getter private TCAPIVersion version = TCAPIVersion.V095;
+    private TCAPIVersion version = TCAPIVersion.V095;
     
     private URI verbID;
     private QueryableStatementTarget object;
@@ -56,8 +51,12 @@ public class StatementsQuery implements StatementsQueryInterface {
     private Agent instructor;
     private Boolean ascending;
 
+	public StatementsQuery() {
+	}
+	
+
     public void setVerbID(String verbID) throws URISyntaxException {
-        this.verbID = new URI(verbID);
+		this.setVerbID(new URI(verbID));
     }
 
     public void setVerbID(Verb verb) throws URISyntaxException {
@@ -72,7 +71,7 @@ public class StatementsQuery implements StatementsQueryInterface {
             params.put("verb", this.getVerbID().toString());
         }
         if (this.getObject() != null) {
-            params.put("object", this.getObject().toJSON(version));
+            params.put("object", this.getObject().toJSON(getVersion()));
         }
         if (this.getRegistration() != null) {
             params.put("registration", this.getRegistration().toString());
@@ -81,7 +80,7 @@ public class StatementsQuery implements StatementsQueryInterface {
             params.put("context", this.getContext().toString());
         }
         if (this.getActor() != null) {
-            params.put("actor", this.getActor().toJSON(version));
+            params.put("actor", this.getActor().toJSON(getVersion()));
         }
         if (this.getSince() != null) {
             params.put("since", fmt.print(this.getSince()));
@@ -99,7 +98,7 @@ public class StatementsQuery implements StatementsQueryInterface {
             params.put("sparse", this.getSparse().toString());
         }
         if (this.getInstructor() != null) {
-            params.put("instructor", this.getInstructor().toJSON(version));
+            params.put("instructor", this.getInstructor().toJSON(getVersion()));
         }
         if (this.getAscending() != null) {
             params.put("ascending", this.getAscending().toString());
@@ -107,4 +106,108 @@ public class StatementsQuery implements StatementsQueryInterface {
 
         return params;
     }
+
+	public TCAPIVersion getVersion() {
+		return version;
+	}
+
+	public void setVersion(TCAPIVersion version) {
+		this.version = version;
+	}
+
+	public URI getVerbID() {
+		return verbID;
+	}
+
+	public void setVerbID(URI verbID) {
+		this.verbID = verbID;
+	}
+
+	public QueryableStatementTarget getObject() {
+		return object;
+	}
+
+	public void setObject(QueryableStatementTarget object) {
+		this.object = object;
+	}
+
+	public UUID getRegistration() {
+		return registration;
+	}
+
+	public void setRegistration(UUID registration) {
+		this.registration = registration;
+	}
+
+	public Boolean getContext() {
+		return context;
+	}
+
+	public void setContext(Boolean context) {
+		this.context = context;
+	}
+
+	public Agent getActor() {
+		return actor;
+	}
+
+	public void setActor(Agent actor) {
+		this.actor = actor;
+	}
+
+	public DateTime getSince() {
+		return since;
+	}
+
+	public void setSince(DateTime since) {
+		this.since = since;
+	}
+
+	public DateTime getUntil() {
+		return until;
+	}
+
+	public void setUntil(DateTime until) {
+		this.until = until;
+	}
+
+	public Integer getLimit() {
+		return limit;
+	}
+
+	public void setLimit(Integer limit) {
+		this.limit = limit;
+	}
+
+	public Boolean getAuthoritative() {
+		return authoritative;
+	}
+
+	public void setAuthoritative(Boolean authoritative) {
+		this.authoritative = authoritative;
+	}
+
+	public Boolean getSparse() {
+		return sparse;
+	}
+
+	public void setSparse(Boolean sparse) {
+		this.sparse = sparse;
+	}
+
+	public Agent getInstructor() {
+		return instructor;
+	}
+
+	public void setInstructor(Agent instructor) {
+		this.instructor = instructor;
+	}
+
+	public Boolean getAscending() {
+		return ascending;
+	}
+
+	public void setAscending(Boolean ascending) {
+		this.ascending = ascending;
+	}
 }

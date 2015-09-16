@@ -20,13 +20,11 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.UUID;
 
-import lombok.Data;
 import org.junit.Test;
 
 /**
  * StatementRefTest Class Description
  */
-@Data
 public class StatementRefTest {
     
     @Test

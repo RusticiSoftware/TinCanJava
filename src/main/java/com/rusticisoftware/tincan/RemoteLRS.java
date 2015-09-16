@@ -25,8 +25,6 @@ import com.rusticisoftware.tincan.documents.StateDocument;
 import com.rusticisoftware.tincan.http.HTTPRequest;
 import com.rusticisoftware.tincan.http.HTTPResponse;
 import com.rusticisoftware.tincan.lrsresponses.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -53,29 +51,48 @@ import static org.eclipse.jetty.client.HttpClient.CONNECTOR_SELECT_CHANNEL;
  * Class used to communicate with a TCAPI endpoint synchronously
  */
 // TODO: handle extended on all requests
-@Data
-@NoArgsConstructor
 public class RemoteLRS implements LRS {
     private static int TIMEOUT_CONNECT = 5 * 1000;
 
+	public RemoteLRS() {
+	}
+	
+
     private static HttpClient _httpClient;
     private static HttpClient httpClient() throws Exception {
-        if (_httpClient == null ) {
-            _httpClient = new HttpClient();
-            _httpClient.setConnectorType(CONNECTOR_SELECT_CHANNEL);
-            _httpClient.setConnectTimeout(TIMEOUT_CONNECT);
-            _httpClient.start();
+        if (getHttpClient() == null ) {
+            setHttpClient(new HttpClient());
+            getHttpClient().setConnectorType(CONNECTOR_SELECT_CHANNEL);
+            getHttpClient().setConnectTimeout(getTIMEOUT_CONNECT());
+            getHttpClient().start();
         }
 
-        return _httpClient;
+        return getHttpClient();
+		
     }
 
     public static int getHTTPClientConnectTimeout() {
-        return _httpClient.getConnectTimeout();
+        return getHttpClient().getConnectTimeout();
     }
     public static void setHTTPClientConnectTimeout(int timeout) {
-        _httpClient.setConnectTimeout(timeout);
+        getHttpClient().setConnectTimeout(timeout);
     }
+
+	public static int getTIMEOUT_CONNECT() {
+		return TIMEOUT_CONNECT;
+	}
+
+	public static void setTIMEOUT_CONNECT(int aTIMEOUT_CONNECT) {
+		TIMEOUT_CONNECT = aTIMEOUT_CONNECT;
+	}
+
+	public static HttpClient getHttpClient() {
+		return _httpClient;
+	}
+
+	public static void setHttpClient(HttpClient aHttpClient) {
+		_httpClient = aHttpClient;
+	}
 
     private URL endpoint;
     private TCAPIVersion version = this.getVersion();
@@ -105,7 +122,7 @@ public class RemoteLRS implements LRS {
     public void setUsername(String str) {
         this.username = str;
 
-        if (this.password != null) {
+        if (this.getPassword() != null) {
             this.setAuth(this.calculateBasicAuth());
         }
     }
@@ -113,7 +130,7 @@ public class RemoteLRS implements LRS {
     public void setPassword(String str) {
         this.password = str;
 
-        if (this.username != null) {
+        if (this.getUsername() != null) {
             this.setAuth(this.calculateBasicAuth());
         }
     }
@@ -138,7 +155,7 @@ public class RemoteLRS implements LRS {
             url = req.getResource();
         }
         else {
-            url = this.endpoint.toString();
+            url = this.getEndpoint().toString();
             if (! url.endsWith("/") && ! req.getResource().startsWith("/")) {
                 url += "/";
             }
@@ -147,17 +164,15 @@ public class RemoteLRS implements LRS {
 
         if (req.getQueryParams() != null) {
             String qs = "";
-            Iterator it = req.getQueryParams().entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
-                if (qs != "") {
-                    qs += "&";
-                }
-                try {
-                    qs += URLEncoder.encode(entry.getKey().toString(), "UTF-8") + "=" + URLEncoder.encode(entry.getValue().toString(), "UTF-8");
-                } catch (UnsupportedEncodingException ex) {}
-            }
-            if (qs != "") {
+			for (Map.Entry entry : req.getQueryParams().entrySet()) {
+				if (!"".equals(qs)) {
+					qs += "&";
+				}
+				try {
+					qs += URLEncoder.encode(entry.getKey().toString(), "UTF-8") + "=" + URLEncoder.encode(entry.getValue().toString(), "UTF-8");
+				} catch (UnsupportedEncodingException ex) {}
+			}
+            if (!"".equals(qs)) {
                 url += "?" + qs;
             }
         }
@@ -190,16 +205,14 @@ public class RemoteLRS implements LRS {
         webReq.setURL(url);
         webReq.setMethod(req.getMethod());
 
-        webReq.addRequestHeader("X-Experience-API-Version", this.version.toString());
-        if (this.auth != null) {
-            webReq.addRequestHeader("Authorization", this.auth);
+        webReq.addRequestHeader("X-Experience-API-Version", this.getVersion().toString());
+        if (this.getAuth() != null) {
+            webReq.addRequestHeader("Authorization", this.getAuth());
         }
         if (req.getHeaders() != null) {
-            Iterator it = req.getHeaders().entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
-                webReq.addRequestHeader(entry.getKey().toString(), entry.getValue().toString());
-            }
+			for (Map.Entry entry : req.getHeaders().entrySet()) {
+				webReq.addRequestHeader(entry.getKey().toString(), entry.getValue().toString());
+			}
         }
 
         if (req.getContentType() != null) {
@@ -469,14 +482,14 @@ public class RemoteLRS implements LRS {
     @Override
     public StatementsResultLRSResponse saveStatements(List<Statement> statements) {
         StatementsResultLRSResponse lrsResponse = new StatementsResultLRSResponse();
-        if (statements.size() == 0) {
+        if (statements.isEmpty()) {
             lrsResponse.setSuccess(true);
             return lrsResponse;
         }
 
         ArrayNode rootNode = Mapper.getInstance().createArrayNode();
         for (Statement statement : statements) {
-            rootNode.add(statement.toJSONNode(version));
+            rootNode.add(statement.toJSONNode(getVersion()));
         }
 
         lrsResponse.setRequest(new HTTPRequest());
@@ -810,4 +823,48 @@ public class RemoteLRS implements LRS {
 
         return deleteDocument("agents/profile", queryParams);
     }
+
+	public URL getEndpoint() {
+		return endpoint;
+	}
+
+	public TCAPIVersion getVersion() {
+		return version;
+	}
+
+	public void setVersion(TCAPIVersion version) {
+		this.version = version;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public String getAuth() {
+		return auth;
+	}
+
+	public void setAuth(String auth) {
+		this.auth = auth;
+	}
+
+	public HashMap getExtended() {
+		return extended;
+	}
+
+	public void setExtended(HashMap extended) {
+		this.extended = extended;
+	}
+
+	public Boolean getPrettyJSON() {
+		return prettyJSON;
+	}
+
+	public void setPrettyJSON(Boolean prettyJSON) {
+		this.prettyJSON = prettyJSON;
+	}
 }

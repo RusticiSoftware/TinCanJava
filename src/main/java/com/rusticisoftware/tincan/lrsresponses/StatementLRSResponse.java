@@ -18,17 +18,23 @@ package com.rusticisoftware.tincan.lrsresponses;
 import com.rusticisoftware.tincan.Statement;
 import com.rusticisoftware.tincan.http.HTTPRequest;
 import com.rusticisoftware.tincan.http.HTTPResponse;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
 public class StatementLRSResponse extends LRSResponse{
     private Statement content;
+
+	public StatementLRSResponse() {
+	}
+	
 
     public StatementLRSResponse(HTTPRequest initRequest, HTTPResponse initResponse) {
         super(initRequest, initResponse);
     }
+
+	public Statement getContent() {
+		return content;
+	}
+
+	public void setContent(Statement content) {
+		this.content = content;
+	}
 }

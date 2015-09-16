@@ -21,10 +21,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -35,12 +31,14 @@ import com.rusticisoftware.tincan.json.StringOfJSON;
 /**
  * Statements result model class, returned by LRS calls to get multiple statements
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
+
 public class StatementsResult extends JSONBase {
     private ArrayList<Statement> statements = new ArrayList<Statement>();
     private String moreURL;
+
+	public StatementsResult() {
+	}
+	
 
     public StatementsResult(JsonNode jsonNode) throws URISyntaxException, MalformedURLException {
         this();
@@ -79,4 +77,20 @@ public class StatementsResult extends JSONBase {
         }
         return node;
     }
+
+	public ArrayList<Statement> getStatements() {
+		return statements;
+	}
+
+	public void setStatements(ArrayList<Statement> statements) {
+		this.statements = statements;
+	}
+
+	public String getMoreURL() {
+		return moreURL;
+	}
+
+	public void setMoreURL(String moreURL) {
+		this.moreURL = moreURL;
+	}
 }

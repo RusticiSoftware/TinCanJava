@@ -20,12 +20,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import lombok.Data;
-
 /**
  * ExtensionsTest Class Description
  */
-@Data
 public class ExtensionsTest {
     
     @Test

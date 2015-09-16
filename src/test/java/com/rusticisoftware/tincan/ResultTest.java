@@ -17,8 +17,6 @@ package com.rusticisoftware.tincan;
 
 import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
 
-import lombok.Data;
-
 import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,7 +24,6 @@ import org.junit.Test;
 /**
  * ResultTest Class Description
  */
-@Data
 public class ResultTest {
     
     @Test
