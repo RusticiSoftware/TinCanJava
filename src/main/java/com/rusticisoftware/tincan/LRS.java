@@ -52,4 +52,6 @@ public interface LRS {
     LRSResponse saveAgentProfile(AgentProfileDocument profile);
     LRSResponse updateAgentProfile(AgentProfileDocument profile);
     LRSResponse deleteAgentProfile(AgentProfileDocument profile);
+	
+	void destroy();
 }

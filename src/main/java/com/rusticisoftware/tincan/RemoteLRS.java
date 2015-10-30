@@ -810,4 +810,16 @@ public class RemoteLRS implements LRS {
 
         return deleteDocument("agents/profile", queryParams);
     }
+	
+	@Override
+	public void destroy() {
+		if (this._httpClient != null) {
+			try {
+				this._httpClient.stop();
+				this._httpClient.destroy();
+			} catch (Exception ex) {
+				throw new RuntimeException(ex);
+			}
+		}
+	}
 }
