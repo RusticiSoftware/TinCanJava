@@ -24,19 +24,20 @@ import com.rusticisoftware.tincan.documents.AgentProfileDocument;
 import com.rusticisoftware.tincan.documents.Document;
 import com.rusticisoftware.tincan.documents.StateDocument;
 import com.rusticisoftware.tincan.exceptions.*;
+import com.rusticisoftware.tincan.lrsresponses.*;
 import com.rusticisoftware.tincan.http.HTTPRequest;
 import com.rusticisoftware.tincan.http.HTTPResponse;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
-import com.rusticisoftware.tincan.lrsresponses.*;
 import com.rusticisoftware.tincan.v10x.StatementsQuery;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
+import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.util.BytesContentProvider;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -59,7 +60,7 @@ public class RemoteLRS implements LRS {
     private static HttpClient _httpClient;
     private static HttpClient httpClient() throws Exception {
         if (_httpClient == null ) {
-            _httpClient = new HttpClient();
+            _httpClient = new HttpClient(new SslContextFactory());
             _httpClient.setConnectTimeout(TIMEOUT_CONNECT);
             _httpClient.start();
         }
