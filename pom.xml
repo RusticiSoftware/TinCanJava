@@ -54,7 +54,7 @@
             <!--<plugin>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok-maven-plugin</artifactId>
-                <version>0.11.6.0</version>
+                <version>1.16.6</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
@@ -121,7 +121,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>0.11.6</version>
+            <version>1.16.6</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -161,7 +161,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-client</artifactId>
-            <version>8.1.9.v20130131</version>
+            <version>9.3.6.v20151106</version>
         </dependency>
     </dependencies>
 
