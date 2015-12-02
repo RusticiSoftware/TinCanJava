@@ -36,18 +36,15 @@ import java.net.URLEncoder;
 import java.util.*;
 
 import org.apache.commons.codec.binary.Base64;
-import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.HttpExchange;
-import org.eclipse.jetty.http.HttpMethods;
-import org.eclipse.jetty.io.Buffer;
-import org.eclipse.jetty.io.ByteArrayBuffer;
+import org.eclipse.jetty.client.api.*;
+import org.eclipse.jetty.client.util.BytesContentProvider;
+import org.eclipse.jetty.http.HttpField;
+import org.eclipse.jetty.http.HttpMethod;
 import com.rusticisoftware.tincan.exceptions.*;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
 import com.rusticisoftware.tincan.v10x.StatementsQuery;
-
-import static org.eclipse.jetty.client.HttpClient.CONNECTOR_SELECT_CHANNEL;
 
 /**
  * Class used to communicate with a TCAPI endpoint synchronously
@@ -56,13 +53,12 @@ import static org.eclipse.jetty.client.HttpClient.CONNECTOR_SELECT_CHANNEL;
 @Data
 @NoArgsConstructor
 public class RemoteLRS implements LRS {
-    private static int TIMEOUT_CONNECT = 5 * 1000;
+    private static long TIMEOUT_CONNECT = 5 * 1000;
 
     private static HttpClient _httpClient;
     private static HttpClient httpClient() throws Exception {
         if (_httpClient == null ) {
             _httpClient = new HttpClient();
-            _httpClient.setConnectorType(CONNECTOR_SELECT_CHANNEL);
             _httpClient.setConnectTimeout(TIMEOUT_CONNECT);
             _httpClient.start();
         }
@@ -70,10 +66,10 @@ public class RemoteLRS implements LRS {
         return _httpClient;
     }
 
-    public static int getHTTPClientConnectTimeout() {
+    public static long getHTTPClientConnectTimeout() {
         return _httpClient.getConnectTimeout();
     }
-    public static void setHTTPClientConnectTimeout(int timeout) {
+    public static void setHTTPClientConnectTimeout(long timeout) {
         _httpClient.setConnectTimeout(timeout);
     }
 
@@ -165,63 +161,47 @@ public class RemoteLRS implements LRS {
         //Overload some of an ContentExchange object's functions with anonymous inner functions
         //Access the HTTPResponse variable via a closure
         final HTTPResponse response = new HTTPResponse();
-        ContentExchange webReq = new ContentExchange() {
-            protected void onResponseStatus(Buffer version, int status, Buffer reason) throws IOException {
-                super.onResponseStatus(version, status, reason);
-                response.setStatus(status);
-                response.setStatusMsg(reason.toString());
-            }
-
-            @Override
-            protected void onResponseHeader(Buffer name, Buffer value) throws IOException {
-                super.onResponseHeader(name, value);
-
-                response.setHeader(name.toString(), value.toString());
-            }
-
-            @Override
-            protected void onResponseComplete() throws IOException {
-                super.onResponseComplete();
-
-                response.setContentBytes(this.getResponseContentBytes());
-            }
-        };
-
-        webReq.setURL(url);
-        webReq.setMethod(req.getMethod());
-
-        webReq.addRequestHeader("X-Experience-API-Version", this.version.toString());
-        if (this.auth != null) {
-            webReq.addRequestHeader("Authorization", this.auth);
-        }
-        if (req.getHeaders() != null) {
-            Iterator it = req.getHeaders().entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
-                webReq.addRequestHeader(entry.getKey().toString(), entry.getValue().toString());
-            }
-        }
-
-        if (req.getContentType() != null) {
-            webReq.setRequestContentType(req.getContentType());
-        }
-        else {
-            webReq.setRequestContentType("application/octet-stream");
-        }
-
-        if (req.getContent() != null) {
-            webReq.setRequestContent(new ByteArrayBuffer(req.getContent()));
-        }
 
         try {
-            httpClient().send(webReq);
+            final Request webReq = httpClient().
+                    newRequest(url).
+                    method(HttpMethod.fromString(req.getMethod())).
+                    header("X-Experience-API-Version", this.version.toString()).
+                    onResponseHeaders(new Response.HeadersListener() {
+                        @Override
+                        public void onHeaders(Response webResp) {
+                            response.setStatus(webResp.getStatus());
+                            response.setStatusMsg(webResp.getReason());
+                            for(HttpField header: webResp.getHeaders()) {
+                                response.setHeader(header.getName(), header.getValue());
+                            }
+                        }
+                    });
 
-            // Waits until the exchange is terminated
-            int exchangeState = webReq.waitForDone();
-
-            if (exchangeState != HttpExchange.STATUS_COMPLETED) {
-                throw new FailedHTTPExchange(exchangeState);
+            if (this.auth != null) {
+                webReq.header("Authorization", this.auth);
             }
+            if (req.getHeaders() != null) {
+                Iterator it = req.getHeaders().entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry entry = (Map.Entry) it.next();
+                    webReq.header(entry.getKey().toString(), entry.getValue().toString());
+                }
+            }
+
+            if (req.getContentType() != null) {
+                webReq.header("Content-Type", req.getContentType());
+            }
+            else {
+                webReq.header("Content-Type", "application/octet-stream");
+            }
+
+            if (req.getContent() != null) {
+                webReq.content(new BytesContentProvider(req.getContent()));
+            }
+
+            final ContentResponse webResp = webReq.send();
+            response.setContentBytes(webResp.getContent());
         } catch (Exception ex) {
             response.setStatus(400);
             response.setStatusMsg("Exception in RemoteLRS.makeSyncRequest(): " + ex);
@@ -232,7 +212,7 @@ public class RemoteLRS implements LRS {
 
     private StatementLRSResponse getStatement(String id, String paramName) {
         HTTPRequest request = new HTTPRequest();
-        request.setMethod(HttpMethods.GET);
+        request.setMethod(HttpMethod.GET.asString());
         request.setResource("statements");
         request.setQueryParams(new HashMap<String, String>());
         request.getQueryParams().put(paramName, id);
@@ -260,7 +240,7 @@ public class RemoteLRS implements LRS {
 
     private LRSResponse getDocument(String resource, Map<String, String> queryParams, Document document) {
         HTTPRequest request = new HTTPRequest();
-        request.setMethod(HttpMethods.GET);
+        request.setMethod(HttpMethod.GET.asString());
         request.setResource(resource);
         request.setQueryParams(queryParams);
 
@@ -288,7 +268,7 @@ public class RemoteLRS implements LRS {
     private LRSResponse deleteDocument(String resource, Map<String, String> queryParams) {
         HTTPRequest request = new HTTPRequest();
 
-        request.setMethod(HttpMethods.DELETE);
+        request.setMethod(HttpMethod.DELETE.asString());
         request.setResource(resource);
         request.setQueryParams(queryParams);
 
@@ -308,7 +288,7 @@ public class RemoteLRS implements LRS {
 
     private LRSResponse saveDocument(String resource, Map<String, String> queryParams, Document document) {
         HTTPRequest request = new HTTPRequest();
-        request.setMethod(HttpMethods.PUT);
+        request.setMethod(HttpMethod.PUT.asString());
         request.setResource(resource);
         request.setQueryParams(queryParams);
         request.setContentType(document.getContentType());
@@ -334,7 +314,7 @@ public class RemoteLRS implements LRS {
 
     private LRSResponse updateDocument(String resource, Map<String, String> queryParams, Document document) {
         HTTPRequest request = new HTTPRequest();
-        request.setMethod(HttpMethods.POST);
+        request.setMethod(HttpMethod.POST.asString());
         request.setResource(resource);
         request.setQueryParams(queryParams);
         request.setContentType(document.getContentType());
@@ -360,7 +340,7 @@ public class RemoteLRS implements LRS {
 
     private ProfileKeysLRSResponse getProfileKeys(String resource, HashMap<String, String> queryParams) {
         HTTPRequest request = new HTTPRequest();
-        request.setMethod(HttpMethods.GET);
+        request.setMethod(HttpMethod.GET.asString());
         request.setResource(resource);
         request.setQueryParams(queryParams);
 
@@ -392,7 +372,7 @@ public class RemoteLRS implements LRS {
     @Override
     public AboutLRSResponse about() {
         HTTPRequest request = new HTTPRequest();
-        request.setMethod(HttpMethods.GET);
+        request.setMethod(HttpMethod.GET.asString());
         request.setResource("about");
 
         HTTPResponse response = makeSyncRequest(request);
@@ -432,10 +412,10 @@ public class RemoteLRS implements LRS {
         }
 
         if (statement.getId() == null) {
-            lrsResponse.getRequest().setMethod(HttpMethods.POST);
+            lrsResponse.getRequest().setMethod(HttpMethod.POST.asString());
         }
         else {
-            lrsResponse.getRequest().setMethod(HttpMethods.PUT);
+            lrsResponse.getRequest().setMethod(HttpMethod.PUT.asString());
             lrsResponse.getRequest().setQueryParams(new HashMap<String, String>());
             lrsResponse.getRequest().getQueryParams().put("statementId", statement.getId().toString());
         }
@@ -481,7 +461,7 @@ public class RemoteLRS implements LRS {
 
         lrsResponse.setRequest(new HTTPRequest());
         lrsResponse.getRequest().setResource("statements");
-        lrsResponse.getRequest().setMethod(HttpMethods.POST);
+        lrsResponse.getRequest().setMethod(HttpMethod.POST.asString());
         lrsResponse.getRequest().setContentType("application/json");
         try {
             lrsResponse.getRequest().setContent(Mapper.getWriter(this.usePrettyJSON()).writeValueAsBytes(rootNode));
@@ -546,7 +526,7 @@ public class RemoteLRS implements LRS {
         StatementsResultLRSResponse lrsResponse = new StatementsResultLRSResponse();
 
         lrsResponse.setRequest(new HTTPRequest());
-        lrsResponse.getRequest().setMethod(HttpMethods.GET);
+        lrsResponse.getRequest().setMethod(HttpMethod.GET.asString());
         lrsResponse.getRequest().setResource("statements");
 
         try {
@@ -588,7 +568,7 @@ public class RemoteLRS implements LRS {
 
         HTTPRequest request = new HTTPRequest();
         request.setResource(url);
-        request.setMethod(HttpMethods.GET);
+        request.setMethod(HttpMethod.GET.asString());
         HTTPResponse response = makeSyncRequest(request);
 
         StatementsResultLRSResponse lrsResponse = new StatementsResultLRSResponse(request, response);
