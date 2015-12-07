@@ -18,12 +18,7 @@ package com.rusticisoftware.tincan;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.UUID;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -33,6 +28,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.internal.StatementBase;
 import com.rusticisoftware.tincan.json.StringOfJSON;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * Statement Class
@@ -45,7 +44,7 @@ public class Statement extends StatementBase {
     private DateTime stored;
     private Agent authority;
     private TCAPIVersion version;
-    
+
     @Deprecated
     private Boolean voided;
 
@@ -66,12 +65,12 @@ public class Statement extends StatementBase {
         if (! authorityNode.isMissingNode()) {
             this.setAuthority(Agent.fromJson(authorityNode));
         }
-        
+
         JsonNode voidedNode = jsonNode.path("voided");
         if (! voidedNode.isMissingNode()) {
             this.setVoided(voidedNode.asBoolean());
         }
-        
+
         JsonNode versionNode = jsonNode.path("version");
         if (! versionNode.isMissingNode()) {
             this.setVersion(TCAPIVersion.fromString(versionNode.textValue()));
@@ -79,7 +78,7 @@ public class Statement extends StatementBase {
     }
 
     public Statement(StringOfJSON jsonStr) throws IOException, URISyntaxException {
-        super(jsonStr);
+        this(jsonStr.toJSONNode());
     }
 
     public Statement(Agent actor, Verb verb, StatementTarget object, Result result, Context context) {
@@ -104,21 +103,21 @@ public class Statement extends StatementBase {
         if (this.authority != null) {
             node.put("authority", this.getAuthority().toJSONNode(version));
         }
-        
+
         //Include 0.95 specific fields if asking for 0.95 version
         if (TCAPIVersion.V095.equals(version)) {
             if (this.getVoided() != null) {
                 node.put("voided", this.getVoided());
             }
         }
-        
+
         //Include 1.0.x specific fields if asking for 1.0.x version
         if (version.ordinal() <= TCAPIVersion.V100.ordinal()) {
             if (this.getVersion() != null) {
                 node.put("version", this.getVersion().toString());
             }
         }
-        
+
         return node;
     }
 
