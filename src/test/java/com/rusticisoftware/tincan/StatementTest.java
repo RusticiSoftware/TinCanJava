@@ -15,9 +15,8 @@
 */
 package com.rusticisoftware.tincan;
 
-import static com.rusticisoftware.tincan.TestUtils.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static com.rusticisoftware.tincan.TestUtils.assertSerializeDeserialize;
+import static com.rusticisoftware.tincan.TestUtils.getAgent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +27,8 @@ import org.junit.Test;
 
 import com.rusticisoftware.tincan.json.StringOfJSON;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 /**
  * Description
  */

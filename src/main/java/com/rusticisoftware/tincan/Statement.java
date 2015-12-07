@@ -18,7 +18,12 @@ package com.rusticisoftware.tincan;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.UUID;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -28,10 +33,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.internal.StatementBase;
 import com.rusticisoftware.tincan.json.StringOfJSON;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 /**
  * Statement Class
@@ -44,7 +45,7 @@ public class Statement extends StatementBase {
     private DateTime stored;
     private Agent authority;
     private TCAPIVersion version;
-
+    
     @Deprecated
     private Boolean voided;
 
@@ -65,12 +66,12 @@ public class Statement extends StatementBase {
         if (! authorityNode.isMissingNode()) {
             this.setAuthority(Agent.fromJson(authorityNode));
         }
-
+        
         JsonNode voidedNode = jsonNode.path("voided");
         if (! voidedNode.isMissingNode()) {
             this.setVoided(voidedNode.asBoolean());
         }
-
+        
         JsonNode versionNode = jsonNode.path("version");
         if (! versionNode.isMissingNode()) {
             this.setVersion(TCAPIVersion.fromString(versionNode.textValue()));
