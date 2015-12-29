@@ -166,19 +166,19 @@ public class RemoteLRS implements LRS {
 
         try {
             final Request webReq = httpClient().
-                    newRequest(url).
-                    method(HttpMethod.fromString(req.getMethod())).
-                    header("X-Experience-API-Version", this.version.toString()).
-                    onResponseHeaders(new Response.HeadersListener() {
-                        @Override
-                        public void onHeaders(Response webResp) {
-                            response.setStatus(webResp.getStatus());
-                            response.setStatusMsg(webResp.getReason());
-                            for(HttpField header: webResp.getHeaders()) {
-                                response.setHeader(header.getName(), header.getValue());
-                            }
+                newRequest(url).
+                method(HttpMethod.fromString(req.getMethod())).
+                header("X-Experience-API-Version", this.version.toString()).
+                onResponseHeaders(new Response.HeadersListener() {
+                    @Override
+                    public void onHeaders(Response webResp) {
+                        response.setStatus(webResp.getStatus());
+                        response.setStatusMsg(webResp.getReason());
+                        for(HttpField header: webResp.getHeaders()) {
+                            response.setHeader(header.getName(), header.getValue());
                         }
-                    });
+                    }
+                });
 
             if (this.auth != null) {
                 webReq.header("Authorization", this.auth);
