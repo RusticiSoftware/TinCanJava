@@ -62,6 +62,7 @@ public class RemoteLRS implements LRS {
         if (_httpClient == null ) {
             _httpClient = new HttpClient(new SslContextFactory());
             _httpClient.setConnectTimeout(TIMEOUT_CONNECT);
+            _httpClient.setFollowRedirects(false);
             _httpClient.start();
         }
 
