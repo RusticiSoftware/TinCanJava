@@ -41,6 +41,7 @@ import com.rusticisoftware.tincan.v10x.StatementsQuery;
 @Log
 public class RemoteLRSTest {
     private static RemoteLRS lrs;
+    private static RemoteLRS lrsGZip;
     private static Agent agent;
     private static Verb verb;
     private static Activity activity;
@@ -55,15 +56,20 @@ public class RemoteLRSTest {
 
     @BeforeClass
     public static void Init() throws Exception {
-        lrs = new RemoteLRS(TCAPIVersion.V100);
-
         InputStream is = RemoteLRSTest.class.getResourceAsStream("/lrs.properties");
         config.load(is);
         is.close();
 
+        lrs = new RemoteLRS(TCAPIVersion.V100);
         lrs.setEndpoint(config.getProperty("endpoint"));
         lrs.setUsername(config.getProperty("username"));
         lrs.setPassword(config.getProperty("password"));
+
+        lrsGZip = new RemoteLRS(TCAPIVersion.V100);
+        lrsGZip.setEndpoint(config.getProperty("endpoint"));
+        lrsGZip.setUsername(config.getProperty("username"));
+        lrsGZip.setPassword(config.getProperty("password"));
+        lrsGZip.setCompressionGZip(true);
 
         agent = new Agent();
         agent.setMbox("mailto:tincanjava@tincanapi.com");
@@ -198,6 +204,12 @@ public class RemoteLRSTest {
     }
 
     @Test
+    public void testAboutGZIP() throws Exception {
+        AboutLRSResponse lrsRes = lrsGZip.about();
+        Assert.assertTrue(lrsRes.getSuccess());
+    }
+
+    @Test
     public void testAboutFailure() throws Exception {
         RemoteLRS obj = new RemoteLRS(TCAPIVersion.V100);
         obj.setEndpoint(new URI("http://cloud.scorm.com/tc/3TQLAI9/sandbox/").toString());
@@ -214,6 +226,19 @@ public class RemoteLRSTest {
         statement.setObject(activity);
 
         StatementLRSResponse lrsRes = lrs.saveStatement(statement);
+        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertEquals(statement, lrsRes.getContent());
+        Assert.assertNotNull(lrsRes.getContent().getId());
+    }
+
+    @Test
+    public void testSaveStatementGZIP() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+
+        StatementLRSResponse lrsRes = lrsGZip.saveStatement(statement);
         Assert.assertTrue(lrsRes.getSuccess());
         Assert.assertEquals(statement, lrsRes.getContent());
         Assert.assertNotNull(lrsRes.getContent().getId());

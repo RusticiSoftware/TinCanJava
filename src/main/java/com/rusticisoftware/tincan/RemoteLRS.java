@@ -30,10 +30,12 @@ import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.io.ByteArrayOutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.client.ContentExchange;
@@ -42,6 +44,7 @@ import org.eclipse.jetty.client.HttpExchange;
 import org.eclipse.jetty.http.HttpMethods;
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.ByteArrayBuffer;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import com.rusticisoftware.tincan.exceptions.*;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
@@ -62,6 +65,9 @@ public class RemoteLRS implements LRS {
     private static HttpClient httpClient() throws Exception {
         if (_httpClient == null ) {
             _httpClient = new HttpClient();
+            QueuedThreadPool pool = new QueuedThreadPool();
+            pool.setDaemon(true);
+            _httpClient.setThreadPool(pool);
             _httpClient.setConnectorType(CONNECTOR_SELECT_CHANNEL);
             _httpClient.setConnectTimeout(TIMEOUT_CONNECT);
             _httpClient.start();
@@ -84,6 +90,7 @@ public class RemoteLRS implements LRS {
     private String auth;
     private HashMap extended;
     private Boolean prettyJSON = false;
+    private Boolean compressionGZip = false;
 
     public RemoteLRS(TCAPIVersion version) {
         this.setVersion(version);
@@ -210,7 +217,18 @@ public class RemoteLRS implements LRS {
         }
 
         if (req.getContent() != null) {
+
             webReq.setRequestContent(new ByteArrayBuffer(req.getContent()));
+
+            if (this.getCompressionGZip()) {
+                try {
+                    webReq.setRequestContent(gzipContent(webReq.getRequestContent()));
+                    webReq.addRequestHeader("Content-Encoding", "gzip");
+                }
+                //If gzipContent() throws an IOException, webReq will not be altered and will
+                //continue on uncompressed.
+                catch (IOException e) {}
+            }
         }
 
         try {
@@ -228,6 +246,23 @@ public class RemoteLRS implements LRS {
         }
 
         return response;
+    }
+
+    private ByteArrayBuffer gzipContent(Buffer content) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        GZIPOutputStream gzos = null;
+
+        try {
+            gzos = new GZIPOutputStream(baos);
+            gzos.write(content.array());
+        }
+        finally {
+            if (gzos != null) {
+                gzos.close();
+            }
+        }
+
+        return new ByteArrayBuffer(baos.toByteArray());
     }
 
     private StatementLRSResponse getStatement(String id, String paramName) {
