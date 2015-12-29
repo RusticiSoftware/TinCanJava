@@ -37,6 +37,7 @@ import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.util.BytesContentProvider;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpMethod;
+import org.eclipse.jetty.util.HttpCookieStore;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -63,6 +64,7 @@ public class RemoteLRS implements LRS {
             _httpClient = new HttpClient(new SslContextFactory());
             _httpClient.setConnectTimeout(TIMEOUT_CONNECT);
             _httpClient.setFollowRedirects(false);
+            _httpClient.setCookieStore(new HttpCookieStore.Empty());
             _httpClient.start();
         }
 
