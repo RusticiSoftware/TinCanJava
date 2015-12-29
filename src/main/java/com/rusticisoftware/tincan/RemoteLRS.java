@@ -58,6 +58,7 @@ import java.util.*;
 public class RemoteLRS implements LRS {
     private static long TIMEOUT_CONNECT = 5 * 1000;
 
+    private static Boolean _ourClient = false;
     private static HttpClient _httpClient;
     private static HttpClient httpClient() throws Exception {
         if (_httpClient == null ) {
@@ -66,16 +67,45 @@ public class RemoteLRS implements LRS {
             _httpClient.setFollowRedirects(false);
             _httpClient.setCookieStore(new HttpCookieStore.Empty());
             _httpClient.start();
+
+            _ourClient = true;
         }
 
         return _httpClient;
     }
 
+    /**
+     * Get the connect timeout value for the default HTTP client
+     *
+     * @return
+     * @deprecated set your own HTTP client using {@link #setHttpClient()}
+     */
+    @Deprecated
     public static long getHTTPClientConnectTimeout() {
         return _httpClient.getConnectTimeout();
     }
+
+    /**
+     * Set the connect timeout value for the default HTTP client
+     *
+     * @deprecated set your own HTTP client using {@link #setHttpClient()}
+     */
+    @Deprecated
     public static void setHTTPClientConnectTimeout(long timeout) {
         _httpClient.setConnectTimeout(timeout);
+    }
+
+    public static void setHttpClient(HttpClient client) throws Exception {
+        if (_httpClient != null && _ourClient) {
+            _httpClient.stop();
+            _httpClient.destroy();
+        }
+        _ourClient = false;
+        _httpClient = client;
+    }
+
+    public static void destroy() throws Exception {
+        setHttpClient(null);
     }
 
     private URL endpoint;
