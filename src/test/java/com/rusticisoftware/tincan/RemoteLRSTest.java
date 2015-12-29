@@ -386,7 +386,7 @@ public class RemoteLRSTest {
         Assert.assertTrue(save.getSuccess());
 
         StateLRSResponse lrsRes = lrs.retrieveState("test", activity, agent, null);
-        Assert.assertEquals("\"C140F82CB70E3884AD729B5055B7EAA81C795F1F\"", lrsRes.getContent().getEtag());
+        Assert.assertEquals("\"c140f82cb70e3884ad729b5055b7eaa81c795f1f\"", lrsRes.getContent().getEtag().toLowerCase());
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
@@ -539,7 +539,7 @@ public class RemoteLRSTest {
         Assert.assertTrue(save.getSuccess());
 
         ActivityProfileLRSResponse lrsRes = lrs.retrieveActivityProfile("test", activity);
-        Assert.assertEquals("\"6E6E6C11D7E0BFFE0369873A2A5FD751AB2EA64F\"", lrsRes.getContent().getEtag());
+        Assert.assertEquals("\"6e6e6c11d7e0bffe0369873a2a5fd751ab2ea64f\"", lrsRes.getContent().getEtag().toLowerCase());
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
@@ -688,7 +688,7 @@ public class RemoteLRSTest {
         Assert.assertTrue(save.getSuccess());
 
         AgentProfileLRSResponse lrsRes = lrs.retrieveAgentProfile("test", agent);
-        Assert.assertEquals("\"DA16D3E0CBD55E0F13558AD0ECFD2605E2238C71\"", lrsRes.getContent().getEtag());
+        Assert.assertEquals("\"da16d3e0cbd55e0f13558ad0ecfd2605e2238c71\"", lrsRes.getContent().getEtag().toLowerCase());
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
