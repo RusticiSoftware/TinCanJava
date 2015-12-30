@@ -31,7 +31,7 @@ import org.junit.Test;
  * Description
  */
 public class LanguageMapTest {
-    
+
     @Test
     public void serializeDeserialize() throws Exception {
         LanguageMap lm = new LanguageMap();
@@ -53,7 +53,6 @@ public class LanguageMapTest {
         }
 
         String lmContent = lm.toJSON();
-
         String lmCopyContent = lmCopy.toJSON();
 
         assertEquals(lmContent, lmCopyContent);
@@ -74,8 +73,8 @@ public class LanguageMapTest {
         assertEquals(arrayOfLangs.size(), 3);
         assertEquals(linkedListOfLangs.size(), 3);
         assertEquals(vectorOfLangs.size(), 3);
-        for(String s : linkedListOfLangs) {
-        	assertTrue(lm.containsKey(s));
+        for (String s : linkedListOfLangs) {
+            assertTrue(lm.containsKey(s));
         }
     }
 }

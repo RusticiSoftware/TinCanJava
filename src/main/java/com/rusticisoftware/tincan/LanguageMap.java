@@ -41,6 +41,7 @@ public class LanguageMap extends JSONBase implements Iterable<Map.Entry<String, 
         public LanguageMapIterator() {
             iterator = _map.entrySet().iterator();
         }
+
         @Override
         public boolean hasNext() {
             return iterator.hasNext();
@@ -54,7 +55,8 @@ public class LanguageMap extends JSONBase implements Iterable<Map.Entry<String, 
         @Override
         public void remove() throws UnsupportedOperationException {
             throw new UnsupportedOperationException(
-                "LanguageMap iterator does not implement the remove method");
+                "LanguageMap iterator does not implement the remove method"
+            );
         }
     }
     public LanguageMap(JsonNode jsonNode) {
@@ -81,7 +83,7 @@ public class LanguageMap extends JSONBase implements Iterable<Map.Entry<String, 
     public String put(String key, String val) {
         return this._map.put(key, val);
     }
-    
+
     public String put(Map.Entry<String, String> entry) {
         return this.put(entry.getKey(), entry.getValue());
     }
@@ -110,13 +112,13 @@ public class LanguageMap extends JSONBase implements Iterable<Map.Entry<String, 
         }
         return retVal;
     }
-    
+
     public void populateWithAvailableLanguages(List<String> list) {
-    	Iterator<Map.Entry<String, String>> it = this.iterator();
-    	while (it.hasNext()) {
-    		Map.Entry<String, String> n = it.next();
-    		list.add(n.getKey());
-    	}
+        Iterator<Map.Entry<String, String>> it = this.iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, String> n = it.next();
+            list.add(n.getKey());
+        }
     }
 
     @Override
