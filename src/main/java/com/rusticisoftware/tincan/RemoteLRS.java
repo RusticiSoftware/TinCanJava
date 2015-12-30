@@ -25,6 +25,7 @@ import com.rusticisoftware.tincan.documents.StateDocument;
 import com.rusticisoftware.tincan.http.HTTPRequest;
 import com.rusticisoftware.tincan.http.HTTPResponse;
 import com.rusticisoftware.tincan.lrsresponses.*;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -42,6 +43,7 @@ import org.eclipse.jetty.client.HttpExchange;
 import org.eclipse.jetty.http.HttpMethods;
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.ByteArrayBuffer;
+
 import com.rusticisoftware.tincan.exceptions.*;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
@@ -695,6 +697,26 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
+    public ActivityProfileLRSResponse retrieveActivity(Activity activity) {
+    	HashMap<String, String> queryParams = new HashMap<String, String>();
+    	queryParams.put("activityId", activity.getId().toString());
+    	ActivityProfileDocument profileDocument = new ActivityProfileDocument();
+    	profileDocument.setActivity(activity);
+    	profileDocument.setId(null);
+    	
+    	LRSResponse lrsResp = getDocument("activities", queryParams, profileDocument);
+    	
+        ActivityProfileLRSResponse lrsResponse = new ActivityProfileLRSResponse(lrsResp.getRequest(), lrsResp.getResponse());
+        lrsResponse.setSuccess(lrsResp.getSuccess());
+
+        if (lrsResponse.getResponse().getStatus() == 200) {
+            lrsResponse.setContent(profileDocument);
+        }
+
+        return lrsResponse;    	
+    }
+    
+    @Override
     public ProfileKeysLRSResponse retrieveActivityProfileIds(Activity activity) {
         HashMap<String, String> queryParams = new HashMap<String, String>();
 
@@ -753,6 +775,26 @@ public class RemoteLRS implements LRS {
         return deleteDocument("activities/profile", queryParams);
     }
 
+    @Override
+    public AgentProfileLRSResponse retrievePerson(Agent agent) {
+    	HashMap<String, String> queryParams = new HashMap<String, String>();
+    	queryParams.put("agent", agent.toJSON(TCAPIVersion.V100));
+    	AgentProfileDocument profileDocument = new AgentProfileDocument();
+    	profileDocument.setAgent(agent);
+    	profileDocument.setId(null);
+    	
+    	LRSResponse lrsResp = getDocument("agents", queryParams, profileDocument);
+    	
+        AgentProfileLRSResponse lrsResponse = new AgentProfileLRSResponse(lrsResp.getRequest(), lrsResp.getResponse());
+        lrsResponse.setSuccess(lrsResp.getSuccess());
+
+        if (lrsResponse.getResponse().getStatus() == 200) {
+            lrsResponse.setContent(profileDocument);
+        }
+
+        return lrsResponse;    	
+    }
+    
     @Override
     public ProfileKeysLRSResponse retrieveAgentProfileIds(Agent agent) {
         HashMap<String, String> queryParams = new HashMap<String, String>();

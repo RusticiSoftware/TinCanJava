@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
@@ -107,6 +109,14 @@ public class LanguageMap extends JSONBase implements Iterable<Map.Entry<String, 
             }
         }
         return retVal;
+    }
+    
+    public void populateWithAvailableLanguages(List<String> list) {
+    	Iterator<Map.Entry<String, String>> it = this.iterator();
+    	while (it.hasNext()) {
+    		Map.Entry<String, String> n = it.next();
+    		list.add(n.getKey());
+    	}
     }
 
     @Override
