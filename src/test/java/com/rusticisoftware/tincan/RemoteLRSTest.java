@@ -26,7 +26,10 @@ import com.rusticisoftware.tincan.documents.AgentProfileDocument;
 import com.rusticisoftware.tincan.documents.StateDocument;
 import com.rusticisoftware.tincan.lrsresponses.*;
 import com.rusticisoftware.tincan.json.*;
+
 import lombok.extern.java.Log;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -67,6 +70,7 @@ public class RemoteLRSTest {
 
         agent = new Agent();
         agent.setMbox("mailto:tincanjava@tincanapi.com");
+        agent.setName("Test Agent");
 
         verb = new Verb("http://adlnet.gov/expapi/verbs/experienced");
         verb.setDisplay(new LanguageMap());
@@ -519,6 +523,15 @@ public class RemoteLRSTest {
     }
 
     @Test
+    public void testRetrieveActivity() throws Exception {
+        ActivityLRSResponse lrsResponse = lrs.retrieveActivity(activity);
+        Assert.assertTrue(lrsResponse.getSuccess());
+
+        Activity returnedActivity = lrsResponse.getContent();
+        Assert.assertTrue(activity.getId().toString().equals(returnedActivity.getId().toString()));
+    }
+
+    @Test
     public void testRetrieveActivityProfileIds() throws Exception {
         ProfileKeysLRSResponse lrsRes = lrs.retrieveActivityProfileIds(activity);
         Assert.assertTrue(lrsRes.getSuccess());
@@ -665,6 +678,16 @@ public class RemoteLRSTest {
 
         LRSResponse lrsRes = lrs.deleteActivityProfile(doc);
         Assert.assertTrue(lrsRes.getSuccess());
+    }
+
+    @Test
+    public void testRetrievePerson() throws Exception {
+        PersonLRSResponse lrsResponse = lrs.retrievePerson(agent);
+        Assert.assertTrue(lrsResponse.getSuccess());
+
+        Person person = lrsResponse.getContent();
+        Assert.assertTrue(agent.getName().equals(person.getName().get(0)));
+        Assert.assertTrue(agent.getMbox().equals(person.getMbox().get(0)));
     }
 
     @Test

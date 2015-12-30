@@ -25,6 +25,7 @@ import com.rusticisoftware.tincan.documents.StateDocument;
 import com.rusticisoftware.tincan.http.HTTPRequest;
 import com.rusticisoftware.tincan.http.HTTPResponse;
 import com.rusticisoftware.tincan.lrsresponses.*;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -42,6 +43,7 @@ import org.eclipse.jetty.client.HttpExchange;
 import org.eclipse.jetty.http.HttpMethods;
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.ByteArrayBuffer;
+
 import com.rusticisoftware.tincan.exceptions.*;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
@@ -695,6 +697,35 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
+    public ActivityLRSResponse retrieveActivity(Activity activity) {
+        HTTPRequest request = new HTTPRequest();
+        request.setMethod(HttpMethods.GET);
+        request.setResource("activities");
+        request.setQueryParams(new HashMap<String, String>());
+        request.getQueryParams().put("activityId", activity.getId().toString());
+
+        HTTPResponse response = makeSyncRequest(request);
+        int status = response.getStatus();
+
+        ActivityLRSResponse lrsResponse = new ActivityLRSResponse(request, response);
+
+        if (status == 200) {
+            lrsResponse.setSuccess(true);
+            try {
+                lrsResponse.setContent(new Activity(new StringOfJSON(response.getContent())));
+            } catch (Exception ex) {
+                lrsResponse.setErrMsg("Exception: " + ex.toString());
+                lrsResponse.setSuccess(false);
+            }
+        }
+        else {
+            lrsResponse.setSuccess(false);
+        }
+
+        return lrsResponse;
+    }
+
+    @Override
     public ProfileKeysLRSResponse retrieveActivityProfileIds(Activity activity) {
         HashMap<String, String> queryParams = new HashMap<String, String>();
 
@@ -751,6 +782,35 @@ public class RemoteLRS implements LRS {
         // TODO: need to pass Etag?
 
         return deleteDocument("activities/profile", queryParams);
+    }
+
+    @Override
+    public PersonLRSResponse retrievePerson(Agent agent) {
+        HTTPRequest request = new HTTPRequest();
+        request.setMethod(HttpMethods.GET);
+        request.setResource("agents");
+        request.setQueryParams(new HashMap<String, String>());
+        request.getQueryParams().put("agent", agent.toJSON(this.getVersion(), this.usePrettyJSON()));
+
+        HTTPResponse response = makeSyncRequest(request);
+        int status = response.getStatus();
+
+        PersonLRSResponse lrsResponse = new PersonLRSResponse(request, response);
+
+        if (status == 200) {
+            lrsResponse.setSuccess(true);
+            try {
+                lrsResponse.setContent(new Person(new StringOfJSON(response.getContent())));
+            } catch (Exception ex) {
+                lrsResponse.setErrMsg("Exception: " + ex.toString());
+                lrsResponse.setSuccess(false);
+            }
+        }
+        else {
+            lrsResponse.setSuccess(false);
+        }
+
+        return lrsResponse;
     }
 
     @Override

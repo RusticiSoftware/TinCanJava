@@ -21,6 +21,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Vector;
 
 import org.junit.Test;
 
@@ -28,7 +31,7 @@ import org.junit.Test;
  * Description
  */
 public class LanguageMapTest {
-    
+
     @Test
     public void serializeDeserialize() throws Exception {
         LanguageMap lm = new LanguageMap();
@@ -50,7 +53,6 @@ public class LanguageMapTest {
         }
 
         String lmContent = lm.toJSON();
-
         String lmCopyContent = lmCopy.toJSON();
 
         assertEquals(lmContent, lmCopyContent);
@@ -58,9 +60,21 @@ public class LanguageMapTest {
         boolean hasKey = lm.containsKey("und");
         boolean hasValue = lm.containsValue("Some english");
         Map.Entry<String, String> entry = lm.findFirstValue("Some espanol");
+        ArrayList<String> arrayOfLangs = new ArrayList<String>();
+        LinkedList<String> linkedListOfLangs = new LinkedList<String>();
+        Vector<String> vectorOfLangs = new Vector<String>();
+        lm.populateWithAvailableLanguages(arrayOfLangs);
+        lm.populateWithAvailableLanguages(linkedListOfLangs);
+        lm.populateWithAvailableLanguages(vectorOfLangs);
 
         assertTrue(hasKey);
         assertTrue(hasValue);
         assertEquals(entry.getKey(), "es-ES");
+        assertEquals(arrayOfLangs.size(), 3);
+        assertEquals(linkedListOfLangs.size(), 3);
+        assertEquals(vectorOfLangs.size(), 3);
+        for (String s : linkedListOfLangs) {
+            assertTrue(lm.containsKey(s));
+        }
     }
 }

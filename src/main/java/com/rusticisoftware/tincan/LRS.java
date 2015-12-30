@@ -41,12 +41,14 @@ public interface LRS {
     LRSResponse deleteState(StateDocument state);
     LRSResponse clearState(Activity activity, Agent agent, UUID registration);
 
+    ActivityLRSResponse retrieveActivity(Activity activity);
     ProfileKeysLRSResponse retrieveActivityProfileIds(Activity activity);
     ActivityProfileLRSResponse retrieveActivityProfile(String id, Activity activity);
     LRSResponse saveActivityProfile(ActivityProfileDocument profile);
     LRSResponse updateActivityProfile(ActivityProfileDocument profile);
     LRSResponse deleteActivityProfile(ActivityProfileDocument profile);
 
+    PersonLRSResponse retrievePerson(Agent agent);
     ProfileKeysLRSResponse retrieveAgentProfileIds(Agent agent);
     AgentProfileLRSResponse retrieveAgentProfile(String id, Agent agent);
     LRSResponse saveAgentProfile(AgentProfileDocument profile);
