@@ -25,6 +25,10 @@ import java.util.UUID;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
+import com.rusticisoftware.tincan.json.StringOfJSON;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 /**
  * Description
  */
@@ -32,19 +36,19 @@ public class StatementTest {
 
     @Test
     public void serializeDeserialize() throws Exception {
-        
+
         List<StatementTarget> statementTargets = new ArrayList<StatementTarget>();
         statementTargets.add(new Activity("http://example.com/activity"));
         statementTargets.add(getAgent("Target", "mbox", "mailto:target@example.com"));
         statementTargets.add(new StatementRef(UUID.randomUUID()));
-        
+
         SubStatement sub = new SubStatement();
         sub.setActor(getAgent("Sub", "mbox", "mailto:sub@example.com"));
         sub.setVerb(new Verb("http://example.com/verb"));
         sub.setObject(new Activity("http://example.com/sub-activity"));
         statementTargets.add(sub);
-        
-        
+
+
         Statement st = new Statement();
         st.setActor(getAgent("Joe", "mbox", "mailto:joe@example.com"));
 
@@ -52,24 +56,76 @@ public class StatementTest {
         Attachment att = new Attachment();
         att.setSha2("abc");
         st.getAttachments().add(att);
-        
+
         st.setAuthority(getAgent("Authority", "mbox", "mailto:authority@example.com"));
-        
+
         st.setContext(new Context());
         st.getContext().setLanguage("en-US");
-        
+
         st.setId(UUID.randomUUID());
-        
+
         st.setResult(new Result());
         st.getResult().setCompletion(true);
-        
+
         st.setStored(new DateTime());
         st.setTimestamp(new DateTime());
         st.setVerb(new Verb("http://example.com/verb"));
-        
+
         for (StatementTarget target : statementTargets) {
             st.setObject(target);
             assertSerializeDeserialize(st);
+        }
+    }
+
+
+    /**
+     * To assert that {@Link Statement(StringOfJSON)} converts all textbased-elements in StringOfJSON to {@Link Statement}
+     *
+     * @throws Exception
+     */
+    @Test
+    public void StatementConstructorTest() throws Exception {
+
+        List<StatementTarget> statementTargets = new ArrayList<StatementTarget>();
+        statementTargets.add(new Activity("http://example.com/activity"));
+        statementTargets.add(getAgent("Target", "mbox", "mailto:target@example.com"));
+        statementTargets.add(new StatementRef(UUID.randomUUID()));
+
+        SubStatement sub = new SubStatement();
+        sub.setActor(getAgent("Sub", "mbox", "mailto:sub@example.com"));
+        sub.setVerb(new Verb("http://example.com/verb"));
+        sub.setObject(new Activity("http://example.com/sub-activity"));
+        statementTargets.add(sub);
+
+        Statement st = new Statement();
+        st.setActor(getAgent("Joe", "mbox", "mailto:joe@example.com"));
+
+        st.setAttachments(new ArrayList<Attachment>());
+        Attachment att = new Attachment();
+        att.setSha2("abc");
+        st.getAttachments().add(att);
+
+        st.setAuthority(getAgent("Authority", "mbox", "mailto:authority@example.com"));
+
+        st.setContext(new Context());
+        st.getContext().setLanguage("en-US");
+
+        st.setId(UUID.randomUUID());
+
+        st.setResult(new Result());
+        st.getResult().setCompletion(true);
+
+        st.setStored(new DateTime());
+        st.setTimestamp(new DateTime());
+        st.setVerb(new Verb("http://example.com/verb"));
+
+
+        for (StatementTarget target : statementTargets) {
+            st.setObject(target);
+
+            Statement tmpStatement = new Statement(new StringOfJSON(st.toJSON()));
+
+            assertThat(st.toJSON(), is(tmpStatement.toJSON()));
         }
     }
 }

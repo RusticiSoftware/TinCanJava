@@ -79,7 +79,7 @@ public class Statement extends StatementBase {
     }
 
     public Statement(StringOfJSON jsonStr) throws IOException, URISyntaxException {
-        super(jsonStr);
+        this(jsonStr.toJSONNode());
     }
 
     public Statement(Agent actor, Verb verb, StatementTarget object, Result result, Context context) {
@@ -104,21 +104,21 @@ public class Statement extends StatementBase {
         if (this.authority != null) {
             node.put("authority", this.getAuthority().toJSONNode(version));
         }
-        
+
         //Include 0.95 specific fields if asking for 0.95 version
         if (TCAPIVersion.V095.equals(version)) {
             if (this.getVoided() != null) {
                 node.put("voided", this.getVoided());
             }
         }
-        
+
         //Include 1.0.x specific fields if asking for 1.0.x version
         if (version.ordinal() <= TCAPIVersion.V100.ordinal()) {
             if (this.getVersion() != null) {
                 node.put("version", this.getVersion().toString());
             }
         }
-        
+
         return node;
     }
 
