@@ -524,25 +524,11 @@ public class RemoteLRSTest {
 
     @Test
     public void testRetrieveActivity() throws Exception {
-        ActivityProfileLRSResponse lrsResponse = lrs.retrieveActivity(activity);
+        ActivityLRSResponse lrsResponse = lrs.retrieveActivity(activity);
         Assert.assertTrue(lrsResponse.getSuccess());
 
-        ActivityProfileDocument returnedDoc = lrsResponse.getContent();
-        Assert.assertNull(returnedDoc.getId());    // Retrieving the full Activity does not return a profile ID
-        Activity returnedActivity = returnedDoc.getActivity();
+        Activity returnedActivity = lrsResponse.getContent();
         Assert.assertTrue(activity.getId().toString().equals(returnedActivity.getId().toString()));
-
-        // Test for non-existent activity
-        Activity noActivity = new Activity();
-        noActivity.setId("https://brindlewaye.com/xAPITerms/Activity/NeverGonnaHappen/");
-
-        ActivityProfileLRSResponse lrsResponse2 = lrs.retrieveActivity(noActivity);
-        // Report success even though response status was 404
-        Assert.assertTrue(lrsResponse2.getSuccess());
-        Assert.assertTrue(lrsResponse2.getResponse().getStatus() == 404);
-
-        ActivityProfileDocument returnedDoc2 = lrsResponse2.getContent();
-        Assert.assertNull(returnedDoc2);
     }
 
     @Test
@@ -696,26 +682,12 @@ public class RemoteLRSTest {
 
     @Test
     public void testRetrievePerson() throws Exception {
-        AgentProfileLRSResponse lrsResponse = lrs.retrievePerson(agent);
+        PersonLRSResponse lrsResponse = lrs.retrievePerson(agent);
         Assert.assertTrue(lrsResponse.getSuccess());
 
-        AgentProfileDocument returnedDoc = lrsResponse.getContent();
-        Assert.assertNull(returnedDoc.getId());    // Retrieving the full Agent does not return a profile ID
-        Agent returnedAgent = returnedDoc.getAgent();
-        Assert.assertTrue(agent.getName().equals(returnedAgent.getName()));
-
-        // Test for non-existent agent
-        Agent noAgent = new Agent();
-        noAgent.setMbox("mailto:noone@example.com");
-        noAgent.setName("No One");
-
-        AgentProfileLRSResponse lrsResponse2 = lrs.retrievePerson(noAgent);
-        Assert.assertTrue(lrsResponse2.getSuccess());
-        Assert.assertTrue(lrsResponse2.getResponse().getStatus() == 200);
-
-        Agent returnedAgent2 = lrsResponse2.getContent().getAgent();
-        // The spec says that this call will return an object built from the information provided in the parameter Agent if it finds nothing matching at the endpoint
-        Assert.assertTrue(returnedAgent2.equals(noAgent));
+        Person person = lrsResponse.getContent();
+        Assert.assertTrue(agent.getName().equals(person.getName().get(0)));
+        Assert.assertTrue(agent.getMbox().equals(person.getMbox().get(0)));
     }
 
     @Test

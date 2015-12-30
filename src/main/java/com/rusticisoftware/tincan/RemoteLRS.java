@@ -697,20 +697,29 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
-    public ActivityProfileLRSResponse retrieveActivity(Activity activity) {
-        HashMap<String, String> queryParams = new HashMap<String, String>();
-        queryParams.put("activityId", activity.getId().toString());
-        ActivityProfileDocument profileDocument = new ActivityProfileDocument();
-        profileDocument.setActivity(activity);
-        profileDocument.setId(null);
+    public ActivityLRSResponse retrieveActivity(Activity activity) {
+        HTTPRequest request = new HTTPRequest();
+        request.setMethod(HttpMethods.GET);
+        request.setResource("activities");
+        request.setQueryParams(new HashMap<String, String>());
+        request.getQueryParams().put("activityId", activity.getId().toString());
 
-        LRSResponse lrsResp = getDocument("activities", queryParams, profileDocument);
+        HTTPResponse response = makeSyncRequest(request);
+        int status = response.getStatus();
 
-        ActivityProfileLRSResponse lrsResponse = new ActivityProfileLRSResponse(lrsResp.getRequest(), lrsResp.getResponse());
-        lrsResponse.setSuccess(lrsResp.getSuccess());
+        ActivityLRSResponse lrsResponse = new ActivityLRSResponse(request, response);
 
-        if (lrsResponse.getResponse().getStatus() == 200) {
-            lrsResponse.setContent(profileDocument);
+        if (status == 200) {
+            lrsResponse.setSuccess(true);
+            try {
+                lrsResponse.setContent(new Activity(new StringOfJSON(response.getContent())));
+            } catch (Exception ex) {
+                lrsResponse.setErrMsg("Exception: " + ex.toString());
+                lrsResponse.setSuccess(false);
+            }
+        }
+        else {
+            lrsResponse.setSuccess(false);
         }
 
         return lrsResponse;
@@ -776,20 +785,29 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
-    public AgentProfileLRSResponse retrievePerson(Agent agent) {
-        HashMap<String, String> queryParams = new HashMap<String, String>();
-        queryParams.put("agent", agent.toJSON(TCAPIVersion.V100));
-        AgentProfileDocument profileDocument = new AgentProfileDocument();
-        profileDocument.setAgent(agent);
-        profileDocument.setId(null);
+    public PersonLRSResponse retrievePerson(Agent agent) {
+        HTTPRequest request = new HTTPRequest();
+        request.setMethod(HttpMethods.GET);
+        request.setResource("agents");
+        request.setQueryParams(new HashMap<String, String>());
+        request.getQueryParams().put("agent", agent.toJSON(this.getVersion(), this.usePrettyJSON()));
 
-        LRSResponse lrsResp = getDocument("agents", queryParams, profileDocument);
+        HTTPResponse response = makeSyncRequest(request);
+        int status = response.getStatus();
 
-        AgentProfileLRSResponse lrsResponse = new AgentProfileLRSResponse(lrsResp.getRequest(), lrsResp.getResponse());
-        lrsResponse.setSuccess(lrsResp.getSuccess());
+        PersonLRSResponse lrsResponse = new PersonLRSResponse(request, response);
 
-        if (lrsResponse.getResponse().getStatus() == 200) {
-            lrsResponse.setContent(profileDocument);
+        if (status == 200) {
+            lrsResponse.setSuccess(true);
+            try {
+                lrsResponse.setContent(new Person(new StringOfJSON(response.getContent())));
+            } catch (Exception ex) {
+                lrsResponse.setErrMsg("Exception: " + ex.toString());
+                lrsResponse.setSuccess(false);
+            }
+        }
+        else {
+            lrsResponse.setSuccess(false);
         }
 
         return lrsResponse;

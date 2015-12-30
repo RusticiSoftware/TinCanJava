@@ -15,6 +15,7 @@
 */
 package com.rusticisoftware.tincan;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
+import com.rusticisoftware.tincan.json.StringOfJSON;
 
 /**
  * Activity model class
@@ -65,6 +67,10 @@ public class Activity extends JSONBase implements QueryableStatementTarget {
         this(id);
 
         this.setDefinition(new ActivityDefinition(name, description));
+    }
+
+    public Activity(StringOfJSON jsonStr) throws URISyntaxException, IOException {
+        this(jsonStr.toJSONNode());
     }
 
     @Override
