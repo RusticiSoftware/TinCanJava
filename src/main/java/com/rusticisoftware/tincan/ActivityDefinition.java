@@ -227,6 +227,7 @@ public class ActivityDefinition extends JSONBase {
 
                 case TRUE_FALSE:
                 case FILL_IN:
+                case LONG_FILL_IN:
                 case NUMERIC:
                 case OTHER:
                     break;

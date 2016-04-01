@@ -28,6 +28,7 @@ public enum InteractionType {
     PERFORMANCE("performance"),
     TRUE_FALSE("true-false"),
     FILL_IN("fill-in"),
+    LONG_FILL_IN("long-fill-in"),
     NUMERIC("numeric"),
     OTHER("other");
 
