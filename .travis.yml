@@ -1,3 +1,4 @@
+sudo: false
 language: java
-jdk: openjdk7
+jdk: oraclejdk8
 before_script: cp src/test/resources/travis-ci.properties src/test/resources/lrs.properties
