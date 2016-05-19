@@ -77,8 +77,7 @@ public class RemoteLRS implements LRS {
     /**
      * Get the connect timeout value for the default HTTP client
      *
-     * @return
-     * @deprecated set your own HTTP client using {@link #setHttpClient()}
+     * @deprecated set your own HTTP client using {@link #setHttpClient(HttpClient client)}
      */
     @Deprecated
     public static long getHTTPClientConnectTimeout() {
@@ -88,7 +87,7 @@ public class RemoteLRS implements LRS {
     /**
      * Set the connect timeout value for the default HTTP client
      *
-     * @deprecated set your own HTTP client using {@link #setHttpClient()}
+     * @deprecated set your own HTTP client using {@link #setHttpClient(HttpClient client)}
      */
     @Deprecated
     public static void setHTTPClientConnectTimeout(long timeout) {
