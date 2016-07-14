@@ -19,15 +19,20 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rusticisoftware.tincan.http.HTTPPart;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.codec.binary.Hex;
 
 /**
  * Attachment Class
@@ -43,6 +48,7 @@ public class Attachment extends JSONBase {
     private Integer length;
     private String sha2;
     private URL fileUrl;
+    private byte[] content;
     
     public Attachment(JsonNode jsonNode) throws URISyntaxException, MalformedURLException {
         JsonNode usageTypeNode = jsonNode.path("usageType");
@@ -80,7 +86,18 @@ public class Attachment extends JSONBase {
             this.setFileUrl(new URL(fileUrlNode.textValue()));
         }
     }
-    
+
+
+    public void setContent(byte[] content) throws NoSuchAlgorithmException {
+        this.content = Arrays.copyOf(content, content.length);
+        setLength(content.length);
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        digest.update(content);
+        byte[] hash = digest.digest();
+        setSha2(new String(Hex.encodeHex(hash)));
+
+    }
+
     @Override
     public ObjectNode toJSONNode(TCAPIVersion version) {
         ObjectNode node = Mapper.getInstance().createObjectNode();
@@ -106,5 +123,13 @@ public class Attachment extends JSONBase {
             node.put("fileUrl", this.getFileUrl().toString());
         }
         return node;
+    }
+
+    public HTTPPart getPart(){
+        HTTPPart part = new HTTPPart();
+        part.setContent(content);
+        part.setContentType(contentType);
+        part.setSha2(sha2);
+        return part;
     }
 }

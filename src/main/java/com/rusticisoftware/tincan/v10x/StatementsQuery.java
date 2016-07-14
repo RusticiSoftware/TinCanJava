@@ -54,8 +54,7 @@ public class StatementsQuery implements StatementsQueryInterface {
     private DateTime until;
     private Integer limit;
     private QueryResultFormat format;
-    //TODO: Expose when attachments are supported here
-    //private Boolean attachments;
+    private Boolean attachments;
     private Boolean ascending;
 
     public void setVerbID(String verbID) throws URISyntaxException {
@@ -102,6 +101,11 @@ public class StatementsQuery implements StatementsQueryInterface {
         }
         if (this.getAscending() != null) {
             params.put("ascending", this.getAscending().toString());
+        }
+
+        if (this.getAttachments() != null) {
+
+            params.put("attachments", this.getAttachments().toString());
         }
 
         return params;

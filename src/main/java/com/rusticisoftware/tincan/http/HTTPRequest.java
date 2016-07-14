@@ -15,9 +15,11 @@
 */
 package com.rusticisoftware.tincan.http;
 
+import com.rusticisoftware.tincan.Attachment;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,4 +35,5 @@ public class HTTPRequest {
     private String contentType;
     private byte[] content;
     private HTTPResponse response;
+    private List<HTTPPart> partList;
 }

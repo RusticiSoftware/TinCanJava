@@ -34,6 +34,7 @@ public interface LRS {
     StatementsResultLRSResponse queryStatements(StatementsQueryInterface query);
     StatementsResultLRSResponse moreStatements(String moreURL);
 
+
     ProfileKeysLRSResponse retrieveStateIds(Activity activity, Agent agent, UUID registration);
     StateLRSResponse retrieveState(String id, Activity activity, Agent agent, UUID registration);
     LRSResponse saveState(StateDocument state);

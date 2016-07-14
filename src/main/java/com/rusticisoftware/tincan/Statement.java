@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.UUID;
 
+import com.rusticisoftware.tincan.http.HTTPPart;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -133,4 +134,6 @@ public class Statement extends StatementBase {
             this.setTimestamp(new DateTime());
         }
     }
+
+
 }

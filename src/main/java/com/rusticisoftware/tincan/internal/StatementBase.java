@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.rusticisoftware.tincan.http.HTTPPart;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -165,5 +166,42 @@ public abstract class StatementBase extends JSONBase {
         }
         
         return node;
+    }
+
+    public boolean hasAttachments(){
+        return (attachments != null && attachments.size() > 0);
+    }
+
+    public boolean hasAttachmentsWithContent(){
+        if(attachments != null) {
+            for (Attachment attachment : attachments) {
+                if (attachment.getContent().length > 0) {
+                    return true;
+                }
+
+            }
+        }
+        return false;
+    }
+
+    public void addAttachment(Attachment attachment){
+        if(attachments == null){
+            attachments = new ArrayList<Attachment>();
+        }
+        attachments.add(attachment);
+    }
+    public void addAttachments(Attachment attachments){
+        if(this.attachments == null){
+            this.attachments = new ArrayList<Attachment>();
+        }
+        this.attachments.add(attachments);
+    }
+
+    public List<HTTPPart> getPartList(){
+        List<HTTPPart> partList = new ArrayList<HTTPPart>();
+        for (Attachment attachment:attachments) {
+            partList.add(attachment.getPart());
+        }
+        return partList;
     }
 }

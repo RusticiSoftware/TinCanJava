@@ -211,6 +211,128 @@ public class RemoteLRSTest {
     }
 
     @Test
+    public void testSaveStatementWithAttachment() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+
+        Attachment attachment = new Attachment();
+        String testAttachment = "hello world";
+        attachment.setContent(testAttachment.getBytes("UTF-8"));
+        attachment.setContentType("text/plain");
+
+        LanguageMap descriptionMap = new LanguageMap();
+        descriptionMap.put("en-US", "Test Description");
+
+        LanguageMap displayMap = new LanguageMap();
+        displayMap.put("en-US", "Test Display");
+
+
+        attachment.setDescription(descriptionMap);
+        attachment.setDisplay(displayMap);
+        attachment.setUsageType(new URI("http://id.tincanapi.com/attachment/supporting_media"));
+        statement.addAttachment(attachment);
+
+        StatementLRSResponse lrsRes = lrs.saveStatement(statement);
+        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertEquals(statement, lrsRes.getContent());
+        Assert.assertNotNull(lrsRes.getContent().getId());
+        Assert.assertNotNull(lrsRes.getResponse().getContent());
+    }
+
+    @Test
+    public void testSaveStatementWithAttachments() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+
+        Attachment attachment = new Attachment();
+        String testAttachment = "hello world";
+        attachment.setContent(testAttachment.getBytes("UTF-8"));
+        attachment.setContentType("text/plain");
+
+        LanguageMap descriptionMap = new LanguageMap();
+        descriptionMap.put("en-US", "Test Description");
+
+        LanguageMap displayMap = new LanguageMap();
+        displayMap.put("en-US", "Test Display");
+
+
+        attachment.setDescription(descriptionMap);
+        attachment.setDisplay(displayMap);
+        attachment.setUsageType(new URI("http://id.tincanapi.com/attachment/supporting_media"));
+        statement.addAttachment(attachment);
+
+        attachment = new Attachment();
+        testAttachment = "hello world 2";
+        attachment.setContent(testAttachment.getBytes("UTF-8"));
+        attachment.setContentType("text/plain");
+
+        descriptionMap = new LanguageMap();
+        descriptionMap.put("en-US", "Test Description 2");
+
+        displayMap = new LanguageMap();
+        displayMap.put("en-US", "Test Display 2");
+
+
+        attachment.setDescription(descriptionMap);
+        attachment.setDisplay(displayMap);
+        attachment.setUsageType(new URI("http://id.tincanapi.com/attachment/supporting_media"));
+        statement.addAttachment(attachment);
+
+
+        StatementLRSResponse lrsRes = lrs.saveStatement(statement);
+        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertEquals(statement, lrsRes.getContent());
+        Assert.assertNotNull(lrsRes.getContent().getId());
+        Assert.assertNotNull(lrsRes.getResponse().getContent());
+    }
+
+    @Test
+    public void testSaveStatementsWithAttachment() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+
+        Attachment attachment = new Attachment();
+        String testAttachment = "hello world";
+        attachment.setContent(testAttachment.getBytes("UTF-8"));
+        attachment.setContentType("text/plain");
+
+        LanguageMap descriptionMap = new LanguageMap();
+        descriptionMap.put("en-US", "Test Description");
+
+        LanguageMap displayMap = new LanguageMap();
+        displayMap.put("en-US", "Test Display");
+
+
+        attachment.setDescription(descriptionMap);
+        attachment.setDisplay(displayMap);
+        attachment.setUsageType(new URI("http://id.tincanapi.com/attachment/supporting_media"));
+        statement.addAttachment(attachment);
+
+        List<Statement> statementList = new ArrayList<Statement>();
+        statementList.add(statement);
+
+        statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+        statementList.add(statement);
+
+        StatementsResultLRSResponse lrsResultResp = lrs.saveStatements(statementList);
+        Assert.assertTrue(lrsResultResp.getSuccess());
+        Assert.assertEquals(statement, lrsResultResp.getContent().getStatements().get(1));
+        Assert.assertNotNull(lrsResultResp.getContent().getStatements().get(0).getId());
+        Assert.assertNotNull(lrsResultResp.getContent().getStatements().get(1).getId());
+        Assert.assertNotNull(lrsResultResp.getResponse().getContent());
+    }
+
+
+    @Test
     public void testSaveStatement() throws Exception {
         Statement statement = new Statement();
         statement.setActor(agent);
@@ -354,6 +476,47 @@ public class RemoteLRSTest {
 
         StatementsResultLRSResponse lrsRes = lrs.queryStatements(query);
         Assert.assertTrue(lrsRes.getSuccess());
+    }
+
+
+    @Test
+    public void testQueryStatementsWithAttachments() throws Exception {
+
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+
+        Attachment attachment = new Attachment();
+        String testAttachment = "hello world";
+        attachment.setContent(testAttachment.getBytes("UTF-8"));
+        attachment.setContentType("text/plain");
+
+        LanguageMap descriptionMap = new LanguageMap();
+        descriptionMap.put("en-US", "Test Description");
+
+        LanguageMap displayMap = new LanguageMap();
+        displayMap.put("en-US", "Test Display");
+
+
+        attachment.setDescription(descriptionMap);
+        attachment.setDisplay(displayMap);
+        attachment.setUsageType(new URI("http://id.tincanapi.com/attachment/supporting_media"));
+        statement.addAttachment(attachment);
+
+        StatementLRSResponse lrsRes = lrs.saveStatement(statement);
+        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertEquals(statement, lrsRes.getContent());
+        Assert.assertNotNull(lrsRes.getContent().getId());
+        Assert.assertNotNull(lrsRes.getResponse().getContent());
+
+        StatementsQuery query = new StatementsQuery();
+        query.setFormat(QueryResultFormat.EXACT);
+        query.setLimit(10);
+        query.setAttachments(true);
+
+        StatementsResultLRSResponse lrsStmntRes = lrs.queryStatements(query);
+        Assert.assertTrue(lrsStmntRes.getSuccess());
     }
 
     @Test

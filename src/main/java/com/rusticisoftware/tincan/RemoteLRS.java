@@ -15,6 +15,10 @@
 */
 package com.rusticisoftware.tincan;
 
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.http.Part;
+
+import com.rusticisoftware.tincan.http.HTTPPart;
 import org.apache.commons.codec.binary.Base64;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -34,20 +38,23 @@ import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.util.BytesContentProvider;
+import org.eclipse.jetty.client.api.Response.CompleteListener;
+import org.eclipse.jetty.client.api.Response.Listener;
+import org.eclipse.jetty.client.util.*;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.jetty.util.HttpCookieStore;
+import org.eclipse.jetty.util.*;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class used to communicate with a TCAPI endpoint synchronously
@@ -192,25 +199,14 @@ public class RemoteLRS implements LRS {
             }
         }
 
-        //Overload some of an ContentExchange object's functions with anonymous inner functions
-        //Access the HTTPResponse variable via a closure
+
         final HTTPResponse response = new HTTPResponse();
 
         try {
             final Request webReq = httpClient().
                 newRequest(url).
                 method(HttpMethod.fromString(req.getMethod())).
-                header("X-Experience-API-Version", this.version.toString()).
-                onResponseHeaders(new Response.HeadersListener() {
-                    @Override
-                    public void onHeaders(Response webResp) {
-                        response.setStatus(webResp.getStatus());
-                        response.setStatusMsg(webResp.getReason());
-                        for(HttpField header: webResp.getHeaders()) {
-                            response.setHeader(header.getName(), header.getValue());
-                        }
-                    }
-                });
+                header("X-Experience-API-Version", this.version.toString());
 
             if (this.auth != null) {
                 webReq.header("Authorization", this.auth);
@@ -223,19 +219,88 @@ public class RemoteLRS implements LRS {
                 }
             }
 
-            if (req.getContentType() != null) {
-                webReq.header("Content-Type", req.getContentType());
-            }
-            else {
-                webReq.header("Content-Type", "application/octet-stream");
+
+            OutputStreamContentProvider content = new OutputStreamContentProvider();
+            InputStreamResponseListener listener = new InputStreamResponseListener();
+
+            try (OutputStream output = content.getOutputStream()){
+                if(req.getPartList() == null || req.getPartList().size() <= 0) {
+                    if (req.getContentType() != null) {
+                        webReq.header("Content-Type", req.getContentType());
+                    }
+                    else {
+                        webReq.header("Content-Type", "application/octet-stream");
+                    }
+
+                    webReq.content(content).send(listener);
+
+                    if(req.getContent() != null) {
+                        output.write(req.getContent());
+                    }
+
+                    output.close();
+                }
+                else {
+
+                    MultiPartOutputStream multiout = new MultiPartOutputStream(output);
+
+                    webReq.header("Content-Type", "multipart/mixed; boundary=" + multiout.getBoundary());
+                    webReq.content(content).send(listener);
+
+
+                    if (req.getContentType() != null) {
+                        multiout.startPart(req.getContentType());
+                    } else {
+                        multiout.startPart("application/octet-stream");
+                    }
+
+                    if (req.getContent() != null) {
+                        multiout.write(req.getContent());
+                    }
+
+                    for (HTTPPart part : req.getPartList()) {
+                        multiout.startPart(part.getContentType(), new String[]{
+                                "Content-Transfer-Encoding: binary",
+                                "X-Experience-API-Hash: " + part.getSha2()});
+                        multiout.write(part.getContent());
+
+
+                    }
+                    multiout.close();
+                }
             }
 
-            if (req.getContent() != null) {
-                webReq.content(new BytesContentProvider(req.getContent()));
+            Response httpResponse = listener.get(5, TimeUnit.SECONDS);
+
+            response.setStatus(httpResponse.getStatus());
+            response.setStatusMsg(httpResponse.getReason());
+            for(HttpField header: httpResponse.getHeaders()) {
+                response.setHeader(header.getName(), header.getValue());
             }
 
-            final ContentResponse webResp = webReq.send();
-            response.setContentBytes(webResp.getContent());
+
+
+            // Use try-with-resources to close input stream.
+            try (InputStream responseContent = listener.getInputStream())
+            {
+
+                if(response.getContentType() != null && response.getContentType().contains("multipart/mixed")){
+
+                    MultiPartInputStreamParser multiin = new MultiPartInputStreamParser(responseContent,response.getContentType().replace("multipart/mixed","multipart/form-data"),new MultipartConfigElement("/tmp"),new File("/tmp"));
+
+                    Collection<Part> parts = multiin.getParts();
+
+                    for (Part part : parts) {
+                        if(part.getContentType().equals("application/json")){
+                        }
+
+                    }
+                }
+                String responseContentString = IO.toString(responseContent);
+                response.setContentBytes(responseContentString.getBytes());
+            }
+
+
         } catch (Exception ex) {
             response.setStatus(400);
             response.setStatusMsg("Exception in RemoteLRS.makeSyncRequest(): " + ex);
@@ -445,6 +510,10 @@ public class RemoteLRS implements LRS {
             return lrsResponse;
         }
 
+        if (statement.hasAttachmentsWithContent()) {
+            lrsResponse.getRequest().setPartList(statement.getPartList());
+        }
+
         if (statement.getId() == null) {
             lrsResponse.getRequest().setMethod(HttpMethod.POST.asString());
         }
@@ -503,6 +572,18 @@ public class RemoteLRS implements LRS {
             lrsResponse.setErrMsg("Exception: " + ex.toString());
             return lrsResponse;
         }
+
+        for (Statement statement: statements) {
+            if (statement.hasAttachmentsWithContent()) {
+                if(lrsResponse.getRequest().getPartList() == null){
+                    lrsResponse.getRequest().setPartList(statement.getPartList());
+                }
+                else{
+                    lrsResponse.getRequest().getPartList().addAll(statement.getPartList());
+                }
+            }
+        }
+
 
         HTTPResponse response = makeSyncRequest(lrsResponse.getRequest());
         int status = response.getStatus();
