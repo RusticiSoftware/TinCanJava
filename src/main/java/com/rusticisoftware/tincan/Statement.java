@@ -18,6 +18,7 @@ package com.rusticisoftware.tincan;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,7 +51,7 @@ public class Statement extends StatementBase {
     @Deprecated
     private Boolean voided;
 
-    public Statement(JsonNode jsonNode) throws URISyntaxException, MalformedURLException {
+    public Statement(JsonNode jsonNode) throws URISyntaxException, MalformedURLException, IOException, NoSuchAlgorithmException {
         super(jsonNode);
 
         JsonNode idNode = jsonNode.path("id");
@@ -79,7 +80,7 @@ public class Statement extends StatementBase {
         }
     }
 
-    public Statement(StringOfJSON jsonStr) throws IOException, URISyntaxException {
+    public Statement(StringOfJSON jsonStr) throws IOException, URISyntaxException, NoSuchAlgorithmException {
         this(jsonStr.toJSONNode());
     }
 

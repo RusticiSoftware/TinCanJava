@@ -18,6 +18,7 @@ package com.rusticisoftware.tincan;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -42,7 +43,7 @@ public class StatementsResult extends JSONBase {
     private ArrayList<Statement> statements = new ArrayList<Statement>();
     private String moreURL;
 
-    public StatementsResult(JsonNode jsonNode) throws URISyntaxException, MalformedURLException {
+    public StatementsResult(JsonNode jsonNode) throws URISyntaxException, MalformedURLException, IOException, NoSuchAlgorithmException {
         this();
 
         JsonNode statementsNode = jsonNode.path("statements");
@@ -58,7 +59,7 @@ public class StatementsResult extends JSONBase {
         }
     }
 
-    public StatementsResult(StringOfJSON json) throws IOException, URISyntaxException {
+    public StatementsResult(StringOfJSON json) throws IOException, URISyntaxException, NoSuchAlgorithmException {
         this(json.toJSONNode());
     }
 

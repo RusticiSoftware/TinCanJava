@@ -26,7 +26,6 @@ public class HTTPPart {
     private String sha2;
     private String contentType;
     private byte[] content;
-
 }
 
 

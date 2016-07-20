@@ -53,6 +53,9 @@ public class RemoteLRSTest {
     private static Score score;
     private static StatementRef statementRef;
     private static SubStatement subStatement;
+    private static Attachment attachment1;
+    private static Attachment attachment2;
+
 
     private static Properties config = new Properties();
 
@@ -120,6 +123,24 @@ public class RemoteLRSTest {
         subStatement.setActor(agent);
         subStatement.setVerb(verb);
         subStatement.setObject(parent);
+
+        attachment1 = new Attachment();
+        attachment1.setContent("hello world".getBytes("UTF-8"));
+        attachment1.setContentType("text/plain");
+        attachment1.setDescription(new LanguageMap());
+        attachment1.getDescription().put("en-US", "Test Description");
+        attachment1.setDisplay(new LanguageMap());
+        attachment1.getDisplay().put("en-US", "Test Display");
+        attachment1.setUsageType(new URI("http://id.tincanapi.com/attachment/supporting_media"));
+
+        attachment2 = new Attachment();
+        attachment2.setContent("hello world 2".getBytes("UTF-8"));
+        attachment2.setContentType("text/plain");
+        attachment2.setDescription(new LanguageMap());
+        attachment2.getDescription().put("en-US", "Test Description 2");
+        attachment2.setDisplay(new LanguageMap());
+        attachment2.getDisplay().put("en-US", "Test Display 2");
+        attachment2.setUsageType(new URI("http://id.tincanapi.com/attachment/supporting_media"));
     }
 
     @Test
@@ -216,23 +237,7 @@ public class RemoteLRSTest {
         statement.setActor(agent);
         statement.setVerb(verb);
         statement.setObject(activity);
-
-        Attachment attachment = new Attachment();
-        String testAttachment = "hello world";
-        attachment.setContent(testAttachment.getBytes("UTF-8"));
-        attachment.setContentType("text/plain");
-
-        LanguageMap descriptionMap = new LanguageMap();
-        descriptionMap.put("en-US", "Test Description");
-
-        LanguageMap displayMap = new LanguageMap();
-        displayMap.put("en-US", "Test Display");
-
-
-        attachment.setDescription(descriptionMap);
-        attachment.setDisplay(displayMap);
-        attachment.setUsageType(new URI("http://id.tincanapi.com/attachment/supporting_media"));
-        statement.addAttachment(attachment);
+        statement.addAttachment(attachment1);
 
         StatementLRSResponse lrsRes = lrs.saveStatement(statement);
         Assert.assertTrue(lrsRes.getSuccess());
@@ -247,40 +252,8 @@ public class RemoteLRSTest {
         statement.setActor(agent);
         statement.setVerb(verb);
         statement.setObject(activity);
-
-        Attachment attachment = new Attachment();
-        String testAttachment = "hello world";
-        attachment.setContent(testAttachment.getBytes("UTF-8"));
-        attachment.setContentType("text/plain");
-
-        LanguageMap descriptionMap = new LanguageMap();
-        descriptionMap.put("en-US", "Test Description");
-
-        LanguageMap displayMap = new LanguageMap();
-        displayMap.put("en-US", "Test Display");
-
-
-        attachment.setDescription(descriptionMap);
-        attachment.setDisplay(displayMap);
-        attachment.setUsageType(new URI("http://id.tincanapi.com/attachment/supporting_media"));
-        statement.addAttachment(attachment);
-
-        attachment = new Attachment();
-        testAttachment = "hello world 2";
-        attachment.setContent(testAttachment.getBytes("UTF-8"));
-        attachment.setContentType("text/plain");
-
-        descriptionMap = new LanguageMap();
-        descriptionMap.put("en-US", "Test Description 2");
-
-        displayMap = new LanguageMap();
-        displayMap.put("en-US", "Test Display 2");
-
-
-        attachment.setDescription(descriptionMap);
-        attachment.setDisplay(displayMap);
-        attachment.setUsageType(new URI("http://id.tincanapi.com/attachment/supporting_media"));
-        statement.addAttachment(attachment);
+        statement.addAttachment(attachment1);
+        statement.addAttachment(attachment2);
 
 
         StatementLRSResponse lrsRes = lrs.saveStatement(statement);
@@ -296,23 +269,7 @@ public class RemoteLRSTest {
         statement.setActor(agent);
         statement.setVerb(verb);
         statement.setObject(activity);
-
-        Attachment attachment = new Attachment();
-        String testAttachment = "hello world";
-        attachment.setContent(testAttachment.getBytes("UTF-8"));
-        attachment.setContentType("text/plain");
-
-        LanguageMap descriptionMap = new LanguageMap();
-        descriptionMap.put("en-US", "Test Description");
-
-        LanguageMap displayMap = new LanguageMap();
-        displayMap.put("en-US", "Test Display");
-
-
-        attachment.setDescription(descriptionMap);
-        attachment.setDisplay(displayMap);
-        attachment.setUsageType(new URI("http://id.tincanapi.com/attachment/supporting_media"));
-        statement.addAttachment(attachment);
+        statement.addAttachment(attachment1);
 
         List<Statement> statementList = new ArrayList<Statement>();
         statementList.add(statement);
@@ -459,7 +416,22 @@ public class RemoteLRSTest {
 
         StatementLRSResponse saveRes = lrs.saveStatement(statement);
         Assert.assertTrue(saveRes.getSuccess());
-        StatementLRSResponse retRes = lrs.retrieveStatement(saveRes.getContent().getId().toString());
+        StatementLRSResponse retRes = lrs.retrieveStatement(saveRes.getContent().getId().toString(), false);
+        Assert.assertTrue(retRes.getSuccess());
+    }
+
+    @Test
+    public void testRetrieveStatementWithAttachment() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+        statement.addAttachment(attachment1);
+
+        StatementLRSResponse saveRes = lrs.saveStatement(statement);
+        Assert.assertTrue(saveRes.getSuccess());
+
+        StatementLRSResponse retRes = lrs.retrieveStatement(saveRes.getContent().getId().toString(), true);
         Assert.assertTrue(retRes.getSuccess());
     }
 
@@ -486,23 +458,7 @@ public class RemoteLRSTest {
         statement.setActor(agent);
         statement.setVerb(verb);
         statement.setObject(activity);
-
-        Attachment attachment = new Attachment();
-        String testAttachment = "hello world";
-        attachment.setContent(testAttachment.getBytes("UTF-8"));
-        attachment.setContentType("text/plain");
-
-        LanguageMap descriptionMap = new LanguageMap();
-        descriptionMap.put("en-US", "Test Description");
-
-        LanguageMap displayMap = new LanguageMap();
-        displayMap.put("en-US", "Test Display");
-
-
-        attachment.setDescription(descriptionMap);
-        attachment.setDisplay(displayMap);
-        attachment.setUsageType(new URI("http://id.tincanapi.com/attachment/supporting_media"));
-        statement.addAttachment(attachment);
+        statement.addAttachment(attachment1);
 
         StatementLRSResponse lrsRes = lrs.saveStatement(statement);
         Assert.assertTrue(lrsRes.getSuccess());

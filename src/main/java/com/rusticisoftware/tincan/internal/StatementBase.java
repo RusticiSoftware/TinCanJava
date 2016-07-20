@@ -18,9 +18,11 @@ package com.rusticisoftware.tincan.internal;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.security.NoSuchAlgorithmException;
 
 import com.rusticisoftware.tincan.http.HTTPPart;
 import lombok.Data;
@@ -58,7 +60,7 @@ public abstract class StatementBase extends JSONBase {
     @Deprecated
     private Boolean voided;
 
-    public StatementBase(JsonNode jsonNode) throws URISyntaxException, MalformedURLException {
+    public StatementBase(JsonNode jsonNode) throws URISyntaxException, MalformedURLException, IOException, NoSuchAlgorithmException {
         this();
 
         JsonNode actorNode = jsonNode.path("actor");
@@ -117,7 +119,7 @@ public abstract class StatementBase extends JSONBase {
         }
     }
 
-    public StatementBase(StringOfJSON jsonStr) throws IOException, URISyntaxException {
+    public StatementBase(StringOfJSON jsonStr) throws IOException, URISyntaxException, NoSuchAlgorithmException {
         this(jsonStr.toJSONNode());
     }
 
@@ -169,12 +171,12 @@ public abstract class StatementBase extends JSONBase {
     }
 
     public boolean hasAttachments(){
-        return (attachments != null && attachments.size() > 0);
+        return (this.getAttachments() != null && this.getAttachments().size() > 0);
     }
 
-    public boolean hasAttachmentsWithContent(){
-        if(attachments != null) {
-            for (Attachment attachment : attachments) {
+    public boolean hasAttachmentsWithContent() {
+        if (this.getAttachments() != null) {
+            for (Attachment attachment : this.getAttachments()) {
                 if (attachment.getContent().length > 0) {
                     return true;
                 }
@@ -184,22 +186,22 @@ public abstract class StatementBase extends JSONBase {
         return false;
     }
 
-    public void addAttachment(Attachment attachment){
-        if(attachments == null){
-            attachments = new ArrayList<Attachment>();
+    public void addAttachment(Attachment attachment) {
+        if (this.getAttachments() == null) {
+            this.setAttachments(new ArrayList<Attachment>());
         }
-        attachments.add(attachment);
+        this.getAttachments().add(attachment);
     }
-    public void addAttachments(Attachment attachments){
-        if(this.attachments == null){
-            this.attachments = new ArrayList<Attachment>();
+    public void addAttachments(Attachment attachments) {
+        if (this.getAttachments() == null) {
+            this.setAttachments(new ArrayList<Attachment>());
         }
-        this.attachments.add(attachments);
+        this.getAttachments().add(attachments);
     }
 
-    public List<HTTPPart> getPartList(){
+    public List<HTTPPart> getPartList() {
         List<HTTPPart> partList = new ArrayList<HTTPPart>();
-        for (Attachment attachment:attachments) {
+        for (Attachment attachment : this.getAttachments()) {
             partList.add(attachment.getPart());
         }
         return partList;

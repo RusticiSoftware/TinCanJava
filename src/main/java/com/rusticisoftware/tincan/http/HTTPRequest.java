@@ -18,6 +18,7 @@ package com.rusticisoftware.tincan.http;
 import com.rusticisoftware.tincan.Attachment;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import javax.servlet.http.Part;
 
 import java.util.List;
 import java.util.Map;

@@ -17,12 +17,11 @@ package com.rusticisoftware.tincan;
 
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
-
-import com.rusticisoftware.tincan.http.HTTPPart;
 import org.apache.commons.codec.binary.Base64;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rusticisoftware.tincan.documents.ActivityProfileDocument;
 import com.rusticisoftware.tincan.documents.AgentProfileDocument;
 import com.rusticisoftware.tincan.documents.Document;
@@ -34,6 +33,8 @@ import com.rusticisoftware.tincan.http.HTTPResponse;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
 import com.rusticisoftware.tincan.v10x.StatementsQuery;
+import com.rusticisoftware.tincan.http.HTTPPart;
+import com.rusticisoftware.tincan.internal.MultipartParser;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
@@ -219,22 +220,21 @@ public class RemoteLRS implements LRS {
                 }
             }
 
-
             OutputStreamContentProvider content = new OutputStreamContentProvider();
             InputStreamResponseListener listener = new InputStreamResponseListener();
 
-            try (OutputStream output = content.getOutputStream()){
-                if(req.getPartList() == null || req.getPartList().size() <= 0) {
+            try (OutputStream output = content.getOutputStream()) {
+                if (req.getPartList() == null || req.getPartList().size() <= 0) {
                     if (req.getContentType() != null) {
                         webReq.header("Content-Type", req.getContentType());
                     }
-                    else {
+                    else if (req.getContentType() != "GET") {
                         webReq.header("Content-Type", "application/octet-stream");
                     }
 
                     webReq.content(content).send(listener);
 
-                    if(req.getContent() != null) {
+                    if (req.getContent() != null) {
                         output.write(req.getContent());
                     }
 
@@ -246,7 +246,6 @@ public class RemoteLRS implements LRS {
 
                     webReq.header("Content-Type", "multipart/mixed; boundary=" + multiout.getBoundary());
                     webReq.content(content).send(listener);
-
 
                     if (req.getContentType() != null) {
                         multiout.startPart(req.getContentType());
@@ -263,8 +262,6 @@ public class RemoteLRS implements LRS {
                                 "Content-Transfer-Encoding: binary",
                                 "X-Experience-API-Hash: " + part.getSha2()});
                         multiout.write(part.getContent());
-
-
                     }
                     multiout.close();
                 }
@@ -274,7 +271,7 @@ public class RemoteLRS implements LRS {
 
             response.setStatus(httpResponse.getStatus());
             response.setStatusMsg(httpResponse.getReason());
-            for(HttpField header: httpResponse.getHeaders()) {
+            for (HttpField header : httpResponse.getHeaders()) {
                 response.setHeader(header.getName(), header.getValue());
             }
 
@@ -284,22 +281,51 @@ public class RemoteLRS implements LRS {
             try (InputStream responseContent = listener.getInputStream())
             {
 
-                if(response.getContentType() != null && response.getContentType().contains("multipart/mixed")){
+                if (response.getContentType() != null && response.getContentType().contains("multipart/mixed")) {
 
-                    MultiPartInputStreamParser multiin = new MultiPartInputStreamParser(responseContent,response.getContentType().replace("multipart/mixed","multipart/form-data"),new MultipartConfigElement("/tmp"),new File("/tmp"));
+                    MultipartParser responseHandler = new MultipartParser(responseContent);
 
-                    Collection<Part> parts = multiin.getParts();
+                    // We need to get the first part that contains the statements and parse them
+                    responseHandler.nextPart();
 
-                    for (Part part : parts) {
-                        if(part.getContentType().equals("application/json")){
+                    ArrayList<Statement> statements = new ArrayList<Statement>();
+
+                    if (responseHandler.getHeaders().get("Content-Type").contains("application/json")) {
+                        JsonNode statementsNode = (new StringOfJSON(new String(responseHandler.getContent())).toJSONNode());
+                        if (! (statementsNode.findPath("statements").isMissingNode())) {
+                            statementsNode = statementsNode.findPath("statements");
+                            for (JsonNode obj : statementsNode) {
+                                statements.add(new Statement(obj));
+                            }
                         }
-
+                        else {
+                            statements.add(new Statement(statementsNode));
+                        }
                     }
-                }
-                String responseContentString = IO.toString(responseContent);
-                response.setContentBytes(responseContentString.getBytes());
-            }
 
+                    while (! responseHandler.noMoreParts) {
+                        responseHandler.nextPart();
+                        String hashToMatch = responseHandler.getHeaders().get("X-Experience-API-Hash");
+                        for (Statement stmt : statements) {
+                            if (stmt.getAttachments() != null) {
+                                for (Attachment a : stmt.getAttachments()) {
+                                    if (a.getSha2().equals(hashToMatch)) {
+                                        a.setContent(responseHandler.getContent());
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    StatementsResult responseStatements = new StatementsResult();
+                    responseStatements.setStatements(statements);
+                    response.setContentBytes(responseStatements.toJSONNode(TCAPIVersion.V101).toString().getBytes());
+                }
+                else {
+                    String responseContentString = IO.toString(responseContent);
+                    response.setContentBytes(responseContentString.getBytes());
+                }
+            }
 
         } catch (Exception ex) {
             response.setStatus(400);
@@ -309,12 +335,11 @@ public class RemoteLRS implements LRS {
         return response;
     }
 
-    private StatementLRSResponse getStatement(String id, String paramName) {
+    private StatementLRSResponse getStatement(HashMap<String, String> params) {
         HTTPRequest request = new HTTPRequest();
         request.setMethod(HttpMethod.GET.asString());
         request.setResource("statements");
-        request.setQueryParams(new HashMap<String, String>());
-        request.getQueryParams().put(paramName, id);
+        request.setQueryParams(params);
 
         HTTPResponse response = makeSyncRequest(request);
         int status = response.getStatus();
@@ -612,14 +637,20 @@ public class RemoteLRS implements LRS {
     }
 
     @Override
-    public StatementLRSResponse retrieveStatement(String id) {
-        return getStatement(id, "statementId");
+    public StatementLRSResponse retrieveStatement(String id, boolean attachments) {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("statementId", id);
+        params.put("attachments", String.valueOf(attachments));
+        return getStatement(params);
     }
 
     @Override
-    public StatementLRSResponse retrieveVoidedStatement(String id) {
+    public StatementLRSResponse retrieveVoidedStatement(String id, boolean attachments) {
         String paramName = (this.getVersion() == TCAPIVersion.V095) ? "statementId" : "voidedStatementId";
-        return getStatement(id, paramName);
+        HashMap<String, String>  params = new HashMap<String, String>();
+        params.put(paramName, id);
+        params.put("attachments", String.valueOf(attachments));
+        return getStatement(params);
     }
 
     @Override

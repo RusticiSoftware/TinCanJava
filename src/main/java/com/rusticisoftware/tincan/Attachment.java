@@ -22,6 +22,7 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.io.IOException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -50,7 +51,7 @@ public class Attachment extends JSONBase {
     private URL fileUrl;
     private byte[] content;
     
-    public Attachment(JsonNode jsonNode) throws URISyntaxException, MalformedURLException {
+    public Attachment(JsonNode jsonNode) throws URISyntaxException, MalformedURLException, IOException, NoSuchAlgorithmException {
         JsonNode usageTypeNode = jsonNode.path("usageType");
         if (! usageTypeNode.isMissingNode()) {
             this.setUsageType(new URI(usageTypeNode.textValue()));
@@ -85,6 +86,11 @@ public class Attachment extends JSONBase {
         if (! fileUrlNode.isMissingNode()) {
             this.setFileUrl(new URL(fileUrlNode.textValue()));
         }
+
+        JsonNode contentNode = jsonNode.path("content");
+        if (! contentNode.isMissingNode()) {
+            this.setContent(contentNode.binaryValue());
+        }
     }
 
 
@@ -95,7 +101,6 @@ public class Attachment extends JSONBase {
         digest.update(content);
         byte[] hash = digest.digest();
         setSha2(new String(Hex.encodeHex(hash)));
-
     }
 
     @Override
