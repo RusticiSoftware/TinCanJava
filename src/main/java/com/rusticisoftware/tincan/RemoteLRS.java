@@ -28,13 +28,13 @@ import com.rusticisoftware.tincan.documents.Document;
 import com.rusticisoftware.tincan.documents.StateDocument;
 import com.rusticisoftware.tincan.exceptions.*;
 import com.rusticisoftware.tincan.lrsresponses.*;
+import com.rusticisoftware.tincan.http.HTTPPart;
 import com.rusticisoftware.tincan.http.HTTPRequest;
 import com.rusticisoftware.tincan.http.HTTPResponse;
+import com.rusticisoftware.tincan.internal.MultipartParser;
 import com.rusticisoftware.tincan.json.Mapper;
 import com.rusticisoftware.tincan.json.StringOfJSON;
 import com.rusticisoftware.tincan.v10x.StatementsQuery;
-import com.rusticisoftware.tincan.http.HTTPPart;
-import com.rusticisoftware.tincan.internal.MultipartParser;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
@@ -200,7 +200,6 @@ public class RemoteLRS implements LRS {
             }
         }
 
-
         final HTTPResponse response = new HTTPResponse();
 
         try {
@@ -221,14 +220,14 @@ public class RemoteLRS implements LRS {
             }
 
             OutputStreamContentProvider content = new OutputStreamContentProvider();
-            InputStreamResponseListener listener = new InputStreamResponseListener();
+            FutureResponseListener listener = new FutureResponseListener(webReq);
 
             try (OutputStream output = content.getOutputStream()) {
                 if (req.getPartList() == null || req.getPartList().size() <= 0) {
                     if (req.getContentType() != null) {
                         webReq.header("Content-Type", req.getContentType());
                     }
-                    else if (req.getContentType() != "GET") {
+                    else if (req.getMethod() != "GET") {
                         webReq.header("Content-Type", "application/octet-stream");
                     }
 
@@ -241,7 +240,6 @@ public class RemoteLRS implements LRS {
                     output.close();
                 }
                 else {
-
                     MultiPartOutputStream multiout = new MultiPartOutputStream(output);
 
                     webReq.header("Content-Type", "multipart/mixed; boundary=" + multiout.getBoundary());
@@ -249,7 +247,8 @@ public class RemoteLRS implements LRS {
 
                     if (req.getContentType() != null) {
                         multiout.startPart(req.getContentType());
-                    } else {
+                    }
+                    else {
                         multiout.startPart("application/octet-stream");
                     }
 
@@ -260,14 +259,15 @@ public class RemoteLRS implements LRS {
                     for (HTTPPart part : req.getPartList()) {
                         multiout.startPart(part.getContentType(), new String[]{
                                 "Content-Transfer-Encoding: binary",
-                                "X-Experience-API-Hash: " + part.getSha2()});
+                                "X-Experience-API-Hash: " + part.getSha2()
+                        });
                         multiout.write(part.getContent());
                     }
                     multiout.close();
                 }
             }
 
-            Response httpResponse = listener.get(5, TimeUnit.SECONDS);
+            ContentResponse httpResponse = listener.get();
 
             response.setStatus(httpResponse.getStatus());
             response.setStatusMsg(httpResponse.getReason());
@@ -275,58 +275,44 @@ public class RemoteLRS implements LRS {
                 response.setHeader(header.getName(), header.getValue());
             }
 
+            if (response.getContentType() != null && response.getContentType().contains("multipart/mixed")) {
+                String boundary = response.getContentType().split("boundary=")[1];
 
+                MultipartParser responseHandler = new MultipartParser(listener.getContentAsString(), boundary);
+                String temp = listener.getContentAsString();
 
-            // Use try-with-resources to close input stream.
-            try (InputStream responseContent = listener.getInputStream())
-            {
+                // We need to get the first part that contains the statements and parse them
+                responseHandler.nextPart();
 
-                if (response.getContentType() != null && response.getContentType().contains("multipart/mixed")) {
+                ArrayList<Statement> statements = new ArrayList<Statement>();
 
-                    MultipartParser responseHandler = new MultipartParser(responseContent);
-
-                    // We need to get the first part that contains the statements and parse them
-                    responseHandler.nextPart();
-
-                    ArrayList<Statement> statements = new ArrayList<Statement>();
-
-                    if (responseHandler.getHeaders().get("Content-Type").contains("application/json")) {
-                        JsonNode statementsNode = (new StringOfJSON(new String(responseHandler.getContent())).toJSONNode());
-                        if (! (statementsNode.findPath("statements").isMissingNode())) {
-                            statementsNode = statementsNode.findPath("statements");
-                            for (JsonNode obj : statementsNode) {
-                                statements.add(new Statement(obj));
-                            }
-                        }
-                        else {
-                            statements.add(new Statement(statementsNode));
+                if (responseHandler.getHeaders().get("Content-Type").contains("application/json")) {
+                    JsonNode statementsNode = (new StringOfJSON(new String(responseHandler.getContent())).toJSONNode());
+                    if (statementsNode.findPath("statements").isMissingNode()) {
+                        statements.add(new Statement(statementsNode));
+                    }
+                    else {
+                        statementsNode = statementsNode.findPath("statements");
+                        for (JsonNode obj : statementsNode) {
+                            statements.add(new Statement(obj));
                         }
                     }
-
-                    while (! responseHandler.noMoreParts) {
-                        responseHandler.nextPart();
-                        String hashToMatch = responseHandler.getHeaders().get("X-Experience-API-Hash");
-                        for (Statement stmt : statements) {
-                            if (stmt.getAttachments() != null) {
-                                for (Attachment a : stmt.getAttachments()) {
-                                    if (a.getSha2().equals(hashToMatch)) {
-                                        a.setContent(responseHandler.getContent());
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    StatementsResult responseStatements = new StatementsResult();
-                    responseStatements.setStatements(statements);
-                    response.setContentBytes(responseStatements.toJSONNode(TCAPIVersion.V101).toString().getBytes());
                 }
                 else {
-                    String responseContentString = IO.toString(responseContent);
-                    response.setContentBytes(responseContentString.getBytes());
+                    throw new Exception("The first part of this response had a Content-Type other than \"application/json\"");
                 }
-            }
 
+                while (!responseHandler.noMoreParts) {
+                    responseHandler.nextPart();
+                    response.setAttachment(responseHandler.getHeaders().get("X-Experience-API-Hash"), responseHandler.getContent());
+                }
+                StatementsResult responseStatements = new StatementsResult();
+                responseStatements.setStatements(statements);
+                response.setContentBytes(responseStatements.toJSONNode(TCAPIVersion.V101).toString().getBytes());
+            }
+            else {
+                response.setContentBytes(listener.getContent());
+            }
         } catch (Exception ex) {
             response.setStatus(400);
             response.setStatusMsg("Exception in RemoteLRS.makeSyncRequest(): " + ex);
@@ -349,7 +335,21 @@ public class RemoteLRS implements LRS {
         if (status == 200) {
             lrsResponse.setSuccess(true);
             try {
-                lrsResponse.setContent(new Statement(new StringOfJSON(response.getContent())));
+                JsonNode contentNode = (new StringOfJSON(response.getContent())).toJSONNode();
+                if (! (contentNode.findPath("statements").isMissingNode())) {
+                    contentNode = contentNode.findPath("statements").get(0);
+                }
+
+                Statement stmt = new Statement (contentNode);
+                for (Map.Entry<String, byte[]> entry : response.getAttachments().entrySet()) {
+                    for (Attachment a : stmt.getAttachments()) {
+                        if (entry.getKey().equals(a.getSha2())) {
+                            a.setContent(entry.getValue());
+                        }
+                    }
+                }
+
+                lrsResponse.setContent(stmt);
             } catch (Exception ex) {
                 lrsResponse.setErrMsg("Exception: " + ex.toString());
                 lrsResponse.setSuccess(false);
@@ -598,17 +598,12 @@ public class RemoteLRS implements LRS {
             return lrsResponse;
         }
 
+        lrsResponse.getRequest().setPartList(new ArrayList<HTTPPart>());
         for (Statement statement: statements) {
             if (statement.hasAttachmentsWithContent()) {
-                if(lrsResponse.getRequest().getPartList() == null){
-                    lrsResponse.getRequest().setPartList(statement.getPartList());
-                }
-                else{
-                    lrsResponse.getRequest().getPartList().addAll(statement.getPartList());
-                }
+                lrsResponse.getRequest().getPartList().addAll(statement.getPartList());
             }
         }
-
 
         HTTPResponse response = makeSyncRequest(lrsResponse.getRequest());
         int status = response.getStatus();
@@ -634,6 +629,16 @@ public class RemoteLRS implements LRS {
         }
 
         return lrsResponse;
+    }
+
+    @Override
+    public StatementLRSResponse retrieveStatement(String id) {
+        return retrieveStatement(id, false);
+    }
+
+    @Override
+    public StatementLRSResponse retrieveVoidedStatement(String id) {
+        return retrieveVoidedStatement(id, false);
     }
 
     @Override
@@ -690,6 +695,18 @@ public class RemoteLRS implements LRS {
             lrsResponse.setSuccess(true);
             try {
                 lrsResponse.setContent(new StatementsResult(new StringOfJSON(response.getContent())));
+
+                for (Statement stmt : lrsResponse.getContent().getStatements()) {
+                    if (stmt.hasAttachments()) {
+                        for (Map.Entry<String, byte[]> entry : response.getAttachments().entrySet()) {
+                            for (Attachment a : stmt.getAttachments()) {
+                                if (entry.getKey().equals(a.getSha2())) {
+                                    a.setContent(entry.getValue());
+                                }
+                            }
+                        }
+                    }
+                }
             } catch (Exception ex) {
                 lrsResponse.setErrMsg("Exception: " + ex.toString());
                 lrsResponse.setSuccess(false);

@@ -47,7 +47,7 @@ public class Statement extends StatementBase {
     private DateTime stored;
     private Agent authority;
     private TCAPIVersion version;
-    
+
     @Deprecated
     private Boolean voided;
 
@@ -135,6 +135,4 @@ public class Statement extends StatementBase {
             this.setTimestamp(new DateTime());
         }
     }
-
-
 }

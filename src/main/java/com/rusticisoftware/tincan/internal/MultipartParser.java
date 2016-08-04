@@ -18,34 +18,54 @@ package com.rusticisoftware.tincan.internal;
 import java.io.*;
 import java.util.*;
 import lombok.Data;
+import org.eclipse.jetty.util.IO;
 
 @Data
 public class MultipartParser {
-    private InputStream in;
-    private BufferedReader reader;
+    private Scanner scanner;
     private String boundary = "";
-    private String finalBoundary = "";
     private HashMap<String, String> headers = new HashMap<String, String>();
     private byte[] content;
+    private String contentString;
     public boolean noMoreParts = false;
 
-    public MultipartParser(InputStream _in) throws IOException {
-        this.in = _in;
-        this.reader = new BufferedReader(new InputStreamReader(this.in));
-        this.boundary = this.findBoundary();
-        this.finalBoundary = boundary + "--";
+    public MultipartParser(String contentString, String boundary) throws IOException {
+        this.contentString = contentString;
+        this.scanner = new Scanner(contentString);
+        this.boundary = "--" + boundary;
     }
 
     public void nextPart() throws IOException {
-        String line;
-        while ((line = reader.readLine().trim()).length() > 0) {
-            String[] parts = line.split(":");
-            headers.put(parts[0].trim(), parts[1].trim());
+        String line = scanner.nextLine();
+
+        // Check if the first line is "\r\n" or one of the headers
+        if (line.trim().length() > 0) {
+            if (line.contains(":")) {
+                String[] parts = line.split(":");
+                headers.put(parts[0].trim(), parts[1].trim());
+            }
         }
 
+        // Populate the headers
+        while (scanner.hasNextLine() && (line = scanner.nextLine()).trim().length() > 0) {
+            if (line.contains(":")) {
+                String[] parts = line.split(":");
+
+                if (! parts[1].equals(null)) {
+                    headers.put(parts[0].trim(), parts[1].trim());
+                }
+                else {
+                    if ((line = scanner.nextLine()).charAt(0) == '\t') {
+                        headers.put(parts[0].trim(), line.trim());
+                    }
+                }
+            }
+        }
+
+        // Read in the content
         String contentString = "";
-        while (! (line = reader.readLine()).equals(boundary)) {
-            if (line.equals(finalBoundary)) {
+        while (scanner.hasNextLine() && !(line = scanner.nextLine()).equals(boundary)) {
+            if (line.equals(boundary + "--")) {
                 noMoreParts = true;
                 break;
             }
@@ -53,16 +73,5 @@ public class MultipartParser {
         }
 
         content = contentString.getBytes();
-    }
-
-    private String findBoundary() throws IOException {
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (line.startsWith("--")) {
-                return line;
-            }
-        }
-
-        return "";
     }
 }

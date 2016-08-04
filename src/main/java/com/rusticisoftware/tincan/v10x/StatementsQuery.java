@@ -43,7 +43,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class StatementsQuery implements StatementsQueryInterface {
     @Getter private TCAPIVersion version = TCAPIVersion.V100;
-    
+
     private Agent agent;
     private URI verbID;
     private URI activityID;
@@ -104,7 +104,6 @@ public class StatementsQuery implements StatementsQueryInterface {
         }
 
         if (this.getAttachments() != null) {
-
             params.put("attachments", this.getAttachments().toString());
         }
 

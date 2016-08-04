@@ -22,7 +22,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.security.NoSuchAlgorithmException;
 
 import com.rusticisoftware.tincan.http.HTTPPart;
 import lombok.Data;
@@ -56,7 +55,7 @@ public abstract class StatementBase extends JSONBase {
     private Context context;
     private DateTime timestamp;
     private List<Attachment> attachments;
-    
+
     @Deprecated
     private Boolean voided;
 
@@ -76,10 +75,10 @@ public abstract class StatementBase extends JSONBase {
         JsonNode objectNode = jsonNode.path("object");
         if (! objectNode.isMissingNode()) {
             String objectType = objectNode.path("objectType").textValue();
-            if ("Group".equals(objectType) || "Agent".equals(objectType)){
+            if ("Group".equals(objectType) || "Agent".equals(objectType)) {
                 this.setObject(Agent.fromJson(objectNode));
             }
-            else if ("StatementRef".equals(objectType)){
+            else if ("StatementRef".equals(objectType)) {
                 this.setObject(new StatementRef(objectNode));
             }
             else if ("SubStatement".equals(objectType)) {
@@ -170,7 +169,7 @@ public abstract class StatementBase extends JSONBase {
         return node;
     }
 
-    public boolean hasAttachments(){
+    public boolean hasAttachments() {
         return (this.getAttachments() != null && this.getAttachments().size() > 0);
     }
 
@@ -180,7 +179,6 @@ public abstract class StatementBase extends JSONBase {
                 if (attachment.getContent().length > 0) {
                     return true;
                 }
-
             }
         }
         return false;
@@ -192,6 +190,7 @@ public abstract class StatementBase extends JSONBase {
         }
         this.getAttachments().add(attachment);
     }
+
     public void addAttachments(Attachment attachments) {
         if (this.getAttachments() == null) {
             this.setAttachments(new ArrayList<Attachment>());

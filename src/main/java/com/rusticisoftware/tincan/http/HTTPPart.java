@@ -27,5 +27,3 @@ public class HTTPPart {
     private String contentType;
     private byte[] content;
 }
-
-

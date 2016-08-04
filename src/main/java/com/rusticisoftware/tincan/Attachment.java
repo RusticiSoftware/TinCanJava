@@ -50,57 +50,60 @@ public class Attachment extends JSONBase {
     private String sha2;
     private URL fileUrl;
     private byte[] content;
-    
+
     public Attachment(JsonNode jsonNode) throws URISyntaxException, MalformedURLException, IOException, NoSuchAlgorithmException {
+        this(jsonNode, null);
+    }
+
+    public Attachment(JsonNode jsonNode, byte[] content) throws URISyntaxException, MalformedURLException, IOException, NoSuchAlgorithmException {
         JsonNode usageTypeNode = jsonNode.path("usageType");
         if (! usageTypeNode.isMissingNode()) {
             this.setUsageType(new URI(usageTypeNode.textValue()));
         }
-        
+
         JsonNode displayNode = jsonNode.path("display");
         if (! displayNode.isMissingNode()) {
             this.setDisplay(new LanguageMap(displayNode));
         }
-        
+
         JsonNode descriptionNode = jsonNode.path("description");
         if (! descriptionNode.isMissingNode()) {
             this.setDescription(new LanguageMap(descriptionNode));
         }
-        
+
         JsonNode contentTypeNode = jsonNode.path("contentType");
         if (! contentTypeNode.isMissingNode()) {
             this.setContentType(contentTypeNode.textValue());
         }
-        
+
         JsonNode lengthNode = jsonNode.path("length");
         if (! lengthNode.isMissingNode()) {
             this.setLength(lengthNode.intValue());
         }
-        
+
         JsonNode sha2Node = jsonNode.path("sha2");
         if (! sha2Node.isMissingNode()) {
             this.setSha2(sha2Node.textValue());
         }
-        
+
         JsonNode fileUrlNode = jsonNode.path("fileUrl");
         if (! fileUrlNode.isMissingNode()) {
             this.setFileUrl(new URL(fileUrlNode.textValue()));
         }
 
-        JsonNode contentNode = jsonNode.path("content");
-        if (! contentNode.isMissingNode()) {
-            this.setContent(contentNode.binaryValue());
+        if (content != null) {
+            this.setContent(content);
         }
     }
 
 
     public void setContent(byte[] content) throws NoSuchAlgorithmException {
         this.content = Arrays.copyOf(content, content.length);
-        setLength(content.length);
+        this.setLength(content.length);
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         digest.update(content);
         byte[] hash = digest.digest();
-        setSha2(new String(Hex.encodeHex(hash)));
+        this.setSha2(new String(Hex.encodeHex(hash)));
     }
 
     @Override
@@ -130,7 +133,7 @@ public class Attachment extends JSONBase {
         return node;
     }
 
-    public HTTPPart getPart(){
+    public HTTPPart getPart() {
         HTTPPart part = new HTTPPart();
         part.setContent(content);
         part.setContentType(contentType);

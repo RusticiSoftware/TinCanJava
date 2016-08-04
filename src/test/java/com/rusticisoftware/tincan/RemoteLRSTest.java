@@ -19,6 +19,7 @@ package com.rusticisoftware.tincan;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.security.MessageDigest;
 import java.util.*;
 
 import com.rusticisoftware.tincan.documents.ActivityProfileDocument;
@@ -34,6 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
+import org.apache.commons.codec.binary.Hex;
 import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -55,7 +57,6 @@ public class RemoteLRSTest {
     private static SubStatement subStatement;
     private static Attachment attachment1;
     private static Attachment attachment2;
-
 
     private static Properties config = new Properties();
 
@@ -126,7 +127,7 @@ public class RemoteLRSTest {
 
         attachment1 = new Attachment();
         attachment1.setContent("hello world".getBytes("UTF-8"));
-        attachment1.setContentType("text/plain");
+        attachment1.setContentType("application/octet-stream");
         attachment1.setDescription(new LanguageMap());
         attachment1.getDescription().put("en-US", "Test Description");
         attachment1.setDisplay(new LanguageMap());
@@ -255,7 +256,6 @@ public class RemoteLRSTest {
         statement.addAttachment(attachment1);
         statement.addAttachment(attachment2);
 
-
         StatementLRSResponse lrsRes = lrs.saveStatement(statement);
         Assert.assertTrue(lrsRes.getSuccess());
         Assert.assertEquals(statement, lrsRes.getContent());
@@ -287,7 +287,6 @@ public class RemoteLRSTest {
         Assert.assertNotNull(lrsResultResp.getContent().getStatements().get(1).getId());
         Assert.assertNotNull(lrsResultResp.getResponse().getContent());
     }
-
 
     @Test
     public void testSaveStatement() throws Exception {
@@ -433,6 +432,18 @@ public class RemoteLRSTest {
 
         StatementLRSResponse retRes = lrs.retrieveStatement(saveRes.getContent().getId().toString(), true);
         Assert.assertTrue(retRes.getSuccess());
+
+        String hash1, hash2;
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        digest.update(attachment1.getContent());
+        byte[] hash = digest.digest();
+        hash1 = new String(Hex.encodeHex(hash));
+
+        digest.update(retRes.getContent().getAttachments().get(0).getContent());
+        hash = digest.digest();
+        hash2 = new String(Hex.encodeHex(hash));
+
+        Assert.assertEquals(hash1, hash2);
     }
 
     @Test
@@ -450,10 +461,8 @@ public class RemoteLRSTest {
         Assert.assertTrue(lrsRes.getSuccess());
     }
 
-
     @Test
     public void testQueryStatementsWithAttachments() throws Exception {
-
         Statement statement = new Statement();
         statement.setActor(agent);
         statement.setVerb(verb);
@@ -473,6 +482,18 @@ public class RemoteLRSTest {
 
         StatementsResultLRSResponse lrsStmntRes = lrs.queryStatements(query);
         Assert.assertTrue(lrsStmntRes.getSuccess());
+
+        String hash1, hash2;
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        digest.update(attachment1.getContent());
+        byte[] hash = digest.digest();
+        hash1 = new String(Hex.encodeHex(hash));
+
+        digest.update(lrsStmntRes.getContent().getStatements().get(0).getAttachments().get(0).getContent());
+        hash = digest.digest();
+        hash2 = new String(Hex.encodeHex(hash));
+
+        Assert.assertEquals(hash1, hash2);
     }
 
     @Test
