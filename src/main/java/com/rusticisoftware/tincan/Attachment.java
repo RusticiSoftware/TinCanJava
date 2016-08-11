@@ -29,11 +29,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rusticisoftware.tincan.http.HTTPPart;
 import com.rusticisoftware.tincan.json.JSONBase;
 import com.rusticisoftware.tincan.json.Mapper;
+import org.apache.commons.codec.binary.Hex;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.apache.commons.codec.binary.Hex;
 
 /**
  * Attachment Class
@@ -95,7 +95,6 @@ public class Attachment extends JSONBase {
             this.setContent(content);
         }
     }
-
 
     public void setContent(byte[] content) throws NoSuchAlgorithmException {
         this.content = Arrays.copyOf(content, content.length);

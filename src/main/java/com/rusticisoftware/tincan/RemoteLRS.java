@@ -15,13 +15,10 @@
 */
 package com.rusticisoftware.tincan;
 
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.http.Part;
 import org.apache.commons.codec.binary.Base64;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rusticisoftware.tincan.documents.ActivityProfileDocument;
 import com.rusticisoftware.tincan.documents.AgentProfileDocument;
 import com.rusticisoftware.tincan.documents.Document;
@@ -37,10 +34,7 @@ import com.rusticisoftware.tincan.json.StringOfJSON;
 import com.rusticisoftware.tincan.v10x.StatementsQuery;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.client.api.Response;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.Response.CompleteListener;
-import org.eclipse.jetty.client.api.Response.Listener;
 import org.eclipse.jetty.client.util.*;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpMethod;
@@ -53,9 +47,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.ByteBuffer;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Class used to communicate with a TCAPI endpoint synchronously
