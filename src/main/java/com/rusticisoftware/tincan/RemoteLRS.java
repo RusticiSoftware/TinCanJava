@@ -250,8 +250,8 @@ public class RemoteLRS implements LRS {
 
                     for (HTTPPart part : req.getPartList()) {
                         multiout.startPart(part.getContentType(), new String[]{
-                                "Content-Transfer-Encoding: binary",
-                                "X-Experience-API-Hash: " + part.getSha2()
+                            "Content-Transfer-Encoding: binary",
+                            "X-Experience-API-Hash: " + part.getSha2()
                         });
                         multiout.write(part.getContent());
                     }
@@ -270,33 +270,30 @@ public class RemoteLRS implements LRS {
             if (response.getContentType() != null && response.getContentType().contains("multipart/mixed")) {
                 String boundary = response.getContentType().split("boundary=")[1];
 
-                MultipartParser responseHandler = new MultipartParser(listener.getContentAsString(), boundary);
-                String temp = listener.getContentAsString();
-
-                // We need to get the first part that contains the statements and parse them
-                responseHandler.nextPart();
-
+                MultipartParser responseHandler = new MultipartParser(listener.getContent(), boundary);
                 ArrayList<Statement> statements = new ArrayList<Statement>();
 
-                if (responseHandler.getHeaders().get("Content-Type").contains("application/json")) {
-                    JsonNode statementsNode = (new StringOfJSON(new String(responseHandler.getContent())).toJSONNode());
-                    if (statementsNode.findPath("statements").isMissingNode()) {
-                        statements.add(new Statement(statementsNode));
-                    }
-                    else {
-                        statementsNode = statementsNode.findPath("statements");
-                        for (JsonNode obj : statementsNode) {
-                            statements.add(new Statement(obj));
+                for (int i = 1; i < responseHandler.getSections().size(); i++) {
+                    responseHandler.parsePart(i);
+
+                    if (i == 1) {
+                        if (responseHandler.getHeaders().get("Content-Type").contains("application/json")) {
+                            JsonNode statementsNode = (new StringOfJSON(new String(responseHandler.getContent())).toJSONNode());
+                            if (statementsNode.findPath("statements").isMissingNode()) {
+                                statements.add(new Statement(statementsNode));
+                            } else {
+                                statementsNode = statementsNode.findPath("statements");
+                                for (JsonNode obj : statementsNode) {
+                                    statements.add(new Statement(obj));
+                                }
+                            }
+                        } else {
+                            throw new Exception("The first part of this response had a Content-Type other than \"application/json\"");
                         }
                     }
-                }
-                else {
-                    throw new Exception("The first part of this response had a Content-Type other than \"application/json\"");
-                }
-
-                while (!responseHandler.noMoreParts) {
-                    responseHandler.nextPart();
-                    response.setAttachment(responseHandler.getHeaders().get("X-Experience-API-Hash"), responseHandler.getContent());
+                    else {
+                        response.setAttachment(responseHandler.getHeaders().get("X-Experience-API-Hash"), responseHandler.getContent());
+                    }
                 }
                 StatementsResult responseStatements = new StatementsResult();
                 responseStatements.setStatements(statements);
