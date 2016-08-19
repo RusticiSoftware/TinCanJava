@@ -18,9 +18,11 @@ package com.rusticisoftware.tincan;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.UUID;
 
+import com.rusticisoftware.tincan.http.HTTPPart;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -45,11 +47,11 @@ public class Statement extends StatementBase {
     private DateTime stored;
     private Agent authority;
     private TCAPIVersion version;
-    
+
     @Deprecated
     private Boolean voided;
 
-    public Statement(JsonNode jsonNode) throws URISyntaxException, MalformedURLException {
+    public Statement(JsonNode jsonNode) throws URISyntaxException, MalformedURLException, IOException, NoSuchAlgorithmException {
         super(jsonNode);
 
         JsonNode idNode = jsonNode.path("id");
@@ -78,7 +80,7 @@ public class Statement extends StatementBase {
         }
     }
 
-    public Statement(StringOfJSON jsonStr) throws IOException, URISyntaxException {
+    public Statement(StringOfJSON jsonStr) throws IOException, URISyntaxException, NoSuchAlgorithmException {
         this(jsonStr.toJSONNode());
     }
 

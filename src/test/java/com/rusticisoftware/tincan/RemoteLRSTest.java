@@ -15,10 +15,12 @@
 */
 package com.rusticisoftware.tincan;
 
-
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.security.MessageDigest;
 import java.util.*;
 
 import com.rusticisoftware.tincan.documents.ActivityProfileDocument;
@@ -29,11 +31,10 @@ import com.rusticisoftware.tincan.json.*;
 
 import lombok.extern.java.Log;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
+import org.apache.commons.codec.binary.Hex;
 import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -53,6 +54,9 @@ public class RemoteLRSTest {
     private static Score score;
     private static StatementRef statementRef;
     private static SubStatement subStatement;
+    private static Attachment attachment1;
+    private static Attachment attachment2;
+    private static Attachment attachment3;
 
     private static Properties config = new Properties();
 
@@ -120,6 +124,53 @@ public class RemoteLRSTest {
         subStatement.setActor(agent);
         subStatement.setVerb(verb);
         subStatement.setObject(parent);
+
+        attachment1 = new Attachment();
+        attachment1.setContent("hello world".getBytes("UTF-8"));
+        attachment1.setContentType("application/octet-stream");
+        attachment1.setDescription(new LanguageMap());
+        attachment1.getDescription().put("en-US", "Test Description");
+        attachment1.setDisplay(new LanguageMap());
+        attachment1.getDisplay().put("en-US", "Test Display");
+        attachment1.setUsageType(new URI("http://id.tincanapi.com/attachment/supporting_media"));
+
+        attachment2 = new Attachment();
+        attachment2.setContent("hello world 2".getBytes("UTF-8"));
+        attachment2.setContentType("text/plain");
+        attachment2.setDescription(new LanguageMap());
+        attachment2.getDescription().put("en-US", "Test Description 2");
+        attachment2.setDisplay(new LanguageMap());
+        attachment2.getDisplay().put("en-US", "Test Display 2");
+        attachment2.setUsageType(new URI("http://id.tincanapi.com/attachment/supporting_media"));
+
+
+        attachment3 = new Attachment();
+        attachment3.setContent(getResourceAsByteArray("/files/image.jpg"));
+        attachment3.setContentType("image/jpeg");
+        attachment3.setDescription(new LanguageMap());
+        attachment3.getDescription().put("en-US", "Test Description 3");
+        attachment3.setDisplay(new LanguageMap());
+        attachment3.getDisplay().put("en-US", "Test Display 3");
+        attachment3.setUsageType(new URI("http://id.tincanapi.com/attachment/supporting_media"));
+    }
+
+    //
+    // see http://stackoverflow.com/a/1264737/1464957
+    //
+    private static byte[] getResourceAsByteArray(String resourcePath) throws IOException {
+        InputStream resourceIs = RemoteLRSTest.class.getResourceAsStream(resourcePath);
+        ByteArrayOutputStream resourceData = new ByteArrayOutputStream();
+
+        int nRead;
+        byte[] buffer = new byte[16384];
+
+        while ((nRead = resourceIs.read(buffer, 0, buffer.length)) != -1) {
+            resourceData.write(buffer, 0, nRead);
+        }
+
+        resourceData.flush();
+
+        return resourceData.toByteArray();
     }
 
     @Test
@@ -208,6 +259,62 @@ public class RemoteLRSTest {
 
         AboutLRSResponse lrsRes = obj.about();
         Assert.assertFalse(lrsRes.getSuccess());
+    }
+
+    @Test
+    public void testSaveStatementWithAttachment() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+        statement.addAttachment(attachment1);
+
+        StatementLRSResponse lrsRes = lrs.saveStatement(statement);
+        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertEquals(statement, lrsRes.getContent());
+        Assert.assertNotNull(lrsRes.getContent().getId());
+        Assert.assertNotNull(lrsRes.getResponse().getContent());
+    }
+
+    @Test
+    public void testSaveStatementWithAttachments() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+        statement.addAttachment(attachment1);
+        statement.addAttachment(attachment2);
+
+        StatementLRSResponse lrsRes = lrs.saveStatement(statement);
+        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertEquals(statement, lrsRes.getContent());
+        Assert.assertNotNull(lrsRes.getContent().getId());
+        Assert.assertNotNull(lrsRes.getResponse().getContent());
+    }
+
+    @Test
+    public void testSaveStatementsWithAttachment() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+        statement.addAttachment(attachment1);
+
+        List<Statement> statementList = new ArrayList<Statement>();
+        statementList.add(statement);
+
+        statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+        statementList.add(statement);
+
+        StatementsResultLRSResponse lrsResultResp = lrs.saveStatements(statementList);
+        Assert.assertTrue(lrsResultResp.getSuccess());
+        Assert.assertEquals(statement, lrsResultResp.getContent().getStatements().get(1));
+        Assert.assertNotNull(lrsResultResp.getContent().getStatements().get(0).getId());
+        Assert.assertNotNull(lrsResultResp.getContent().getStatements().get(1).getId());
+        Assert.assertNotNull(lrsResultResp.getResponse().getContent());
     }
 
     @Test
@@ -337,8 +444,62 @@ public class RemoteLRSTest {
 
         StatementLRSResponse saveRes = lrs.saveStatement(statement);
         Assert.assertTrue(saveRes.getSuccess());
-        StatementLRSResponse retRes = lrs.retrieveStatement(saveRes.getContent().getId().toString());
+        StatementLRSResponse retRes = lrs.retrieveStatement(saveRes.getContent().getId().toString(), false);
         Assert.assertTrue(retRes.getSuccess());
+    }
+
+    @Test
+    public void testRetrieveStatementWithAttachment() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+        statement.addAttachment(attachment1);
+
+        StatementLRSResponse saveRes = lrs.saveStatement(statement);
+        Assert.assertTrue(saveRes.getSuccess());
+
+        StatementLRSResponse retRes = lrs.retrieveStatement(saveRes.getContent().getId().toString(), true);
+        Assert.assertTrue(retRes.getSuccess());
+
+        String hash1, hash2;
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        digest.update(attachment1.getContent());
+        byte[] hash = digest.digest();
+        hash1 = new String(Hex.encodeHex(hash));
+
+        digest.update(retRes.getContent().getAttachments().get(0).getContent());
+        hash = digest.digest();
+        hash2 = new String(Hex.encodeHex(hash));
+
+        Assert.assertEquals(hash1, hash2);
+    }
+
+    @Test
+    public void testRetrieveStatementWithBinaryAttachment() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+        statement.addAttachment(attachment3);
+
+        StatementLRSResponse saveRes = lrs.saveStatement(statement);
+        Assert.assertTrue(saveRes.getSuccess());
+
+        StatementLRSResponse retRes = lrs.retrieveStatement(saveRes.getContent().getId().toString(), true);
+        Assert.assertTrue(retRes.getSuccess());
+
+        String hash1, hash2;
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        digest.update(attachment3.getContent());
+        byte[] hash = digest.digest();
+        hash1 = new String(Hex.encodeHex(hash));
+
+        digest.update(retRes.getContent().getAttachments().get(0).getContent());
+        hash = digest.digest();
+        hash2 = new String(Hex.encodeHex(hash));
+
+        Assert.assertEquals(hash1, hash2);
     }
 
     @Test
@@ -354,6 +515,41 @@ public class RemoteLRSTest {
 
         StatementsResultLRSResponse lrsRes = lrs.queryStatements(query);
         Assert.assertTrue(lrsRes.getSuccess());
+    }
+
+    @Test
+    public void testQueryStatementsWithAttachments() throws Exception {
+        Statement statement = new Statement();
+        statement.setActor(agent);
+        statement.setVerb(verb);
+        statement.setObject(activity);
+        statement.addAttachment(attachment1);
+
+        StatementLRSResponse lrsRes = lrs.saveStatement(statement);
+        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertEquals(statement, lrsRes.getContent());
+        Assert.assertNotNull(lrsRes.getContent().getId());
+        Assert.assertNotNull(lrsRes.getResponse().getContent());
+
+        StatementsQuery query = new StatementsQuery();
+        query.setFormat(QueryResultFormat.EXACT);
+        query.setLimit(10);
+        query.setAttachments(true);
+
+        StatementsResultLRSResponse lrsStmntRes = lrs.queryStatements(query);
+        Assert.assertTrue(lrsStmntRes.getSuccess());
+
+        String hash1, hash2;
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        digest.update(attachment1.getContent());
+        byte[] hash = digest.digest();
+        hash1 = new String(Hex.encodeHex(hash));
+
+        digest.update(lrsStmntRes.getContent().getStatements().get(0).getAttachments().get(0).getContent());
+        hash = digest.digest();
+        hash2 = new String(Hex.encodeHex(hash));
+
+        Assert.assertEquals(hash1, hash2);
     }
 
     @Test

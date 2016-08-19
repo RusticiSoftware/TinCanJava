@@ -1,5 +1,5 @@
 /*
-    Copyright 2013 Rustici Software
+    Copyright 2016 Rustici Software
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -15,26 +15,15 @@
 */
 package com.rusticisoftware.tincan.http;
 
-import com.rusticisoftware.tincan.Attachment;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import javax.servlet.http.Part;
+import lombok.NoArgsConstructor;
 
-import java.util.List;
-import java.util.Map;
-
-/**
- * HTTPRequest Class Description
- */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class HTTPRequest {
-    private String method;
-    private String resource;
-    private Map<String, String> queryParams;
-    private Map<String, String> headers;
+@NoArgsConstructor
+public class HTTPPart {
+    private String sha2;
     private String contentType;
     private byte[] content;
-    private HTTPResponse response;
-    private List<HTTPPart> partList;
 }

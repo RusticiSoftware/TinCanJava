@@ -18,10 +18,12 @@ package com.rusticisoftware.tincan.internal;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.rusticisoftware.tincan.http.HTTPPart;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -53,11 +55,11 @@ public abstract class StatementBase extends JSONBase {
     private Context context;
     private DateTime timestamp;
     private List<Attachment> attachments;
-    
+
     @Deprecated
     private Boolean voided;
 
-    public StatementBase(JsonNode jsonNode) throws URISyntaxException, MalformedURLException {
+    public StatementBase(JsonNode jsonNode) throws URISyntaxException, MalformedURLException, IOException, NoSuchAlgorithmException {
         this();
 
         JsonNode actorNode = jsonNode.path("actor");
@@ -73,10 +75,10 @@ public abstract class StatementBase extends JSONBase {
         JsonNode objectNode = jsonNode.path("object");
         if (! objectNode.isMissingNode()) {
             String objectType = objectNode.path("objectType").textValue();
-            if ("Group".equals(objectType) || "Agent".equals(objectType)){
+            if ("Group".equals(objectType) || "Agent".equals(objectType)) {
                 this.setObject(Agent.fromJson(objectNode));
             }
-            else if ("StatementRef".equals(objectType)){
+            else if ("StatementRef".equals(objectType)) {
                 this.setObject(new StatementRef(objectNode));
             }
             else if ("SubStatement".equals(objectType)) {
@@ -116,7 +118,7 @@ public abstract class StatementBase extends JSONBase {
         }
     }
 
-    public StatementBase(StringOfJSON jsonStr) throws IOException, URISyntaxException {
+    public StatementBase(StringOfJSON jsonStr) throws IOException, URISyntaxException, NoSuchAlgorithmException {
         this(jsonStr.toJSONNode());
     }
 
@@ -165,5 +167,42 @@ public abstract class StatementBase extends JSONBase {
         }
         
         return node;
+    }
+
+    public boolean hasAttachments() {
+        return (this.getAttachments() != null && this.getAttachments().size() > 0);
+    }
+
+    public boolean hasAttachmentsWithContent() {
+        if (this.getAttachments() != null) {
+            for (Attachment attachment : this.getAttachments()) {
+                if (attachment.getContent().length > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void addAttachment(Attachment attachment) {
+        if (this.getAttachments() == null) {
+            this.setAttachments(new ArrayList<Attachment>());
+        }
+        this.getAttachments().add(attachment);
+    }
+
+    public void addAttachments(Attachment attachments) {
+        if (this.getAttachments() == null) {
+            this.setAttachments(new ArrayList<Attachment>());
+        }
+        this.getAttachments().add(attachments);
+    }
+
+    public List<HTTPPart> getPartList() {
+        List<HTTPPart> partList = new ArrayList<HTTPPart>();
+        for (Attachment attachment : this.getAttachments()) {
+            partList.add(attachment.getPart());
+        }
+        return partList;
     }
 }

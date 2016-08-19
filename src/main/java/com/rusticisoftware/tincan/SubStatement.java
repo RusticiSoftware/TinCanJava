@@ -17,6 +17,8 @@ package com.rusticisoftware.tincan;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -36,7 +38,7 @@ import com.rusticisoftware.tincan.json.StringOfJSON;
 public class SubStatement extends StatementBase implements StatementTarget {
     private final String objectType = "SubStatement";
 
-    public SubStatement (JsonNode jsonNode) throws MalformedURLException, URISyntaxException {
+    public SubStatement (JsonNode jsonNode) throws MalformedURLException, URISyntaxException, IOException, NoSuchAlgorithmException {
         super(jsonNode);
     }
 

@@ -31,6 +31,8 @@ public interface LRS {
     StatementsResultLRSResponse saveStatements(List<Statement> statements);
     StatementLRSResponse retrieveStatement(String id);
     StatementLRSResponse retrieveVoidedStatement(String id);
+    StatementLRSResponse retrieveStatement(String id, boolean attachments);
+    StatementLRSResponse retrieveVoidedStatement(String id, boolean attachments);
     StatementsResultLRSResponse queryStatements(StatementsQueryInterface query);
     StatementsResultLRSResponse moreStatements(String moreURL);
 

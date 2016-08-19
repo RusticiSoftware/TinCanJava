@@ -22,6 +22,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * HTTPResponse Class Description
@@ -31,8 +32,10 @@ import java.util.HashMap;
 public class HTTPResponse {
     private int status;
     private String statusMsg;
-    private final HashMap<String,String> headers = new HashMap<String, String>();
+    private final HashMap<String, String> headers = new HashMap<String, String>();
     private byte[] contentBytes;
+    private List<HTTPPart> partList;
+    private HashMap<String, byte[]> attachments = new HashMap<String, byte[]>();
 
     public String getHeader(String key) {
         return this.headers.get(key);
@@ -40,6 +43,9 @@ public class HTTPResponse {
     public void setHeader(String key, String val) {
         this.headers.put(key, val);
     }
+
+    public byte[] getAttachment(String key) { return this.attachments.get(key); }
+    public void setAttachment(String key, byte[] val) { this.attachments.put(key, val); }
 
     public String getContent() {
         return new String(this.getContentBytes());
