@@ -4,7 +4,7 @@
 
     <groupId>com.rusticisoftware</groupId>
     <artifactId>tincan</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.1</version>
     <name>Tin Can Java Library</name>
     <url>http://rusticisoftware.github.io/TinCanJava/</url>
     <description>Library used to interact with Learning Record Stores (LRS) speaking the Tin Can API protocol.</description>
@@ -37,7 +37,7 @@
         <connection>scm:git:https://github.com/RusticiSoftware/TinCanJava.git</connection>
         <developerConnection>scm:git:git@github.com:RusticiSoftware/TinCanJava.git</developerConnection>
         <url>https://github.com/RusticiSoftware/TinCanJava</url>
-      <tag>HEAD</tag>
+      <tag>tincan-1.1.1</tag>
     </scm>
     <build>
         <plugins>
