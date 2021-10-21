@@ -575,17 +575,18 @@ public class RemoteLRSTest {
     public void testRetrieveState() throws Exception {
         LRSResponse clear = lrs.clearState(activity, agent, null);
         Assert.assertTrue(clear.getSuccess());
+        String id = "testRetrieveState";
 
         StateDocument doc = new StateDocument();
         doc.setActivity(activity);
         doc.setAgent(agent);
-        doc.setId("test");
+        doc.setId(id);
         doc.setContent("Test value".getBytes("UTF-8"));
 
         LRSResponse save = lrs.saveState(doc);
         Assert.assertTrue(save.getSuccess());
 
-        StateLRSResponse lrsRes = lrs.retrieveState("test", activity, agent, null);
+        StateLRSResponse lrsRes = lrs.retrieveState(id, activity, agent, null);
         Assert.assertEquals("\"c140f82cb70e3884ad729b5055b7eaa81c795f1f\"", lrsRes.getContent().getEtag());
         Assert.assertTrue(lrsRes.getSuccess());
     }
@@ -595,32 +596,33 @@ public class RemoteLRSTest {
         StateDocument doc = new StateDocument();
         doc.setActivity(activity);
         doc.setAgent(agent);
-        doc.setId("test");
+        doc.setId("testSaveState");
         doc.setContent("Test value".getBytes("UTF-8"));
 
         LRSResponse lrsRes = lrs.saveState(doc);
-        Assert.assertTrue(lrsRes.getSuccess());
+        Assert.assertTrue("save succeeded", lrsRes.getSuccess());
     }
 
     @Test
     public void testOverwriteState() throws Exception {
         LRSResponse clear = lrs.clearState(activity, agent, null);
         Assert.assertTrue(clear.getSuccess());
+        String id = "testOverwriteState";
 
         StateDocument doc = new StateDocument();
         doc.setActivity(activity);
         doc.setAgent(agent);
-        doc.setId("test");
+        doc.setId(id);
         doc.setContent("Test value".getBytes("UTF-8"));
 
         LRSResponse save = lrs.saveState(doc);
         Assert.assertTrue(save.getSuccess());
 
-        StateLRSResponse retrieve = lrs.retrieveState("test", activity, agent, null);
+        StateLRSResponse retrieve = lrs.retrieveState(id, activity, agent, null);
         Assert.assertTrue(retrieve.getSuccess());
 
         doc.setEtag(retrieve.getContent().getEtag());
-        doc.setId("testing");
+        doc.setId(id + "-testing");
         doc.setActivity(parent);
         LRSResponse lrsResp = lrs.saveState(doc);
         Assert.assertTrue(lrsResp.getSuccess());
@@ -1006,22 +1008,22 @@ public class RemoteLRSTest {
         doc.setId("test");
 
         LRSResponse clear = lrs.deleteAgentProfile(doc);
-        Assert.assertTrue(clear.getSuccess());
+        Assert.assertTrue("delete succeeds", clear.getSuccess());
 
         doc.setContent("Test value4".getBytes("UTF-8"));
 
         LRSResponse save = lrs.saveAgentProfile(doc);
-        Assert.assertTrue(save.getSuccess());
+        Assert.assertTrue("save succeeds", save.getSuccess());
 
         AgentProfileLRSResponse retrieve = lrs.retrieveAgentProfile("test", agent);
-        Assert.assertTrue(retrieve.getSuccess());
+        Assert.assertTrue("retrieve succeeds", retrieve.getSuccess());
 
         doc.setEtag(retrieve.getContent().getEtag());
         doc.setId("test2");
         doc.setContent("Test value5".getBytes("UTF-8"));
 
         LRSResponse lrsResp = lrs.saveAgentProfile(doc);
-        Assert.assertTrue(lrsResp.getSuccess());
+        Assert.assertTrue("re-save succeeds", lrsResp.getSuccess());
     }
 
     @Test
