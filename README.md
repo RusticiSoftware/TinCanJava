@@ -1,14 +1,12 @@
-A Java library for implementing with the Tin Can API.
-
-[![Build Status](https://travis-ci.org/RusticiSoftware/TinCanJava.png)](https://travis-ci.org/RusticiSoftware/TinCanJava)
+A Java library for implementing the xAPI.
 
 For hosted API documentation, basic usage instructions, supported version listing, etc. visit the main project website at:
 
 http://rusticisoftware.github.io/TinCanJava/
 
-For more information about the Tin Can API visit:
+For more information about the Experience API (xAPI) visit:
 
-http://tincanapi.com/
+http://xapi.com/
 
 This library uses Maven 3 for project management, building, etc. It outputs Maven artifacts.
 
