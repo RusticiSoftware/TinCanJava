@@ -45,6 +45,12 @@
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
                 <version>6.4.1</version>
+                <configuration>
+                    <!-- Disable .NET checks -->
+                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                    <nugetconfAnalyzerEnabled>false</nugetconfAnalyzerEnabled>
+                    <nuspecAnalyzerEnabled>false</nuspecAnalyzerEnabled>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
