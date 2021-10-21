@@ -410,6 +410,10 @@ public class RemoteLRS implements LRS {
             request.setHeaders(new HashMap<String, String>());
             request.getHeaders().put("If-Match", document.getEtag());
         }
+        else if (! (document instanceof StateDocument)) {
+            request.setHeaders(new HashMap<String, String>());
+            request.getHeaders().put("If-None-Match", "*");
+        }
 
         HTTPResponse response = makeSyncRequest(request);
 
